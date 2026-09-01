@@ -1,0 +1,442 @@
+/* ================= MAIN CONTAINER ================= */
+.employees-container {
+  padding: 30px;
+  background-color: #f4f7fa;
+  min-height: calc(100vh - 70px);
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.page-header h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 24px;
+}
+
+.breadcrumb {
+  margin: 5px 0 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* ================= BUTTONS ================= */
+.btn-primary {
+  background: #2563eb;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #374151;
+  padding: 8px 15px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ================= STATS GRID ================= */
+.emp-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 🔥 PUDHUSU: 5 la irundhu 3 aakiyachu 🔥 */
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.emp-stat-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.emp-stat-card .icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+}
+
+/* Icon Colors */
+.icon.blue { background: #eff6ff; color: #3b82f6; }
+.icon.green { background: #f0fdf4; color: #22c55e; }
+.icon.pink { background: #fdf2f8; color: #ec4899; }
+.icon.purple { background: #f5f3ff; color: #8b5cf6; }
+.icon.orange { background: #fff7ed; color: #f97316; }
+
+.emp-stat-card .info p {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.emp-stat-card .info h3 {
+  margin: 5px 0;
+  font-size: 22px;
+  color: #111827;
+}
+
+.emp-stat-card .info span {
+  font-size: 11px;
+  color: #10b981;
+}
+
+/* ================= FILTERS BAR ================= */
+.filters-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.search-box {
+  flex: 1;
+  position: relative;
+}
+
+.search-box i {
+  position: absolute;
+  left: 15px;
+  top: 12px;
+  color: #9ca3af;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 10px 10px 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.filter-dropdowns {
+  display: flex;
+  gap: 10px;
+}
+
+.filter-dropdowns select {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #374151;
+}
+
+.btn-filter {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+/* ================= TABLE ================= */
+.table-container {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th {
+  background: #f9fafb;
+  padding: 15px;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+td {
+  padding: 15px;
+  font-size: 14px;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
+}
+
+.emp-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.emp-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+}
+
+.emp-name-cell strong {
+  display: block;
+  color: #111827;
+}
+
+.emp-name-cell span {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.empty-table {
+  text-align: center;
+  color: #9ca3af;
+  padding: 30px !important;
+}
+
+/* Table Actions & Badges */
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  margin-right: 5px;
+  border-radius: 5px;
+}
+
+.action-btn.edit { color: #3b82f6; background: #eff6ff; }
+.action-btn.delete { color: #ef4444; background: #fef2f2; }
+
+.badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.role-badge { background: #eff6ff; color: #2563eb; }
+.status-active { background: #dcfce7; color: #16a34a; }
+.status-inactive { background: #fee2e2; color: #ef4444; }
+
+
+/* ================= ADD EMPLOYEE FORM ================= */
+.add-employee-form {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-section {
+  margin-bottom: 10px;
+}
+
+.form-section h3 {
+  font-size: 16px;
+  color: #1f2937;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.highlight-section {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group.full-width {
+  grid-column: span 3;
+}
+
+.input-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.input-group input[type="text"], 
+.input-group input[type="email"], 
+.input-group input[type="tel"], 
+.input-group input[type="number"], 
+.input-group input[type="date"], 
+.input-group input[type="time"],
+.input-group select, 
+.input-group textarea {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+.input-group input:focus, 
+.input-group select:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.read-only {
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* Checkboxes & Radios */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checkbox-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.checkbox-group label, 
+.checkbox-row label, 
+.radio-group label {
+  font-size: 13px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.radio-group div {
+  display: flex;
+  gap: 15px;
+  margin-top: 5px;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+  margin: 30px 0;
+}
+
+/* Form Action Buttons */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.btn-cancel {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-reset {
+  background: #f3f4f6;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #4b5563;
+}
+
+.btn-save {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* =========================================
+   🖨️ PRINT STYLES FOR REPORTS (UPDATED)
+========================================= */
+@media print {
+  /* Screen-la irukura ellathayum hide pannidu */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Print Area ulla irukuradha mattum theriya vai */
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+  
+
+  body, html, .employees-container, .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    position: static !important; /* Idhu thaan secret sauce */
+  }
+  
+  /* Table-a exactly Top Left-la fix pandradhu */
+  .print-area {
+    position: absolute;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important; /* Full width */
+    margin: 0 !important;
+    padding: 10px !important; /* Chinna gap mattum vachiruken */
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Table full width yedukka */
+  .print-area table {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  /* Print, Close buttons-a print aagumbodhu hide pandradhu */
+  .no-print {
+    display: none !important;
+  }
+  
+  /* A4 Page layout settings */
+  @page {
+    margin: 1cm; /* Default A4 margin */
+  }
+}
