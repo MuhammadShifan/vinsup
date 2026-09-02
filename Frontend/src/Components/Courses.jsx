@@ -22,7 +22,7 @@ const Courses = () => {
   // 1. FETCH API (GET)
   const fetchCourses = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/courses');
+      const response = await fetch('https://vinsup-4vt5.onrender.com/api/courses');
       const result = await response.json();
       if (result.success) {
         setCourseList(result.data);
@@ -47,7 +47,7 @@ const Courses = () => {
     e.stopPropagation(); 
     if (window.confirm(`Are you sure you want to delete ${courseToDelete.courseName}?`)) {
       try {
-        const response = await fetch(`http://localhost:5001/api/courses/delete/${courseToDelete._id}`, {
+        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/courses/delete/${courseToDelete._id}`, {
           method: 'DELETE'
         });
         const result = await response.json();
@@ -84,7 +84,7 @@ const Courses = () => {
 
     try {
       if (editId) {
-        const response = await fetch(`http://localhost:5001/api/courses/update/${editId}`, {
+        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/courses/update/${editId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
@@ -96,7 +96,7 @@ const Courses = () => {
           fetchCourses(); 
         }
       } else {
-        const response = await fetch('http://localhost:5001/api/courses/add', {
+        const response = await fetch('https://vinsup-4vt5.onrender.com/api/courses/add', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)

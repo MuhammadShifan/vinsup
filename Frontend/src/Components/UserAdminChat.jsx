@@ -17,7 +17,7 @@ const UserAdminChat = ({ userName, userEmail }) => {
   const fetchChatMessages = async () => {
     try {
       if (activeEmail) {
-        const res = await axios.get(`http://localhost:5001/api/privatechat/${activeEmail}`);
+        const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/privatechat/${activeEmail}`);
         setChatMessages(res.data);
       }
     } catch (err) {
@@ -87,7 +87,7 @@ const UserAdminChat = ({ userName, userEmail }) => {
             fileData: selectedFiles[i].data
           };
 
-          await axios.post('http://localhost:5001/api/privatechat/send', { 
+          await axios.post('https://vinsup-4vt5.onrender.com/api/privatechat/send', { 
             senderName: activeName, 
             senderEmail: activeEmail, 
             message: i === 0 ? newMsg : "", 
@@ -95,7 +95,7 @@ const UserAdminChat = ({ userName, userEmail }) => {
           });
         }
       } else {
-        await axios.post('http://localhost:5001/api/privatechat/send', { 
+        await axios.post('https://vinsup-4vt5.onrender.com/api/privatechat/send', { 
           senderName: activeName, 
           senderEmail: activeEmail, 
           message: newMsg,
@@ -104,7 +104,7 @@ const UserAdminChat = ({ userName, userEmail }) => {
       }
 
       const shortMsg = newMsg.length > 30 ? newMsg.substring(0, 30) + '...' : (newMsg || `Sent ${selectedFiles.length} attachment(s)`);
-      await axios.post('http://localhost:5001/api/notifications/add', {
+      await axios.post('https://vinsup-4vt5.onrender.com/api/notifications/add', {
         type: 'Message',
         title: `New Message from ${activeName}`,
         message: shortMsg
@@ -122,7 +122,7 @@ const UserAdminChat = ({ userName, userEmail }) => {
   const handleDeleteMessage = async (id) => {
     if(!window.confirm("Are you sure you want to delete this message?")) return;
     try {
-      await axios.delete(`http://localhost:5001/api/privatechat/delete/${id}`);
+      await axios.delete(`https://vinsup-4vt5.onrender.com/api/privatechat/delete/${id}`);
       fetchChatMessages();
     } catch(err) { console.error("Error deleting message:", err); }
   };
@@ -130,7 +130,7 @@ const UserAdminChat = ({ userName, userEmail }) => {
   const handleUpdateMessage = async (id) => {
     if(!editingMsgText.trim()) return;
     try {
-      await axios.put(`http://localhost:5001/api/privatechat/edit/${id}`, { message: editingMsgText });
+      await axios.put(`https://vinsup-4vt5.onrender.com/api/privatechat/edit/${id}`, { message: editingMsgText });
       setEditingMsgId(null);
       setEditingMsgText("");
       fetchChatMessages();

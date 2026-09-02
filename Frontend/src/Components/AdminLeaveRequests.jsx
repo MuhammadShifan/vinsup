@@ -14,7 +14,7 @@ const AdminLeaveRequests = () => {
 
   const fetchAllEmployees = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/employees');
+      const res = await axios.get('https://vinsup-4vt5.onrender.com/api/employees');
       if (res.data) {
         setAllEmployees(Array.isArray(res.data) ? res.data : res.data.data || []);
       }
@@ -26,7 +26,7 @@ const AdminLeaveRequests = () => {
   const fetchAllLeaves = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get('http://localhost:5001/api/leaves'); 
+      const res = await axios.get('https://vinsup-4vt5.onrender.com/api/leaves'); 
       if (res.data.success) {
         const data = res.data.data;
         setLeaves(data || []); 
@@ -54,7 +54,7 @@ const AdminLeaveRequests = () => {
     if (!confirmAction) return;
 
     try {
-      const res = await axios.put(`http://localhost:5001/api/leaves/${id}/status`, { status: newStatus });
+      const res = await axios.put(`https://vinsup-4vt5.onrender.com/api/leaves/${id}/status`, { status: newStatus });
       if (res.data.success) {
         fetchAllLeaves(); 
         // 🔥 PUDHU FIX: Frontend-la irundhu pogura duplicate notification line remove panniyachu! Backend automatically anuppidum. 🔥
@@ -139,7 +139,7 @@ const AdminLeaveRequests = () => {
                   } else {
                     let cleanPath = rawImage.replace(/\\/g, '/').replace(/^\/+/, '');
                     if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-                    finalImage = `http://localhost:5001/${cleanPath}`;
+                    finalImage = `https://vinsup-4vt5.onrender.com/${cleanPath}`;
                   }
                 } else if (rawImage) {
                   finalImage = rawImage;

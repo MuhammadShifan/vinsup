@@ -21,12 +21,12 @@ const AdminIDCards = () => {
       setSelectedPerson(null);
       try {
         if (activeTab === 'employee') {
-          const response = await axios.get('http://localhost:5001/api/employees');
+          const response = await axios.get('https://vinsup-4vt5.onrender.com/api/employees');
           const data = Array.isArray(response.data) ? response.data : (response.data.data || []);
           setEmployees(data);
           if (data.length > 0) setSelectedPerson(data[0]);
         } else {
-          const response = await axios.get('http://localhost:5001/api/students');
+          const response = await axios.get('https://vinsup-4vt5.onrender.com/api/students');
           const data = Array.isArray(response.data) ? response.data : (response.data.data || []);
           setStudents(data);
           if (data.length > 0) setSelectedPerson(data[0]);
@@ -200,7 +200,7 @@ const AdminIDCards = () => {
                 }}>
                   {selectedPerson.profilePhoto ? (
                     <img 
-                      src={selectedPerson.profilePhoto.startsWith('http') ? selectedPerson.profilePhoto : `http://localhost:5001/${selectedPerson.profilePhoto.replace(/\\/g, '/').replace(/^\/+/, '')}`} 
+                      src={selectedPerson.profilePhoto.startsWith('http') ? selectedPerson.profilePhoto : `https://vinsup-4vt5.onrender.com/${selectedPerson.profilePhoto.replace(/\\/g, '/').replace(/^\/+/, '')}`} 
                       alt="Profile" 
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onError={(e) => { e.target.style.display = 'none'; }}

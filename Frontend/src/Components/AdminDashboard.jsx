@@ -38,7 +38,7 @@ const AdminDashboard = ({ userName, onLogout }) => {
   // Fetch Admin Profile Data for Global Header Sync
   const fetchAdminHeaderProfile = async () => {
     try {
-      const res = await fetch('http://localhost:5001/api/admin/profile');
+      const res = await fetch('https://vinsup-4vt5.onrender.com/api/admin/profile');
       const data = await res.json();
       if (data.success && data.admin) {
         setAdminProfile({
@@ -53,7 +53,7 @@ const AdminDashboard = ({ userName, onLogout }) => {
 
   const fetchChatUnreadCount = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/privatechat/unread/admin');
+      const response = await fetch('https://vinsup-4vt5.onrender.com/api/privatechat/unread/admin');
       const data = await response.json();
       if (data.success) {
         setChatUnreadCount(data.unreadCount);
@@ -119,10 +119,10 @@ const AdminDashboard = ({ userName, onLogout }) => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch('http://localhost:5001/api/dashboard/summary');
+        const response = await fetch('https://vinsup-4vt5.onrender.com/api/dashboard/summary');
         const data = await response.json();
         
-        const empResponse = await fetch('http://localhost:5001/api/employees');
+        const empResponse = await fetch('https://vinsup-4vt5.onrender.com/api/employees');
         const empData = await empResponse.json();
         const employees = Array.isArray(empData) ? empData : (empData.data || []);
         setEmployeesList(employees);

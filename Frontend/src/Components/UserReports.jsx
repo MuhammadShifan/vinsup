@@ -20,7 +20,7 @@ const UserReports = ({ userName, userEmail }) => {
     const fetchAllData = async () => {
       try {
         // Fetch Reports
-        const repRes = await axios.get('http://localhost:5001/api/reports');
+        const repRes = await axios.get('https://vinsup-4vt5.onrender.com/api/reports');
         const allReports = Array.isArray(repRes.data) ? repRes.data : (repRes.data.data || []);
         const myReports = allReports.filter(report => {
           const targetEmail = (report.empEmail || '').toLowerCase().trim();
@@ -30,11 +30,11 @@ const UserReports = ({ userName, userEmail }) => {
         setReports(myReports);
 
         // Fetch Batches for Tables
-        const batchRes = await axios.get('http://localhost:5001/api/batches');
+        const batchRes = await axios.get('https://vinsup-4vt5.onrender.com/api/batches');
         setAllBatches(Array.isArray(batchRes.data) ? batchRes.data : (batchRes.data.data || []));
 
         // Fetch Employees for Attendance/Workload
-        const empRes = await axios.get('http://localhost:5001/api/employees');
+        const empRes = await axios.get('https://vinsup-4vt5.onrender.com/api/employees');
         setAllEmployees(Array.isArray(empRes.data) ? empRes.data : (empRes.data.data || []));
 
       } catch (error) {

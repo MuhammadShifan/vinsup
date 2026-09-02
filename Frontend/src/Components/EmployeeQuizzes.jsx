@@ -40,7 +40,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
 
   const fetchData = async () => {
     try {
-      const bRes = await axios.get('http://localhost:5001/api/batches');
+      const bRes = await axios.get('https://vinsup-4vt5.onrender.com/api/batches');
       const allB = Array.isArray(bRes.data) ? bRes.data : (bRes.data.data || []);
       const trainerBatches = allB.filter(b => {
         const trainerStr = (b.trainer || b.trainerName || b.assignedTo || b.faculty || '').toLowerCase().trim();
@@ -52,7 +52,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
       }
 
       try {
-        const sylRes = await axios.get('http://localhost:5001/api/syllabus');
+        const sylRes = await axios.get('https://vinsup-4vt5.onrender.com/api/syllabus');
         const sylData = Array.isArray(sylRes.data) ? sylRes.data : (sylRes.data.data || []);
         let extractedMods = [];
         sylData.forEach(s => {
@@ -74,11 +74,11 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
         if (!moduleName) setModuleName(fallbackMods[0]);
       }
 
-      const stuRes = await axios.get('http://localhost:5001/api/students').catch(()=>null);
+      const stuRes = await axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(()=>null);
       setAllStudents(stuRes?.data?.data || stuRes?.data || []);
 
       if (activeEmail) {
-        const qRes = await axios.get(`http://localhost:5001/api/quizzes/${activeEmail}`);
+        const qRes = await axios.get(`https://vinsup-4vt5.onrender.com/api/quizzes/${activeEmail}`);
         setQuizzesList(Array.isArray(qRes.data) ? qRes.data : []);
       }
     } catch (error) {
@@ -148,10 +148,10 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
 
     try {
       if (activeTab === 'edit' && currentQuizId) {
-        await axios.put(`http://localhost:5001/api/quizzes/${currentQuizId}`, payload);
+        await axios.put(`https://vinsup-4vt5.onrender.com/api/quizzes/${currentQuizId}`, payload);
         alert("Quiz Updated Successfully! 🎉");
       } else {
-        await axios.post('http://localhost:5001/api/quizzes', payload);
+        await axios.post('https://vinsup-4vt5.onrender.com/api/quizzes', payload);
         alert("Quiz Created Successfully! 🎉");
       }
       
@@ -180,7 +180,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
     setViewingQuiz(quiz);
     setActiveTab('view');
     try {
-      const res = await axios.get(`http://localhost:5001/api/quizzes/${quiz._id}/results`);
+      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/quizzes/${quiz._id}/results`);
       setQuizResults(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error fetching quiz results:", err);
@@ -191,7 +191,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
   const handleDeleteQuiz = async (id) => {
     if (!window.confirm("Are you sure you want to delete this quiz?")) return;
     try {
-      await axios.delete(`http://localhost:5001/api/quizzes/${id}`);
+      await axios.delete(`https://vinsup-4vt5.onrender.com/api/quizzes/${id}`);
       fetchData(); 
     } catch (error) {
       console.error("Error deleting quiz:", error);
@@ -202,7 +202,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
     if (!rawPath) return '';
     if (rawPath.startsWith('http') || rawPath.startsWith('data:image')) return rawPath;
     let cleanPath = rawPath.replace(/\\/g, '/').replace(/^\/+/, '');
-    return `http://localhost:5001/${cleanPath}`;
+    return `https://vinsup-4vt5.onrender.com/${cleanPath}`;
   };
   const fallbackAvatar = (name) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Student')}&background=f1f5f9&color=64748b`;
 

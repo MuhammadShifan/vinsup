@@ -23,7 +23,7 @@ const AdminTasks = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const taskResponse = await axios.get('http://localhost:5001/api/tasks'); 
+        const taskResponse = await axios.get('https://vinsup-4vt5.onrender.com/api/tasks'); 
         const taskData = Array.isArray(taskResponse.data) ? taskResponse.data : (taskResponse.data.data || []);
         setTasks(taskData);
         
@@ -31,7 +31,7 @@ const AdminTasks = () => {
           setSelectedTask(taskData[0]);
         }
 
-        const empResponse = await axios.get('http://localhost:5001/api/employees');
+        const empResponse = await axios.get('https://vinsup-4vt5.onrender.com/api/employees');
         const empData = Array.isArray(empResponse.data) ? empResponse.data : (empResponse.data.data || []);
         setEmployeesList(empData);
 
@@ -73,7 +73,7 @@ const AdminTasks = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5001/api/tasks', newTask);
+      const response = await axios.post('https://vinsup-4vt5.onrender.com/api/tasks', newTask);
       setTasks([response.data.task, ...tasks]);
 
       setNewTask({ title: '', description: '', priority: 'Medium', time: '11:59 PM', assignedTo: '', employeeId: '', role: '' });
@@ -88,7 +88,7 @@ const AdminTasks = () => {
   const handleDeleteTask = async (id) => {
     if(window.confirm("Are you sure you want to delete this task?")) {
       try {
-        await axios.delete(`http://localhost:5001/api/tasks/${id}`);
+        await axios.delete(`https://vinsup-4vt5.onrender.com/api/tasks/${id}`);
         setTasks(tasks.filter(t => t._id !== id));
         setSelectedTask(null);
         alert("Task deleted!");
@@ -140,7 +140,7 @@ const AdminTasks = () => {
     
     let cleanPath = rawImage.replace(/\\/g, '/').replace(/^\/+/, '');
     if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-    return `http://localhost:5001/${cleanPath}`;
+    return `https://vinsup-4vt5.onrender.com/${cleanPath}`;
   };
 
   const previewEmp = employeesList?.find(emp => String(emp._id) === String(newTask.employeeId) || String(emp.empId) === String(newTask.employeeId));

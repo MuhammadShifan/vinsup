@@ -19,14 +19,14 @@ const StudentBatchChat = ({ userName, userEmail }) => {
     if (rawPath.startsWith('http') || rawPath.startsWith('data:image')) return rawPath;
     let cleanPath = rawPath.replace(/\\/g, '/').replace(/^\/+/, '');
     if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-    return `http://localhost:5001/${cleanPath}`;
+    return `https://vinsup-4vt5.onrender.com/${cleanPath}`;
   };
 
   useEffect(() => {
     const initChat = async () => {
       try {
         const activeEmail = (userEmail || "").toLowerCase().trim();
-        const stuRes = await axios.get('http://localhost:5001/api/students').catch(() => null);
+        const stuRes = await axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(() => null);
         const allStudents = stuRes?.data?.data || stuRes?.data || [];
         const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
         
@@ -49,7 +49,7 @@ const StudentBatchChat = ({ userName, userEmail }) => {
 
   const fetchMessages = async (batch) => {
     try {
-      const res = await axios.get(`http://localhost:5001/api/batchchat/${encodeURIComponent(batch)}`);
+      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/batchchat/${encodeURIComponent(batch)}`);
       setMessages(res.data);
       setTimeout(scrollToBottom, 100);
     } catch (err) {
@@ -109,7 +109,7 @@ const StudentBatchChat = ({ userName, userEmail }) => {
         text: newMessage.trim(),
         attachments: selectedFiles
       };
-      await axios.post('http://localhost:5001/api/batchchat/send', payload);
+      await axios.post('https://vinsup-4vt5.onrender.com/api/batchchat/send', payload);
       setNewMessage("");
       setSelectedFiles([]);
       if(fileInputRef.current) fileInputRef.current.value = "";

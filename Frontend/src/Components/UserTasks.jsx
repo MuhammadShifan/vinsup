@@ -9,7 +9,7 @@ const UserTasks = ({ userName }) => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/api/tasks');
+        const response = await axios.get('https://vinsup-4vt5.onrender.com/api/tasks');
         const taskData = Array.isArray(response.data) ? response.data : (response.data.data || []);
         
         const currentUserName = (userName || "").toLowerCase();
@@ -32,7 +32,7 @@ const UserTasks = ({ userName }) => {
 
   const handleStatusUpdate = async (taskId, newStatus) => {
     try {
-      await axios.put(`http://localhost:5001/api/tasks/${taskId}`, { status: newStatus });
+      await axios.put(`https://vinsup-4vt5.onrender.com/api/tasks/${taskId}`, { status: newStatus });
       
       const updatedTasks = tasks.map(t => t._id === taskId ? { ...t, status: newStatus } : t);
       setTasks(updatedTasks);
@@ -45,7 +45,7 @@ const UserTasks = ({ userName }) => {
         const currentTask = tasks.find(t => t._id === taskId);
         const taskTitle = currentTask ? currentTask.title : 'a task';
 
-        await axios.post('http://localhost:5001/api/notifications/add', {
+        await axios.post('https://vinsup-4vt5.onrender.com/api/notifications/add', {
           type: 'Task',
           title: 'Task Completed',
           message: `${userName || 'Employee'} has completed the task: ${taskTitle}.`,

@@ -139,7 +139,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         const incomingEmail = activeEmail.toLowerCase().trim();
         let exactDBName = userName || "Employee";
 
-        const empResponse = await axios.get('http://localhost:5001/api/employees');
+        const empResponse = await axios.get('https://vinsup-4vt5.onrender.com/api/employees');
         const empData = Array.isArray(empResponse.data) ? empResponse.data : (empResponse.data.data || []);
         
         const currentUser = empData.find(emp => (emp.email || '').toLowerCase().trim() === incomingEmail);
@@ -155,7 +155,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
             } else {
               let cleanPath = rawImage.replace(/\\/g, '/').replace(/^\/+/, '');
               if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-              finalImage = `http://localhost:5001/${cleanPath}`;
+              finalImage = `https://vinsup-4vt5.onrender.com/${cleanPath}`;
             }
           }
 
@@ -186,7 +186,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
           }));
         }
 
-        const taskResponse = await axios.get('http://localhost:5001/api/tasks');
+        const taskResponse = await axios.get('https://vinsup-4vt5.onrender.com/api/tasks');
         const tasks = Array.isArray(taskResponse.data) ? taskResponse.data : (taskResponse.data.data || []);
         const myTasks = tasks.filter(t => {
           const assigned = (t.assignedTo || '').toLowerCase().trim();
@@ -195,7 +195,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         const activeTasks = myTasks.filter(t => t.status !== 'Completed');
         setTrainerData(prev => ({ ...prev, tasksData: activeTasks }));
 
-        const batchResponse = await axios.get('http://localhost:5001/api/batches');
+        const batchResponse = await axios.get('https://vinsup-4vt5.onrender.com/api/batches');
         const allBatches = Array.isArray(batchResponse.data) ? batchResponse.data : (batchResponse.data.data || []);
         const myBatches = allBatches.filter(b => {
           const trainer = (b.trainer || b.trainerName || b.assignedTo || b.faculty || '').toLowerCase().trim();
@@ -222,7 +222,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
 
         const activeAllocatedBatches = allocatedBatches.filter(batch => batch.status !== 'Completed' && batch.status !== 'completed');
 
-        const leavesResponse = await axios.get('http://localhost:5001/api/leaves');
+        const leavesResponse = await axios.get('https://vinsup-4vt5.onrender.com/api/leaves');
         const allLeaves = Array.isArray(leavesResponse.data) ? leavesResponse.data : (leavesResponse.data.data || []);
         const myLeaves = allLeaves.filter(l => (l.empEmail || '').toLowerCase().trim() === incomingEmail || (l.empName || '').toLowerCase().trim() === exactDBName.toLowerCase().trim());
         
@@ -243,10 +243,10 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         try {
           let allEvents = [];
           try {
-            const schedRes = await axios.get(`http://localhost:5001/api/schedule/${incomingEmail}`);
+            const schedRes = await axios.get(`https://vinsup-4vt5.onrender.com/api/schedule/${incomingEmail}`);
             allEvents = Array.isArray(schedRes.data) ? schedRes.data : (schedRes.data.data || []);
           } catch(err1) {
-            const schedRes = await axios.get(`http://localhost:5001/api/schedule`);
+            const schedRes = await axios.get(`https://vinsup-4vt5.onrender.com/api/schedule`);
             const allSched = Array.isArray(schedRes.data) ? schedRes.data : (schedRes.data.data || []);
             allEvents = allSched.filter(ev => (ev.email === incomingEmail) || (ev.empEmail === incomingEmail) || (ev.assignedTo === exactDBName));
           }
@@ -312,12 +312,12 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
   const fetchNotifications = async () => {
     if (!activeEmail) return;
     try {
-      const res = await axios.get(`http://localhost:5001/api/notifications/user/${activeEmail}`);
+      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/notifications/user/${activeEmail}`);
       const notifData = Array.isArray(res.data) ? res.data : (res.data.notifications || res.data.data || []);
       setNotifications(notifData);
     } catch (err) {
       try {
-        const resAlt = await axios.get(`http://localhost:5001/api/notifications?email=${activeEmail}`);
+        const resAlt = await axios.get(`https://vinsup-4vt5.onrender.com/api/notifications?email=${activeEmail}`);
         const notifDataAlt = Array.isArray(resAlt.data) ? resAlt.data : (resAlt.data.notifications || resAlt.data.data || []);
         setNotifications(notifDataAlt);
       } catch (err2) {
@@ -330,7 +330,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
   const fetchChatUnreadCount = async () => {
     if (!activeEmail) return;
     try {
-      const res = await axios.get(`http://localhost:5001/api/privatechat/unread/${activeEmail}`);
+      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/privatechat/unread/${activeEmail}`);
       if (res.data.success) {
         setChatUnreadCount(res.data.unreadCount);
       }
@@ -353,7 +353,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
 
         await Promise.all(batchNames.map(async (batch) => {
           if(!batch) return;
-          const res = await axios.get(`http://localhost:5001/api/batchchat/${encodeURIComponent(batch)}`).catch(() => null);
+          const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/batchchat/${encodeURIComponent(batch)}`).catch(() => null);
           if (res && res.data) {
             const msgs = res.data;
             const lastRead = localStorage.getItem(`chat_last_read_${batch}`) || 0;
@@ -394,7 +394,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
 
   const handleMarkNotificationRead = async (id) => {
     try {
-      await axios.put(`http://localhost:5001/api/notifications/mark-read/${id}`);
+      await axios.put(`https://vinsup-4vt5.onrender.com/api/notifications/mark-read/${id}`);
       fetchNotifications();
     } catch(err) {
       console.error("Error marking read:", err);
@@ -403,7 +403,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
 
   const handleDeleteNotification = async (id) => {
     try {
-      await axios.delete(`http://localhost:5001/api/notifications/${id}`);
+      await axios.delete(`https://vinsup-4vt5.onrender.com/api/notifications/${id}`);
       fetchNotifications();
     } catch(err) {
       console.error("Error deleting notification:", err);
@@ -415,7 +415,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
     
     if (tabName === 'Admin Chat') {
         try {
-            await axios.put('http://localhost:5001/api/privatechat/mark-read', {
+            await axios.put('https://vinsup-4vt5.onrender.com/api/privatechat/mark-read', {
                 receiverEmail: activeEmail,
                 senderEmail: 'admin@vinsup.com'
             });
@@ -430,7 +430,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
 
   const fetchChatMessages = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/groupchat');
+      const res = await axios.get('https://vinsup-4vt5.onrender.com/api/groupchat');
       const messages = res.data;
       setChatMessages(messages);
 
@@ -518,7 +518,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
             fileData: selectedGroupFiles[i].data
           };
 
-          await axios.post('http://localhost:5001/api/groupchat/send', { 
+          await axios.post('https://vinsup-4vt5.onrender.com/api/groupchat/send', { 
             senderName, 
             senderEmail, 
             message: i === 0 ? newMsg : "", 
@@ -526,7 +526,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
           });
         }
       } else {
-        await axios.post('http://localhost:5001/api/groupchat/send', { 
+        await axios.post('https://vinsup-4vt5.onrender.com/api/groupchat/send', { 
           senderName, 
           senderEmail, 
           message: newMsg,
@@ -543,7 +543,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
   const handleDeleteMessage = async (id) => {
     if(!window.confirm("Are you sure you want to delete this message?")) return;
     try {
-      await axios.delete(`http://localhost:5001/api/groupchat/delete/${id}`);
+      await axios.delete(`https://vinsup-4vt5.onrender.com/api/groupchat/delete/${id}`);
       fetchChatMessages();
     } catch(err) { console.error("Error deleting message:", err); }
   };
@@ -551,7 +551,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
   const handleUpdateMessage = async (id) => {
     if(!editingMsgText.trim()) return;
     try {
-      await axios.put(`http://localhost:5001/api/groupchat/edit/${id}`, { message: editingMsgText });
+      await axios.put(`https://vinsup-4vt5.onrender.com/api/groupchat/edit/${id}`, { message: editingMsgText });
       setEditingMsgId(null);
       setEditingMsgText("");
       fetchChatMessages();

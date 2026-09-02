@@ -25,7 +25,7 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
     // 🔥 FIXED: Completely removed static if-else check. 
     // Now checking strictly through backend database API 🔥
     try {
-      const response = await fetch('http://localhost:5001/api/auth/login', {
+      const response = await fetch('https://vinsup-4vt5.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -46,14 +46,14 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
     if (rawPath.startsWith('http') || rawPath.startsWith('data:image')) return rawPath;
     let cleanPath = rawPath.replace(/\\/g, '/').replace(/^\/+/, '');
     if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-    return `http://localhost:5001/${cleanPath}`;
+    return `https://vinsup-4vt5.onrender.com/${cleanPath}`;
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const activeEmail = (userEmail || "").toLowerCase().trim();
-        const stuRes = await axios.get('http://localhost:5001/api/students').catch(() => null);
+        const stuRes = await axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(() => null);
         const allStudents = stuRes?.data?.data || stuRes?.data || [];
         const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
         
@@ -70,13 +70,13 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
             const members = allStudents.filter(s => String(s.batch || s.Batch || s.course || '').trim().toLowerCase() === batchName.toLowerCase());
             setBatchMembers(members);
 
-            const batchRes = await axios.get('http://localhost:5001/api/batches').catch(() => null);
+            const batchRes = await axios.get('https://vinsup-4vt5.onrender.com/api/batches').catch(() => null);
             const allBatches = Array.isArray(batchRes?.data) ? batchRes.data : (batchRes?.data?.data || []);
             const currentBatch = allBatches.find(b => String(b.batchName || b.courseName || '').trim().toLowerCase() === batchName.toLowerCase());
             
             if (currentBatch && (currentBatch.trainer || currentBatch.trainerName)) {
                 const trainerQuery = String(currentBatch.trainer || currentBatch.trainerName).toLowerCase().trim();
-                const empRes = await axios.get('http://localhost:5001/api/employees').catch(() => null);
+                const empRes = await axios.get('https://vinsup-4vt5.onrender.com/api/employees').catch(() => null);
                 const allEmp = Array.isArray(empRes?.data) ? empRes.data : (empRes?.data?.data || []);
                 const trainerObj = allEmp.find(e => (e.fullName || '').toLowerCase().trim() === trainerQuery || (e.email || '').toLowerCase().trim() === trainerQuery);
                 
@@ -92,10 +92,10 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
             }
         }
 
-        const quizRes = await axios.get('http://localhost:5001/api/quizzes/all').catch(() => null);
+        const quizRes = await axios.get('https://vinsup-4vt5.onrender.com/api/quizzes/all').catch(() => null);
         const allQuizzes = Array.isArray(quizRes?.data) ? quizRes.data : (quizRes?.data?.data || quizRes?.data?.quizzes || []);
         
-        const resultsRes = await axios.get(`http://localhost:5001/api/quizzes/results/${activeEmail}`).catch(() => null);
+        const resultsRes = await axios.get(`https://vinsup-4vt5.onrender.com/api/quizzes/results/${activeEmail}`).catch(() => null);
         const myResults = Array.isArray(resultsRes?.data) ? resultsRes.data : [];
         const completedQuizIds = myResults.map(r => String(r.quizId));
 
@@ -114,7 +114,7 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
           setUnreadQuizCount(unreadQ);
         }
 
-        const annRes = await axios.get('http://localhost:5001/api/announcements').catch(() => null);
+        const annRes = await axios.get('https://vinsup-4vt5.onrender.com/api/announcements').catch(() => null);
         let allAnn = [];
         if (Array.isArray(annRes?.data)) allAnn = annRes.data;
         else if (Array.isArray(annRes?.data?.data)) allAnn = annRes.data.data;
@@ -145,7 +145,7 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
       const activeEmail = (userEmail || "").toLowerCase().trim(); 
 
       try {
-        const chatRes = await axios.get(`http://localhost:5001/api/batchchat/${encodeURIComponent(myBatch)}`).catch(()=>null);
+        const chatRes = await axios.get(`https://vinsup-4vt5.onrender.com/api/batchchat/${encodeURIComponent(myBatch)}`).catch(()=>null);
         if (chatRes && chatRes.data) {
           const msgs = chatRes.data;
           const cacheKey = `chat_last_read_v3_${myBatch}_${activeEmail}`;

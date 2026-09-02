@@ -14,7 +14,7 @@ const Attendance = () => {
   const fetchMongoDBEmployees = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5001/api/employees');
+      const response = await fetch('https://vinsup-4vt5.onrender.com/api/employees');
       
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
@@ -159,7 +159,7 @@ const Attendance = () => {
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <img 
-                          src={emp.photo.startsWith('http') || emp.photo.startsWith('data:image') ? emp.photo : `http://localhost:5001/${emp.photo.replace(/\\/g, '/').replace(/^\/+/, '').startsWith('uploads/') ? '' : 'uploads/'}${emp.photo.replace(/\\/g, '/').replace(/^\/+/, '')}`} 
+                          src={emp.photo.startsWith('http') || emp.photo.startsWith('data:image') ? emp.photo : `https://vinsup-4vt5.onrender.com/${emp.photo.replace(/\\/g, '/').replace(/^\/+/, '').startsWith('uploads/') ? '' : 'uploads/'}${emp.photo.replace(/\\/g, '/').replace(/^\/+/, '')}`} 
                           alt={emp.name} 
                           style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} 
                           onError={(e) => { e.target.src = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; }}

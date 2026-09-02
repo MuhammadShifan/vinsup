@@ -26,7 +26,7 @@ const EmployeeMyClasses = ({ userName, userEmail }) => {
     if (!rawPath) return '';
     if (rawPath.startsWith('http') || rawPath.startsWith('data:image')) return rawPath;
     let cleanPath = rawPath.replace(/\\/g, '/').replace(/^\/+/, '');
-    return `http://localhost:5001/${cleanPath}`;
+    return `https://vinsup-4vt5.onrender.com/${cleanPath}`;
   };
 
   const fallbackAvatar = (name) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Student')}&background=f1f5f9&color=64748b`;
@@ -47,7 +47,7 @@ const EmployeeMyClasses = ({ userName, userEmail }) => {
         const incomingEmail = (userEmail || "").toLowerCase().trim();
 
         // Fetch Batches
-        const bRes = await axios.get('http://localhost:5001/api/batches');
+        const bRes = await axios.get('https://vinsup-4vt5.onrender.com/api/batches');
         const allB = Array.isArray(bRes.data) ? bRes.data : (bRes.data.data || []);
         const myBatches = allB.filter(b => {
           const trainerStr = (b.trainer || b.trainerName || b.assignedTo || b.faculty || '').toLowerCase().trim();
@@ -56,12 +56,12 @@ const EmployeeMyClasses = ({ userName, userEmail }) => {
         setBatches(myBatches);
 
         // Fetch Students
-        const stuRes = await axios.get('http://localhost:5001/api/students').catch(()=>null);
+        const stuRes = await axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(()=>null);
         const stuData = stuRes?.data?.data || stuRes?.data || [];
         setAllStudents(stuData);
 
         // Fetch Syllabus
-        const sRes = await axios.get('http://localhost:5001/api/syllabus').catch(()=>null);
+        const sRes = await axios.get('https://vinsup-4vt5.onrender.com/api/syllabus').catch(()=>null);
         if (sRes?.data) setSyllabusList(Array.isArray(sRes.data) ? sRes.data : (sRes.data.data || []));
 
         // Calculate Initial Stats
@@ -154,7 +154,7 @@ const EmployeeMyClasses = ({ userName, userEmail }) => {
     const newStatus = newProgress === 100 ? 'Completed' : 'Ongoing';
 
     try {
-      await axios.put(`http://localhost:5001/api/batches/${selectedBatchId}`, { progress: newProgress, status: newStatus });
+      await axios.put(`https://vinsup-4vt5.onrender.com/api/batches/${selectedBatchId}`, { progress: newProgress, status: newStatus });
       setBatches(batches.map(b => (b._id === selectedBatchId || b.batchId === selectedBatchId) ? { ...b, progress: newProgress, status: newStatus } : b));
       let updatedClasses = availableClasses.map(c => ({ ...c, isCompleted: c.checked }));
       setAvailableClasses(updatedClasses);

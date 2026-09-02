@@ -26,7 +26,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
         if (!trainerName || !trainerId) return;
 
         // 1. Fetch Batches (Filter only for this trainer)
-        const batchRes = await axios.get('http://localhost:5001/api/batches');
+        const batchRes = await axios.get('https://vinsup-4vt5.onrender.com/api/batches');
         const allBatches = Array.isArray(batchRes.data) ? batchRes.data : (batchRes.data.data || []);
         
         const filteredBatches = allBatches.filter(b => 
@@ -50,7 +50,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
 
   const fetchAnnouncements = async (trainerId) => {
     try {
-      const res = await axios.get(`http://localhost:5001/api/announcements/trainer/${trainerId}`);
+      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/announcements/trainer/${trainerId}`);
       setAnnouncements(res.data.data || []);
     } catch (error) {
       console.error("Error fetching announcements:", error);
@@ -94,7 +94,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
     };
 
     try {
-      await axios.post('http://localhost:5001/api/announcements', payload);
+      await axios.post('https://vinsup-4vt5.onrender.com/api/announcements', payload);
       alert("Announcement Sent Successfully! 🚀");
       
       // Reset Form
@@ -115,7 +115,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
   const handleDelete = async (id) => {
     if(window.confirm("Are you sure you want to delete this announcement?")) {
       try {
-        await axios.delete(`http://localhost:5001/api/announcements/${id}`);
+        await axios.delete(`https://vinsup-4vt5.onrender.com/api/announcements/${id}`);
         setAnnouncements(announcements.filter(a => a._id !== id));
       } catch (error) {
         console.error("Error deleting:", error);

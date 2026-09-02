@@ -10,7 +10,7 @@ const MyProfile = ({ trainerData }) => {
         if (!trainerName) return;
 
         // Fetching batches or courses from backend to calculate the exact real count
-        const response = await fetch('http://localhost:5001/api/batches');
+        const response = await fetch('https://vinsup-4vt5.onrender.com/api/batches');
         if (response.ok) {
           const result = await response.json();
           const batches = Array.isArray(result) ? result : (result.data || []);

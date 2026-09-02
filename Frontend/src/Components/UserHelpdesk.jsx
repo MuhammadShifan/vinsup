@@ -34,7 +34,7 @@ const UserHelpdesk = () => {
 
   const fetchTickets = async () => {
     try {
-      const response = await axios.get(`http://localhost:5001/api/tickets/${employeeId}`);
+      const response = await axios.get(`https://vinsup-4vt5.onrender.com/api/tickets/${employeeId}`);
       setTickets(response.data);
     } catch (err) {
       console.error("Error fetching tickets:", err);
@@ -59,7 +59,7 @@ const UserHelpdesk = () => {
   const handleSubmit = async () => {
     try {
       const ticketData = { ...formData, priority: selectedPriority, employeeId };
-      const response = await axios.post('http://localhost:5001/api/tickets/add', ticketData);
+      const response = await axios.post('https://vinsup-4vt5.onrender.com/api/tickets/add', ticketData);
       alert(response.data.message || "Ticket successfully raised!");
       setFormData({ subject: '', category: 'Technical Issue', description: '', date: '' });
       setCurrentView('dashboard');
@@ -73,7 +73,7 @@ const UserHelpdesk = () => {
     if (!window.confirm("Are you sure you want to delete this ticket?")) return;
 
     try {
-      await axios.delete(`http://localhost:5001/api/tickets/${ticketId}`);
+      await axios.delete(`https://vinsup-4vt5.onrender.com/api/tickets/${ticketId}`);
       fetchTickets();
     } catch (err) {
       console.error("Error deleting ticket:", err);

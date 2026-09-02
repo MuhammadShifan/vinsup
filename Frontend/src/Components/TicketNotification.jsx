@@ -8,7 +8,7 @@ const TicketNotification = () => {
   // Fetch only Admin Notifications
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/notifications/user/admin');
+      const res = await axios.get('https://vinsup-4vt5.onrender.com/api/notifications/user/admin');
       const notifData = Array.isArray(res.data) ? res.data : (res.data.data || []);
       setNotifications(notifData);
     } catch (err) {
@@ -25,7 +25,7 @@ const TicketNotification = () => {
 
   const handleMarkRead = async (id) => {
     try {
-      await axios.put(`http://localhost:5001/api/notifications/mark-read/${id}`);
+      await axios.put(`https://vinsup-4vt5.onrender.com/api/notifications/mark-read/${id}`);
       fetchNotifications(); // Refresh list after marking as read
     } catch (err) {
       console.error("Error marking notification as read:", err);
@@ -35,7 +35,7 @@ const TicketNotification = () => {
   // 🔥 PUDHUSU: Delete Notification Functionality 🔥
   const handleDeleteNotification = async (id) => {
     try {
-      await axios.delete(`http://localhost:5001/api/notifications/${id}`);
+      await axios.delete(`https://vinsup-4vt5.onrender.com/api/notifications/${id}`);
       fetchNotifications(); // Refresh list after deleting
     } catch (err) {
       console.error("Error deleting notification:", err);

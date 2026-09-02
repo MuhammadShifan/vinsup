@@ -36,7 +36,7 @@ const StudentAnnouncements = ({ userEmail }) => {
         const activeEmail = (userEmail || "").toLowerCase().trim();
         
         // 1. Fetch Student Details (to know their exact batch)
-        const stuRes = await axios.get('http://localhost:5001/api/students').catch(() => null);
+        const stuRes = await axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(() => null);
         const allStudents = stuRes?.data?.data || stuRes?.data || [];
         const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
         
@@ -45,7 +45,7 @@ const StudentAnnouncements = ({ userEmail }) => {
         const studentBatch = String(studentBatchRaw).toLowerCase().trim();
 
         // 2. Fetch Announcements from Backend
-        const annRes = await axios.get('http://localhost:5001/api/announcements').catch(() => null);
+        const annRes = await axios.get('https://vinsup-4vt5.onrender.com/api/announcements').catch(() => null);
         const allAnn = Array.isArray(annRes?.data) ? annRes.data : (annRes?.data?.data || []);
 
         let formattedAnns = [];

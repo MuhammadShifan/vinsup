@@ -25,7 +25,7 @@ const Batches = () => {
 
   const fetchBatches = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/batches');
+      const response = await fetch('https://vinsup-4vt5.onrender.com/api/batches');
       const result = await response.json();
       if (result.success) { setBatchList(result.data); }
     } catch (error) { console.error("Error fetching batches:", error); }
@@ -33,7 +33,7 @@ const Batches = () => {
 
   const fetchTrainers = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/employees');
+      const response = await fetch('https://vinsup-4vt5.onrender.com/api/employees');
       const result = await response.json();
       if (result.success) { 
         const trainers = result.data.filter(emp => emp.designation === 'Trainer');
@@ -44,7 +44,7 @@ const Batches = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/courses');
+      const response = await fetch('https://vinsup-4vt5.onrender.com/api/courses');
       const result = await response.json();
       if (result.success) { 
         setCoursesList(result.data); 
@@ -67,7 +67,7 @@ const Batches = () => {
     e.preventDefault();
     if (window.confirm(`Are you sure you want to delete ${batchToDelete.batchName}?`)) {
       try {
-        const response = await fetch(`http://localhost:5001/api/batches/delete/${batchToDelete._id}`, { method: 'DELETE' });
+        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/batches/delete/${batchToDelete._id}`, { method: 'DELETE' });
         const result = await response.json();
         if (result.success) {
           setBatchList(prevList => prevList.filter(b => b._id !== batchToDelete._id));
@@ -99,7 +99,7 @@ const Batches = () => {
       let isEdit = !!editId;
 
       if (isEdit) {
-        const response = await fetch(`http://localhost:5001/api/batches/update/${editId}`, {
+        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/batches/update/${editId}`, {
           method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData)
         });
         if ((await response.json()).success) { 
@@ -107,7 +107,7 @@ const Batches = () => {
           isSuccess = true; 
         }
       } else {
-        const response = await fetch('http://localhost:5001/api/batches/add', {
+        const response = await fetch('https://vinsup-4vt5.onrender.com/api/batches/add', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...formData, progress: 0, status: 'Ongoing' }) 
         });
         if ((await response.json()).success) { 
@@ -130,7 +130,7 @@ const Batches = () => {
               recipientEmail: assignedTrainer.email.toLowerCase().trim()
             };
 
-            await fetch('http://localhost:5001/api/notifications/add', {
+            await fetch('https://vinsup-4vt5.onrender.com/api/notifications/add', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(notifPayload)
@@ -178,7 +178,7 @@ const Batches = () => {
       } else {
         let cleanPath = trainer.profilePhoto.replace(/\\/g, '/');
         if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-        imageUrl = `http://localhost:5001/${cleanPath}`;
+        imageUrl = `https://vinsup-4vt5.onrender.com/${cleanPath}`;
       }
     }
     return { ...trainer, displayImage: imageUrl };

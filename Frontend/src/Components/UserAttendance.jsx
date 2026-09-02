@@ -55,7 +55,7 @@ const UserAttendance = ({ userName, userEmail }) => {
 
   const fetchUserData = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/employees');
+      const response = await axios.get('https://vinsup-4vt5.onrender.com/api/employees');
       const empData = Array.isArray(response.data) ? response.data : (response.data.data || []);
       
       const storedEmail = localStorage.getItem('loggedInEmail');
@@ -166,14 +166,14 @@ const UserAttendance = ({ userName, userEmail }) => {
         setCheckInTime(timeString);
         setStatusToday(newStatus);
         
-        await axios.put(`http://localhost:5001/api/employees/${currentUserData._id || currentUserData.empId}`, {
+        await axios.put(`https://vinsup-4vt5.onrender.com/api/employees/${currentUserData._id || currentUserData.empId}`, {
           todayCheckIn: timeString,
           todayStatus: newStatus,
           lastAttendanceDate: todayDateStr, 
           todayCheckOut: "-" 
         });
 
-        await axios.post('http://localhost:5001/api/notifications/add', {
+        await axios.post('https://vinsup-4vt5.onrender.com/api/notifications/add', {
           type: 'Attendance',
           title: 'Employee Checked In',
           message: `${empName} has checked in at ${timeString}. Status: ${newStatus}`
@@ -201,11 +201,11 @@ const UserAttendance = ({ userName, userEmail }) => {
           setCheckOutTime(timeString);
           setTotalHours(calculateTotalHours(checkInTime, timeString));
 
-          await axios.put(`http://localhost:5001/api/employees/${currentUserData._id || currentUserData.empId}`, {
+          await axios.put(`https://vinsup-4vt5.onrender.com/api/employees/${currentUserData._id || currentUserData.empId}`, {
             todayCheckOut: timeString
           });
 
-          await axios.post('http://localhost:5001/api/notifications/add', {
+          await axios.post('https://vinsup-4vt5.onrender.com/api/notifications/add', {
             type: 'Attendance',
             title: 'Employee Checked Out',
             message: `${empName} has checked out at ${timeString}.`

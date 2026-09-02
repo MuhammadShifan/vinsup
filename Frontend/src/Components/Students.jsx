@@ -33,7 +33,7 @@ const Students = () => {
 
   const fetchData = async () => {
     try {
-      const stuRes = await axios.get('http://localhost:5001/api/students').catch(() => null);
+      const stuRes = await axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(() => null);
       const stuData = stuRes?.data?.data || stuRes?.data || [];
       const validStudents = Array.isArray(stuData) ? stuData : [];
       setStudentsList(validStudents);
@@ -42,15 +42,15 @@ const Students = () => {
         setActiveStudentId(validStudents[0].studentId);
       }
 
-      const crsRes = await axios.get('http://localhost:5001/api/courses').catch(() => null);
+      const crsRes = await axios.get('https://vinsup-4vt5.onrender.com/api/courses').catch(() => null);
       const crsData = crsRes?.data?.data || crsRes?.data || [];
       setCoursesList(Array.isArray(crsData) ? crsData : []);
 
-      const bthRes = await axios.get('http://localhost:5001/api/batches').catch(() => null);
+      const bthRes = await axios.get('https://vinsup-4vt5.onrender.com/api/batches').catch(() => null);
       const bthData = bthRes?.data?.data || bthRes?.data || [];
       setBatchesList(Array.isArray(bthData) ? bthData : []);
 
-      const empRes = await axios.get('http://localhost:5001/api/employees').catch(() => null);
+      const empRes = await axios.get('https://vinsup-4vt5.onrender.com/api/employees').catch(() => null);
       const empData = empRes?.data?.data || empRes?.data || [];
       const allEmp = Array.isArray(empData) ? empData : [];
       
@@ -59,7 +59,7 @@ const Students = () => {
         return role.includes('trainer') || role.includes('faculty');
       }));
 
-      const sylRes = await axios.get('http://localhost:5001/api/syllabus').catch(() => null);
+      const sylRes = await axios.get('https://vinsup-4vt5.onrender.com/api/syllabus').catch(() => null);
       const sylData = sylRes?.data?.data || sylRes?.data || [];
       setSyllabusList(Array.isArray(sylData) ? sylData : []);
 
@@ -132,11 +132,11 @@ const Students = () => {
     try {
       let response;
       if (isEditing) {
-        response = await axios.put(`http://localhost:5001/api/students/update/${editDbId}`, submitData, {
+        response = await axios.put(`https://vinsup-4vt5.onrender.com/api/students/update/${editDbId}`, submitData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       } else {
-        response = await axios.post('http://localhost:5001/api/students/add', submitData, {
+        response = await axios.post('https://vinsup-4vt5.onrender.com/api/students/add', submitData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
@@ -157,7 +157,7 @@ const Students = () => {
   const handleDeleteStudent = async (dbId, stuName) => {
     if (window.confirm(`Are you sure you want to delete ${stuName}?`)) {
       try {
-        const response = await axios.delete(`http://localhost:5001/api/students/delete/${dbId}`);
+        const response = await axios.delete(`https://vinsup-4vt5.onrender.com/api/students/delete/${dbId}`);
         if (response.data.success) {
           alert("Student Deleted! 🗑️");
           setActiveStudentId(null);
@@ -181,7 +181,7 @@ const Students = () => {
     if (rawPath.startsWith('http') || rawPath.startsWith('data:image')) return rawPath;
     let cleanPath = rawPath.replace(/\\/g, '/').replace(/^\/+/, '');
     if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-    return `http://localhost:5001/${cleanPath}`;
+    return `https://vinsup-4vt5.onrender.com/${cleanPath}`;
   };
 
   const filteredStudents = studentsList.filter(stu => 

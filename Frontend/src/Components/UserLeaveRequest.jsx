@@ -49,7 +49,7 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
   const fetchLeaveHistory = async () => {
     if (!activeEmail) return;
     try {
-      const res = await axios.get(`http://localhost:5001/api/leaves/user/${activeEmail}`);
+      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/leaves/user/${activeEmail}`);
       if (res.data.success) {
         setHistory(res.data.data);
         calculateUsedBalances(res.data.data);
@@ -127,7 +127,7 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
     };
 
     try {
-        const res = await axios.post('http://localhost:5001/api/leaves/apply', payload);
+        const res = await axios.post('https://vinsup-4vt5.onrender.com/api/leaves/apply', payload);
         if (res.data.success) {
             alert("Leave request submitted successfully!");
             // 🔥 FIX: session removed from reset state 🔥

@@ -8,7 +8,7 @@ const AdminHelpdesk = () => {
   // 1. Fetch ALL tickets on load
   const fetchAllTickets = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/tickets');
+      const response = await axios.get('https://vinsup-4vt5.onrender.com/api/tickets');
       setTickets(response.data);
     } catch (err) {
       console.error("Error fetching tickets:", err);
@@ -22,7 +22,7 @@ const AdminHelpdesk = () => {
   // 2. Update Status Function
   const handleStatusChange = async (ticketId, newStatus) => {
     try {
-      await axios.put(`http://localhost:5001/api/tickets/${ticketId}`, { status: newStatus });
+      await axios.put(`https://vinsup-4vt5.onrender.com/api/tickets/${ticketId}`, { status: newStatus });
       // Update state locally without reloading the whole page
       setTickets(tickets.map(ticket => 
         ticket._id === ticketId ? { ...ticket, status: newStatus } : ticket

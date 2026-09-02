@@ -74,7 +74,7 @@ router.post('/add', upload.single('profilePhoto'), async (req, res) => {
     }
 
     if (req.file) {
-      employeeData.profilePhoto = `http://localhost:5001/uploads/${req.file.filename}`;
+      employeeData.profilePhoto = `https://vinsup-4vt5.onrender.com/uploads/${req.file.filename}`;
     }
 
     const newEmployee = new Employee(employeeData);
@@ -98,7 +98,7 @@ router.put('/update/:id', upload.single('profilePhoto'), async (req, res) => {
     }
 
     if (req.file) {
-      employeeData.profilePhoto = `http://localhost:5001/uploads/${req.file.filename}`;
+      employeeData.profilePhoto = `https://vinsup-4vt5.onrender.com/uploads/${req.file.filename}`;
     }
 
     const updatedEmployee = await Employee.findByIdAndUpdate(req.params.id, employeeData, { new: true }).exec();

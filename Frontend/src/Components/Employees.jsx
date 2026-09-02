@@ -23,7 +23,7 @@ const Employees = () => {
   // 1. FETCH API (GET)
   const fetchEmployees = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/employees');
+      const response = await fetch('https://vinsup-4vt5.onrender.com/api/employees');
       const result = await response.json();
       if (result.success) {
         setEmployeeList(result.data);
@@ -66,7 +66,7 @@ const Employees = () => {
     e.stopPropagation(); 
     if (window.confirm(`Are you sure you want to delete ${empToDelete.fullName}?`)) {
       try {
-        const response = await fetch(`http://localhost:5001/api/employees/delete/${empToDelete._id}`, {
+        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/employees/delete/${empToDelete._id}`, {
           method: 'DELETE'
         });
         const result = await response.json();
@@ -119,7 +119,7 @@ const Employees = () => {
 
     try {
       if (editId) {
-        const response = await fetch(`http://localhost:5001/api/employees/update/${editId}`, {
+        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/employees/update/${editId}`, {
           method: 'PUT',
           body: submitData 
         });
@@ -130,7 +130,7 @@ const Employees = () => {
           fetchEmployees(); 
         }
       } else {
-        const response = await fetch('http://localhost:5001/api/employees/add', {
+        const response = await fetch('https://vinsup-4vt5.onrender.com/api/employees/add', {
           method: 'POST',
           body: submitData 
         });
@@ -378,7 +378,7 @@ const Employees = () => {
                           <img 
                             src={emp.profilePhoto.startsWith('http') || emp.profilePhoto.startsWith('data:image') 
                               ? emp.profilePhoto 
-                              : `http://localhost:5001/${emp.profilePhoto.replace(/\\/g, '/').replace(/^\/+/, '').startsWith('uploads/') ? '' : 'uploads/'}${emp.profilePhoto.replace(/\\/g, '/').replace(/^\/+/, '')}`
+                              : `https://vinsup-4vt5.onrender.com/${emp.profilePhoto.replace(/\\/g, '/').replace(/^\/+/, '').startsWith('uploads/') ? '' : 'uploads/'}${emp.profilePhoto.replace(/\\/g, '/').replace(/^\/+/, '')}`
                             } 
                             alt="Profile" 
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}

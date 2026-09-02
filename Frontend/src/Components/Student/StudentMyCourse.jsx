@@ -36,10 +36,10 @@ const StudentMyCourse = ({ userEmail, userName }) => {
 
         // Fetch multiple APIs at once
         const [stuRes, empRes, sylRes, batchRes] = await Promise.all([
-            axios.get('http://localhost:5001/api/students').catch(() => null),
-            axios.get('http://localhost:5001/api/employees').catch(() => null),
-            axios.get('http://localhost:5001/api/syllabus').catch(() => null),
-            axios.get('http://localhost:5001/api/batches').catch(() => null)
+            axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(() => null),
+            axios.get('https://vinsup-4vt5.onrender.com/api/employees').catch(() => null),
+            axios.get('https://vinsup-4vt5.onrender.com/api/syllabus').catch(() => null),
+            axios.get('https://vinsup-4vt5.onrender.com/api/batches').catch(() => null)
         ]);
 
         const allStudents = stuRes?.data?.data || stuRes?.data || [];
@@ -61,7 +61,7 @@ const StudentMyCourse = ({ userEmail, userName }) => {
             let cleanPath = trainerInfo.profilePhoto.replace(/\\/g, '/').replace(/^\/+/, '');
             if (!cleanPath.startsWith('http')) {
                cleanPath = cleanPath.startsWith('uploads/') ? cleanPath : `uploads/${cleanPath}`;
-               trainerImg = `http://localhost:5001/${cleanPath}`;
+               trainerImg = `https://vinsup-4vt5.onrender.com/${cleanPath}`;
             } else trainerImg = trainerInfo.profilePhoto;
           }
 

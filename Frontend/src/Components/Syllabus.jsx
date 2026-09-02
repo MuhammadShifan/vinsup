@@ -23,7 +23,7 @@ const Syllabus = () => {
   // 1. FETCH SYLLABUS API (GET)
   const fetchSyllabus = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/syllabus');
+      const response = await fetch('https://vinsup-4vt5.onrender.com/api/syllabus');
       const result = await response.json();
       if (result.success) {
         setSyllabusList(result.data);
@@ -36,7 +36,7 @@ const Syllabus = () => {
   // 2. FETCH COURSES API (GET)
   const fetchCourses = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/courses');
+      const response = await fetch('https://vinsup-4vt5.onrender.com/api/courses');
       const result = await response.json();
       if (result.success) {
         setCoursesList(result.data);
@@ -112,7 +112,7 @@ const Syllabus = () => {
     e.preventDefault();
     if (window.confirm(`Are you sure you want to delete ${syllabusToDelete.courseName} syllabus?`)) {
       try {
-        const response = await fetch(`http://localhost:5001/api/syllabus/delete/${syllabusToDelete._id}`, { method: 'DELETE' });
+        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/syllabus/delete/${syllabusToDelete._id}`, { method: 'DELETE' });
         const result = await response.json();
         if (result.success) {
           setSyllabusList(prev => prev.filter(s => s._id !== syllabusToDelete._id));
@@ -142,12 +142,12 @@ const Syllabus = () => {
 
     try {
       if (editId) {
-        const response = await fetch(`http://localhost:5001/api/syllabus/update/${editId}`, {
+        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/syllabus/update/${editId}`, {
           method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(submitData)
         });
         if ((await response.json()).success) { alert("Syllabus Updated Successfully! ✏️"); fetchSyllabus(); }
       } else {
-        const response = await fetch('http://localhost:5001/api/syllabus/add', {
+        const response = await fetch('https://vinsup-4vt5.onrender.com/api/syllabus/add', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(submitData)
         });
         if ((await response.json()).success) { alert("New Syllabus Added! 🚀"); fetchSyllabus(); }

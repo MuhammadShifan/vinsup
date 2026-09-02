@@ -35,7 +35,7 @@ const Reports = () => {
 
   const fetchEmployeesForDropdown = async () => {
     try {
-      const empResponse = await fetch('http://localhost:5001/api/employees');
+      const empResponse = await fetch('https://vinsup-4vt5.onrender.com/api/employees');
       if (empResponse.ok) {
         const dbEmployees = await empResponse.json();
         setAllEmployees(Array.isArray(dbEmployees) ? dbEmployees : dbEmployees.data || []);
@@ -47,7 +47,7 @@ const Reports = () => {
 
   const fetchGeneratedReportsHistory = async () => {
     try {
-      const res = await fetch('http://localhost:5001/api/reports');
+      const res = await fetch('https://vinsup-4vt5.onrender.com/api/reports');
       if (res.ok) {
         const dbReports = await res.json();
         setGeneratedReportsHistory(Array.isArray(dbReports.data) ? dbReports.data : []);
@@ -88,7 +88,7 @@ const Reports = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:5001/api/reports', {
+      const res = await fetch('https://vinsup-4vt5.onrender.com/api/reports', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -100,7 +100,7 @@ const Reports = () => {
 
         if (resolvedEmail) {
           try {
-            await fetch('http://localhost:5001/api/notifications/add', {
+            await fetch('https://vinsup-4vt5.onrender.com/api/notifications/add', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -133,7 +133,7 @@ const Reports = () => {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`http://localhost:5001/api/reports/${id}`, {
+      const res = await fetch(`https://vinsup-4vt5.onrender.com/api/reports/${id}`, {
         method: 'DELETE',
       });
       
@@ -158,8 +158,8 @@ const Reports = () => {
         
         if (reportType === 'workload') setActiveWorkloadTab('Active'); 
 
-        const empResponse = await fetch('http://localhost:5001/api/employees');
-        const batchResponse = await fetch('http://localhost:5001/api/batches'); 
+        const empResponse = await fetch('https://vinsup-4vt5.onrender.com/api/employees');
+        const batchResponse = await fetch('https://vinsup-4vt5.onrender.com/api/batches'); 
         
         if (empResponse.ok) {
           const dbEmployees = await empResponse.json();
@@ -244,7 +244,7 @@ const Reports = () => {
       } 
       else if (reportType === 'course') {
         setActiveCourseTab('Ongoing'); 
-        const batchResponse = await fetch('http://localhost:5001/api/batches');
+        const batchResponse = await fetch('https://vinsup-4vt5.onrender.com/api/batches');
         if (batchResponse.ok) {
           const dbBatches = await batchResponse.json();
           const batches = Array.isArray(dbBatches) ? dbBatches : dbBatches.data || [];
@@ -557,7 +557,7 @@ const Reports = () => {
                       } else {
                         let cleanPath = rawImage.replace(/\\/g, '/').replace(/^\/+/, '');
                         if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-                        finalImage = `http://localhost:5001/${cleanPath}`;
+                        finalImage = `https://vinsup-4vt5.onrender.com/${cleanPath}`;
                       }
                     } else if (rawImage) {
                       finalImage = rawImage;

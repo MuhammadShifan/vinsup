@@ -20,7 +20,7 @@ const UserCourses = ({ userName, userEmail }) => {
 
   const fetchSyllabus = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/syllabus');
+      const response = await axios.get('https://vinsup-4vt5.onrender.com/api/syllabus');
       const data = Array.isArray(response.data) ? response.data : (response.data.data || []);
       setAllSyllabus(data);
     } catch (err) {
@@ -30,7 +30,7 @@ const UserCourses = ({ userName, userEmail }) => {
 
   const fetchBatches = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/batches');
+      const response = await axios.get('https://vinsup-4vt5.onrender.com/api/batches');
       const allBatches = Array.isArray(response.data) ? response.data : (response.data.data || []);
       
       const incomingEmail = (userEmail || localStorage.getItem('loggedInEmail') || "").toLowerCase().trim();

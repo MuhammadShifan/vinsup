@@ -17,14 +17,14 @@ const StudentQuizzes = ({ userEmail }) => {
       const activeEmail = (userEmail || "").toLowerCase().trim();
       if (!activeEmail) return;
 
-      const stuRes = await axios.get('http://localhost:5001/api/students').catch(() => null);
+      const stuRes = await axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(() => null);
       const allStudents = stuRes?.data?.data || stuRes?.data || [];
       const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
       const studentBatch = currentStudent ? (currentStudent.batch || '').toLowerCase().trim() : '';
 
       const [quizRes, resultRes] = await Promise.all([
-        axios.get('http://localhost:5001/api/quizzes/all').catch(() => null),
-        axios.get(`http://localhost:5001/api/quizzes/results/${activeEmail}`).catch(() => null)
+        axios.get('https://vinsup-4vt5.onrender.com/api/quizzes/all').catch(() => null),
+        axios.get(`https://vinsup-4vt5.onrender.com/api/quizzes/results/${activeEmail}`).catch(() => null)
       ]);
 
       const allQuizzes = Array.isArray(quizRes?.data) ? quizRes.data : [];
@@ -114,7 +114,7 @@ const StudentQuizzes = ({ userEmail }) => {
   const submitQuiz = async () => {
     if(!window.confirm("Are you sure you want to submit the quiz?")) return;
     try {
-      const res = await axios.post('http://localhost:5001/api/quizzes/submit', {
+      const res = await axios.post('https://vinsup-4vt5.onrender.com/api/quizzes/submit', {
         quizId: activeQuiz._id,
         studentEmail: userEmail,
         answers: answers
