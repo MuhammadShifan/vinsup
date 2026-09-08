@@ -1,9 +1,24 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios'; // 🔥 Axios import panniyachu
 import Loginpage from './Components/Loginpage'; 
 import AdminDashboard from './Components/AdminDashboard'; 
 import UserDashboard from './Components/UserDashboard'; 
 // 🔥 Ippo Student Dashboard-a import panniyachu 🔥
 import StudentDashboard from './Components/Student/StudentDashboard';
+
+// ==========================================
+// 🔥 GLOBAL AXIOS INTERCEPTOR 🔥
+// Ithu unga project-la irukkura ellam API request-layum automatic-a token-a add pannidum!
+// ==========================================
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -31,6 +46,7 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('userAuth');
+    localStorage.removeItem('token'); // 🔥 Logout aagum pothu token-a clear panrom 🔥
     setIsLoggedIn(false);
     setUserName('');
     setUserRole('');

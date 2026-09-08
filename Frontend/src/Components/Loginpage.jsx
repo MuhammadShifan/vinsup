@@ -22,8 +22,6 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
       return;
     }
 
-    // 🔥 FIXED: Completely removed static if-else check. 
-    // Now checking strictly through backend database API 🔥
     try {
       const response = await fetch('https://vinsup-4vt5.onrender.com/api/auth/login', {
         method: 'POST',
@@ -45,7 +43,10 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
           profilePhoto: result.user.profilePhoto || ''
         };
 
+        // 🔥 JWT TOKEN & USER DATA STORAGE 🔥
+        localStorage.setItem('token', result.token); // JWT Token store panrom
         localStorage.setItem('userAuth', JSON.stringify(userData));
+        
         onLoginSuccess(userData); 
       } else {
         alert(result.message || "Invalid Email or Password! Please try again.");
