@@ -12,7 +12,7 @@ const assessmentRoutes = require('./routes/assessmentRoutes');
 const quizRoutes = require('./routes/quizRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const batchChatRoutes = require('./routes/batchChatRoutes');
-const Admin = require('./models/Admin'); // 🔥 Admin Model import pannirukken 🔥
+const Admin = require('./models/Admin'); 
 
 const app = express();
 
@@ -52,34 +52,39 @@ const scheduleRoutes = require('./routes/scheduleRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const privateChatRoutes = require('./routes/privateChatRoutes');
 
+// 🔥 MIDDLEWARE IMPORT 🔥
+const { protect } = require('./middleware/authMiddleware');
+
 // 5. API URLs set
-app.use('/api/auth', authRoutes);
-app.use('/api/employees', employeeRoutes);
-app.use('/api/courses', courseRoutes);
-app.use('/api/batches', batchRoutes); 
-app.use('/api/dashboard', dashboardRoutes); 
-app.use('/api/syllabus', syllabusRoutes);
-app.use('/api/tasks', taskRoutes);
-app.use('/api/tickets', ticketRoutes);
-app.use('/api/leaves', leaveRoutes); 
-app.use('/api/schedule', scheduleRoutes);
-app.use('/api/reports', reportRoutes);
-app.use('/api/groupchat', groupChatRoutes);
-app.use('/api/privatechat', privateChatRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/students', studentRoutes);
-app.use('/api/attendance', require('./routes/attendanceRoutes'));
-app.use('/api/assessments', assessmentRoutes);
-app.use('/api/quizzes', quizRoutes);
-app.use('/api/announcements', announcementRoutes);
-app.use('/api/batchchat', batchChatRoutes);
+app.use('/api/auth', authRoutes); // 🔥 Login Route: No Protection (Public) 🔥
+
+// 👇 MATTHA ELLAM ROUTES-KUM 'PROTECT' GUARD ADD PANNIYACHU 👇
+app.use('/api/employees', protect, employeeRoutes);
+app.use('/api/courses', protect, courseRoutes);
+app.use('/api/batches', protect, batchRoutes); 
+app.use('/api/dashboard', protect, dashboardRoutes); 
+app.use('/api/syllabus', protect, syllabusRoutes);
+app.use('/api/tasks', protect, taskRoutes);
+app.use('/api/tickets', protect, ticketRoutes);
+app.use('/api/leaves', protect, leaveRoutes); 
+app.use('/api/schedule', protect, scheduleRoutes);
+app.use('/api/reports', protect, reportRoutes);
+app.use('/api/groupchat', protect, groupChatRoutes);
+app.use('/api/privatechat', protect, privateChatRoutes);
+app.use('/api/notifications', protect, notificationRoutes);
+app.use('/api/students', protect, studentRoutes);
+app.use('/api/attendance', protect, require('./routes/attendanceRoutes'));
+app.use('/api/assessments', protect, assessmentRoutes);
+app.use('/api/quizzes', protect, quizRoutes);
+app.use('/api/announcements', protect, announcementRoutes);
+app.use('/api/batchchat', protect, batchChatRoutes);
 
 // ==========================================
-// 🔥 ADMIN SETTINGS & PROFILE API ROUTES 🔥
+// 🔥 ADMIN SETTINGS & PROFILE API ROUTES (PROTECTED) 🔥
 // ==========================================
 
 // Get Admin Profile
-app.get('/api/admin/profile', async (req, res) => {
+app.get('/api/admin/profile', protect, async (req, res) => {
   try {
     let admin = await Admin.findOne({ email: 'muhammasshifan@gmail.com' });
     if (!admin) {
@@ -99,7 +104,7 @@ app.get('/api/admin/profile', async (req, res) => {
 });
 
 // Update Admin Name / Photo
-app.put('/api/admin/update', async (req, res) => {
+app.put('/api/admin/update', protect, async (req, res) => {
   try {
     const { name, profilePhoto } = req.body;
     const updateData = {};
@@ -118,7 +123,7 @@ app.put('/api/admin/update', async (req, res) => {
 });
 
 // Update Admin Password
-app.put('/api/admin/change-password', async (req, res) => {
+app.put('/api/admin/change-password', protect, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     let admin = await Admin.findOne({ email: 'muhammasshifan@gmail.com' });
@@ -144,7 +149,7 @@ app.put('/api/admin/change-password', async (req, res) => {
 });
 
 // REPORTS API ROUTES
-app.get('/api/reports', async (req, res) => {
+app.get('/api/reports', protect, async (req, res) => {
   try {
     const reports = await Report.find().sort({ createdAt: -1 }).exec(); 
     res.json(reports);
@@ -153,7 +158,7 @@ app.get('/api/reports', async (req, res) => {
   }
 });
 
-app.post('/api/reports', async (req, res) => {
+app.post('/api/reports', protect, async (req, res) => {
   try {
     const newReport = new Report(req.body);
     await newReport.save();
