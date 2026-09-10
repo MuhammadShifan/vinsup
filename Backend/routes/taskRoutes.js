@@ -4,7 +4,7 @@ const Task = require('../models/Task');
 const Notification = require('../models/Notification'); 
 const Employee = require('../models/Employee'); 
 
-// 1. Get ALL tasks
+
 router.get('/', async (req, res) => {
   try {
     const tasks = await Task.find().sort({ createdAt: -1 }); 
@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 2. Get tasks ONLY for a specific employee
+
 router.get('/employee/:employeeId', async (req, res) => {
   try {
     const tasks = await Task.find({ employeeId: req.params.employeeId }).sort({ createdAt: -1 });
@@ -24,7 +24,7 @@ router.get('/employee/:employeeId', async (req, res) => {
   }
 });
 
-// 3. Add a new task & Notify Employee
+
 router.post('/', async (req, res) => {
   try {
     const newTask = new Task(req.body); 
@@ -79,7 +79,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// 4. Update a task (For Edit Task & Status Update)
+
 router.put('/:id', async (req, res) => {
   try {
     const updatedTask = await Task.findByIdAndUpdate(
@@ -87,16 +87,13 @@ router.put('/:id', async (req, res) => {
       { $set: req.body }, 
       { new: true }
     );
-    
-    // 🔥 PUDHUSU: Duplicate aagakudathu nu inga iruntha extra backend notification-a remove panniyachu 🔥
-
     res.json({ message: "Task updated successfully!", task: updatedTask });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// 5. Delete a task
+
 router.delete('/:id', async (req, res) => {
   try {
     await Task.findByIdAndDelete(req.params.id);

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const GroupMessage = require('../models/GroupMessage');
 
-// 1. Get all group messages (Latest 50 messages)
+
 router.get('/', async (req, res) => {
     try {
         const messages = await GroupMessage.find().sort({ timestamp: 1 }).limit(50);
@@ -12,10 +12,9 @@ router.get('/', async (req, res) => {
     }
 });
 
-// 2. Send a message to the group
+
 router.post('/send', async (req, res) => {
     try {
-        // 🔥 VALIDATION: Message or file rendula edhavadhu onnu irukkanum 🔥
         if (!req.body.message && !req.body.file) {
             return res.status(400).json({ success: false, error: "Message or file is required" });
         }
@@ -33,7 +32,7 @@ router.post('/send', async (req, res) => {
     }
 });
 
-// 3. Edit Message API
+
 router.put('/edit/:id', async (req, res) => {
     try {
         const updatedMsg = await GroupMessage.findByIdAndUpdate(
@@ -47,7 +46,7 @@ router.put('/edit/:id', async (req, res) => {
     }
 });
 
-// 4. Delete Message API
+
 router.delete('/delete/:id', async (req, res) => {
     try {
         await GroupMessage.findByIdAndDelete(req.params.id);

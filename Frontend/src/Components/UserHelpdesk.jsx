@@ -137,9 +137,9 @@ const UserHelpdesk = () => {
   // ==========================================
   const renderDashboard = () => (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
         <div>
-          <h1 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>Helpdesk</h1>
+          <h1 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: 'clamp(20px, 3vw, 24px)', fontWeight: 'bold' }}>Helpdesk</h1>
           <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>We're here to help you. Raise a ticket or view your existing requests.</p>
         </div>
         <button 
@@ -149,11 +149,11 @@ const UserHelpdesk = () => {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 3fr) 300px', gap: '25px', alignItems: 'start' }}>
+      <div className="user-helpdesk-grid">
         {/* === LEFT COLUMN === */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '20px' }}>
             {[
               { title: 'My Tickets', count: padZero(totalTickets), icon: 'fas fa-ticket-alt', color: '#2563eb', bg: '#eff6ff', sub: 'All Time' },
               { title: 'Resolved', count: padZero(resolvedTickets), icon: 'far fa-check-circle', color: '#16a34a', bg: '#dcfce7', sub: 'All Time' },
@@ -172,34 +172,34 @@ const UserHelpdesk = () => {
             ))}
           </div>
 
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-              <div style={{ display: 'flex', gap: '30px', borderBottom: '2px solid #f1f5f9' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(16px, 2vw, 25px)', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
+              <div style={{ display: 'flex', gap: '20px', borderBottom: '2px solid #f1f5f9', overflowX: 'auto', maxWidth: '100%' }}>
                 {['All Tickets', 'In Progress', 'Resolved'].map((tab, i) => (
                   <span 
                     key={i} 
                     onClick={() => setActiveTab(tab)}
-                    style={{ paddingBottom: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginBottom: '-2px', color: activeTab === tab ? '#2563eb' : '#64748b', borderBottom: activeTab === tab ? '2px solid #2563eb' : '2px solid transparent', transition: 'all 0.2s' }}>
+                    style={{ paddingBottom: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginBottom: '-2px', color: activeTab === tab ? '#2563eb' : '#64748b', borderBottom: activeTab === tab ? '2px solid #2563eb' : '2px solid transparent', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
                     {tab}
                   </span>
                 ))}
               </div>
-              <div style={{ display: 'flex', gap: '15px' }}>
-                <div style={{ position: 'relative' }}>
+              <div style={{ display: 'flex', gap: '15px', width: 'auto' }}>
+                <div style={{ position: 'relative', width: '100%' }}>
                   <i className="fas fa-search" style={{ position: 'absolute', left: '12px', top: '11px', color: '#94a3b8', fontSize: '13px' }}></i>
                   <input 
                     type="text" 
                     placeholder="Search tickets..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ padding: '9px 15px 9px 38px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', width: '220px', color: '#1e293b' }} 
+                    style={{ padding: '9px 15px 9px 38px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', width: 'min(220px, 100%)', color: '#1e293b', boxSizing: 'border-box' }} 
                   />
                 </div>
               </div>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                     <th style={{ padding: '16px 20px', fontSize: '13px', color: '#475569', fontWeight: '600', borderRadius: '8px 0 0 8px' }}>Ticket ID</th>
@@ -260,9 +260,9 @@ const UserHelpdesk = () => {
               </table>
             </div>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #f1f5f9' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #f1f5f9', flexWrap: 'wrap', gap: '15px' }}>
               {totalPages > 1 && (
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <button 
                     onClick={prevPage} 
                     disabled={currentPage === 1}
@@ -302,7 +302,7 @@ const UserHelpdesk = () => {
         {/* === RIGHT COLUMN (SIDEBAR) === */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(16px, 2vw, 25px)', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
             <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>Support Hours</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
               <i className="far fa-clock" style={{ fontSize: '26px', color: '#94a3b8' }}></i>
@@ -317,7 +317,7 @@ const UserHelpdesk = () => {
             </div>
           </div>
 
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(16px, 2vw, 25px)', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
             <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>Help Resources</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }}>
               <a href="#" style={{ fontSize: '13px', color: '#475569', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}><i className="far fa-file-alt" style={{ color: '#94a3b8' }}></i> How to access my course?</a>
@@ -343,16 +343,16 @@ const UserHelpdesk = () => {
           <i className="fas fa-chevron-right" style={{ fontSize: '10px' }}></i>
           <span>Raise New Ticket</span>
         </div>
-        <h1 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>Raise New Ticket</h1>
+        <h1 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: 'clamp(20px, 3vw, 24px)', fontWeight: 'bold' }}>Raise New Ticket</h1>
         <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Submit a new request to our support team. We'll get back to you as soon as possible.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 3fr) 300px', gap: '25px', alignItems: 'start' }}>
+      <div className="user-helpdesk-grid">
         
         {/* === LEFT COLUMN (FORM) === */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
           
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '30px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(18px, 2.5vw, 30px)', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
             <h3 style={{ margin: '0 0 25px 0', fontSize: '18px', color: '#0f172a', fontWeight: 'bold' }}>Ticket Information</h3>
             
             <div style={{ marginBottom: '20px' }}>
@@ -360,9 +360,9 @@ const UserHelpdesk = () => {
               <input name="subject" value={formData.subject} onChange={handleInputChange} type="text" placeholder="Enter a short description of your issue" style={{ width: '100%', padding: '14px 18px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', boxSizing: 'border-box', fontSize: '14px', color: '#1e293b' }} />
             </div>
 
-            <div style={{ marginBottom: '20px', width: '50%' }}>
+            <div style={{ marginBottom: '20px', width: 'min(100%, 350px)' }}>
               <label style={{ display: 'block', fontSize: '14px', color: '#1e293b', marginBottom: '8px', fontWeight: '600' }}>Category <span style={{ color: '#ef4444' }}>*</span></label>
-              <select name="category" value={formData.category} onChange={handleInputChange} style={{ width: '100%', padding: '14px 18px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', color: '#475569', background: '#fff' }}>
+              <select name="category" value={formData.category} onChange={handleInputChange} style={{ width: '100%', padding: '14px 18px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', color: '#475569', background: '#fff', boxSizing: 'border-box' }}>
                 <option value="Technical Issue">Technical Issue</option>
                 <option value="Payment">Payment</option>
                 <option value="Course Access">Course Access</option>
@@ -371,19 +371,21 @@ const UserHelpdesk = () => {
 
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '14px', color: '#1e293b', marginBottom: '8px', fontWeight: '600' }}>Priority <span style={{ color: '#ef4444' }}>*</span></label>
-              <div style={{ display: 'flex', gap: '15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
                 {['Low', 'Medium', 'High', 'Urgent'].map(level => (
                   <div 
                     key={level} 
                     onClick={() => setSelectedPriority(level)}
                     style={{ 
-                      flex: 1, padding: '14px', borderRadius: '8px', cursor: 'pointer',
+                      padding: '14px', borderRadius: '8px', cursor: 'pointer',
                       border: selectedPriority === level ? `1px solid ${getPriorityStyle(level).border}` : '1px solid #e2e8f0',
                       background: selectedPriority === level ? '#fff' : '#f8fafc',
                       boxShadow: selectedPriority === level ? `0 0 0 1px ${getPriorityStyle(level).border}` : 'none',
-                      display: 'flex', alignItems: 'center', gap: '10px'
+                      display: 'flex', alignItems: 'center', gap: '10px',
+                      justifyContent: 'center',
+                      boxSizing: 'border-box'
                     }}>
-                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: getPriorityStyle(level).dot }}></div>
+                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: getPriorityStyle(level).dot, flexShrink: 0 }}></div>
                     <span style={{ fontSize: '14px', color: '#1e293b', fontWeight: selectedPriority === level ? '600' : '500' }}>{level}</span>
                   </div>
                 ))}
@@ -397,7 +399,7 @@ const UserHelpdesk = () => {
               </div>
             </div>
 
-            <div style={{ marginBottom: '35px', width: '50%' }}>
+            <div style={{ marginBottom: '35px', width: 'min(100%, 350px)' }}>
               <label style={{ display: 'block', fontSize: '14px', color: '#1e293b', marginBottom: '8px', fontWeight: '600' }}>When did the issue occur? <span style={{ color: '#ef4444' }}>*</span></label>
               <div style={{ position: 'relative' }}>
                 <i className="far fa-calendar-alt" style={{ position: 'absolute', left: '16px', top: '16px', color: '#64748b' }}></i>
@@ -405,7 +407,7 @@ const UserHelpdesk = () => {
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', paddingTop: '20px', borderTop: '1px solid #f1f5f9' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', paddingTop: '20px', borderTop: '1px solid #f1f5f9', flexWrap: 'wrap' }}>
               <button onClick={() => setCurrentView('dashboard')} style={{ padding: '12px 25px', background: '#fff', border: '1px solid #cbd5e1', color: '#475569', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}>Cancel</button>
               <button onClick={handleSubmit} style={{ padding: '12px 25px', background: '#2563eb', border: 'none', color: '#fff', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}>Submit Ticket</button>
             </div>
@@ -415,7 +417,7 @@ const UserHelpdesk = () => {
         {/* === RIGHT COLUMN (FORM SIDEBAR) === */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
           
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(16px, 2vw, 25px)', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
             <h3 style={{ margin: '0 0 25px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>What happens next?</h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
@@ -445,7 +447,7 @@ const UserHelpdesk = () => {
             </div>
           </div>
 
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(16px, 2vw, 25px)', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
             <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
               <i className="far fa-lightbulb" style={{ color: '#2563eb' }}></i> Helpful Tips
             </h3>
@@ -469,7 +471,20 @@ const UserHelpdesk = () => {
   );
 
   return (
-    <div style={{ padding: '25px 30px', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif", background: '#f8fafc', minHeight: '100vh' }}>
+    <div style={{ padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif", background: '#f8fafc', minHeight: '100vh' }}>
+      <style>{`
+        .user-helpdesk-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 3fr) 300px;
+          gap: 25px;
+          align-items: start;
+        }
+        @media (max-width: 992px) {
+          .user-helpdesk-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
       {currentView === 'dashboard' ? renderDashboard() : renderRaiseTicket()}
     </div>
   );

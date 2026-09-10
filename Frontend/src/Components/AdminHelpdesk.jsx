@@ -62,36 +62,59 @@ const AdminHelpdesk = () => {
   );
 
   return (
-    <div style={{ padding: '30px', maxWidth: '1200px', margin: '0 auto', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ padding: 'clamp(14px, 2.5vw, 30px)', maxWidth: '1200px', margin: '0 auto', fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        .admin-helpdesk-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 25px;
+          flex-wrap: wrap;
+          gap: 15px;
+        }
+        .admin-helpdesk-search-wrap {
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 20px;
+          width: 100%;
+        }
+        @media (max-width: 600px) {
+          .admin-helpdesk-search-wrap,
+          .admin-helpdesk-search-wrap > div,
+          .admin-helpdesk-search-wrap input {
+            width: 100% !important;
+          }
+        }
+      `}</style>
       
       {/* HEADER */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+      <div className="admin-helpdesk-header">
         <div>
-          <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>Admin Helpdesk</h1>
+          <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: 'clamp(20px, 3vw, 24px)', fontWeight: 'bold' }}>Admin Helpdesk</h1>
           <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Manage and resolve employee tickets here.</p>
         </div>
       </div>
 
       {/* SEARCH AND TABLE CONTAINER */}
-      <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #e2e8f0' }}>
+      <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(16px, 2vw, 25px)', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
         
         {/* Search Bar */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+        <div className="admin-helpdesk-search-wrap">
            <div style={{ position: 'relative' }}>
              <i className="fas fa-search" style={{ position: 'absolute', left: '12px', top: '10px', color: '#94a3b8', fontSize: '12px' }}></i>
              <input 
                type="text" 
-               placeholder="Search by subject..." 
+               placeholder="Search by subject or category..." 
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
-               style={{ padding: '8px 12px 8px 35px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', width: '250px' }} 
+               style={{ padding: '8px 12px 8px 35px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', width: '250px', boxSizing: 'border-box' }} 
              />
            </div>
         </div>
 
         {/* Tickets Table */}
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', minWidth: '650px', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                 <th style={{ padding: '15px 10px', fontSize: '13px', color: '#0f172a', fontWeight: '600' }}>Ticket ID</th>

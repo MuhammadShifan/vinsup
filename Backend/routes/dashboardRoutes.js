@@ -31,10 +31,8 @@ router.get('/summary', async (req, res) => {
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date();
       endOfDay.setHours(23, 59, 59, 999);
-
-      // Multiple date formats check panrom (Safety-kaga)
-      const dateStr1 = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-      const dateStr2 = new Date().toLocaleDateString('en-US'); // MM/DD/YYYY
+      const dateStr1 = new Date().toISOString().split('T')[0]; 
+      const dateStr2 = new Date().toLocaleDateString('en-US'); 
       const dateStr3 = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }); 
 
       const todayRecords = await Attendance.find({
@@ -46,7 +44,6 @@ router.get('/summary', async (req, res) => {
         ]
       }).exec();
 
-      // Oruvelai oru employee multiple times checkin pannirundha, unique count edukka Set use panrom
       const uniqueEmployees = new Set(todayRecords.map(record => String(record.employeeId || record.empId || record._id)));
       checkedInToday = uniqueEmployees.size > 0 ? uniqueEmployees.size : todayRecords.length;
     } catch (e) {

@@ -595,12 +595,27 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         `}
       </style>
 
+      {isSidebarOpen && (
+        <div 
+          className="sidebar-backdrop active" 
+          onClick={() => setIsSidebarOpen(false)} 
+        />
+      )}
+
       <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-logo"><img src={logoImage} alt="Vinsup Logo" /></div>
         <ul className="sidebar-menu">
           {sidebarMenu.map((item, index) => (
             <li key={index} className={item.name === activeTab ? 'active' : ''}>
-              <a href="#" onClick={(e) => { e.preventDefault(); handleTabClick(item.name); }} style={{ display: 'flex', alignItems: 'center' }}>
+              <a 
+                href="#" 
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  handleTabClick(item.name); 
+                  if (window.innerWidth <= 992) setIsSidebarOpen(false);
+                }} 
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
                   <i className={item.icon}></i>
                   <span>{item.name}</span>
                   {item.name === 'Admin Chat' && chatUnreadCount > 0 && (
@@ -642,7 +657,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
               </div>
               
               {isNotificationOpen && (
-                <div style={{ position: 'absolute', top: '40px', right: '-50px', width: '360px', background: '#fff', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0', zIndex: 1000, overflow: 'hidden', textAlign: 'left' }}>
+                <div style={{ position: 'absolute', top: '40px', right: 0, width: 'min(360px, calc(100vw - 30px))', maxWidth: 'calc(100vw - 30px)', background: '#fff', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0', zIndex: 1000, overflow: 'hidden', textAlign: 'left' }}>
                   <div style={{ padding: '15px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 style={{ margin: 0, fontSize: '15px', color: '#111827', fontWeight: 'bold' }}>Notifications</h3>
                     <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: '600', cursor: 'pointer' }} onClick={() => setIsNotificationOpen(false)}>Close</span>
@@ -705,7 +720,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
               <h1 style={{ color: '#0f172a', fontWeight: 'bold' }}>Welcome back, {trainerData.profile.name.split(' ')[0]}!</h1>
               <p>Here is what is happening with your work today.</p>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '25px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '25px' }}>
               <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #f1f5f9', display: 'flex', gap: '15px', alignItems: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}><div style={{ background: '#f0fdf4', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#16a34a', fontSize: '24px' }}><i className="far fa-calendar-check"></i></div><div><p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#64748b', fontWeight: '500' }}>Attendance Today</p><h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData.attendanceToday.status}</h3><span style={{ fontSize: '12px', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: '600' }}><i className={trainerData.attendanceToday.status !== 'Pending' ? "fas fa-check-circle" : "far fa-clock"}></i> {trainerData.attendanceToday.status !== 'Pending' ? 'Checked In' : 'Waiting'}</span></div></div>
               <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #f1f5f9', display: 'flex', gap: '15px', alignItems: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                 <div style={{ background: '#e0e7ff', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4f46e5', fontSize: '24px' }}><i className="fas fa-briefcase"></i></div>
@@ -719,7 +734,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
               <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #f1f5f9', display: 'flex', gap: '15px', alignItems: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}><div style={{ background: '#faf5ff', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9333ea', fontSize: '24px' }}><i className="far fa-calendar-alt"></i></div><div style={{ width: '100%' }}><p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#64748b', fontWeight: '500' }}>Leaves Balance</p><h3 style={{ margin: '0 0 12px 0', fontSize: '20px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData.leaveBalance.totalAvailable} Days</h3><span style={{ fontSize: '12px', color: '#9333ea', fontWeight: '600', cursor: 'pointer' }} onClick={() => handleTabClick('Leave Request')}>Apply Leave &rarr;</span></div></div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.8fr 1fr', gap: '20px', alignItems: 'start' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '20px', alignItems: 'start' }}>
               <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                 <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>Today's Attendance</h3>
                 <div style={{ background: '#f4fdf8', borderRadius: '12px', padding: '35px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid #eefbf3' }}>
@@ -830,8 +845,8 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
       <div 
         style={{
           position: 'fixed',
-          bottom: '40px',
-          right: '40px',
+          bottom: 'min(40px, 16px)',
+          right: 'min(40px, 16px)',
           zIndex: 1000,
           transform: `translate(${chatPos.x}px, ${chatPos.y}px)`,
           display: 'flex',
@@ -841,7 +856,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         }}
       >
         {isChatOpen && (
-          <div style={{ pointerEvents: 'auto', width: '400px', height: '600px', background: '#fff', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #e2e8f0', animation: 'fadeIn 0.2s ease-out', marginBottom: '15px' }}>
+          <div style={{ pointerEvents: 'auto', width: 'min(400px, calc(100vw - 32px))', height: 'min(560px, calc(100vh - 100px))', background: '#fff', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #e2e8f0', animation: 'fadeIn 0.2s ease-out', marginBottom: '15px' }}>
             
             <div 
               onPointerDown={handlePointerDown} 

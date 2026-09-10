@@ -41,15 +41,48 @@ const MyProfile = ({ trainerData }) => {
   );
 
   return (
-    <div style={{ padding: '30px', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        .profile-top-card {
+          background: #fff;
+          border-radius: 12px;
+          padding: clamp(20px, 3vw, 35px);
+          border: 1px solid #f1f5f9;
+          display: flex;
+          gap: 30px;
+          margin-bottom: 30px;
+          align-items: center;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .profile-top-details {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 25px;
+          flex: 1;
+        }
+        .profile-info-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+          gap: 25px;
+        }
+        @media (max-width: 640px) {
+          .profile-top-card {
+            flex-direction: column;
+            text-align: center;
+          }
+          .profile-top-details {
+            width: 100%;
+          }
+        }
+      `}</style>
       
       {/* Top Profile Card */}
-      <div style={{ background: '#fff', borderRadius: '12px', padding: '35px', border: '1px solid #f1f5f9', display: 'flex', gap: '40px', marginBottom: '30px', alignItems: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+      <div className="profile-top-card">
         
         {/* Avatar */}
         <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff', fontSize: '42px', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-          <span style={{ zIndex: 0 }}>{(trainerData.profileDetails.fullName || "E").charAt(0).toUpperCase()}</span>
-          {trainerData.profile.profilePic && (
+          <span style={{ zIndex: 0 }}>{(trainerData?.profileDetails?.fullName || "E").charAt(0).toUpperCase()}</span>
+          {trainerData?.profile?.profilePic && (
             <img 
               src={trainerData.profile.profilePic} 
               alt="Profile" 
@@ -60,22 +93,22 @@ const MyProfile = ({ trainerData }) => {
         </div>
 
         {/* Details Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', flex: 1 }}>
+        <div className="profile-top-details">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '5px' }}>
-              <h2 style={{ margin: 0, fontSize: '22px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData.profileDetails.fullName}</h2>
-              <span style={{ background: '#dcfce7', color: '#16a34a', fontSize: '11px', padding: '4px 10px', borderRadius: '6px', fontWeight: '700' }}>{trainerData.profileDetails.role}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '5px', flexWrap: 'wrap' }}>
+              <h2 style={{ margin: 0, fontSize: '22px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData?.profileDetails?.fullName}</h2>
+              <span style={{ background: '#dcfce7', color: '#16a34a', fontSize: '11px', padding: '4px 10px', borderRadius: '6px', fontWeight: '700' }}>{trainerData?.profileDetails?.role}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500' }}><i className="fas fa-user" style={{ width: '16px', color: '#64748b' }}></i> Employee</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500' }}><i className="far fa-id-badge" style={{ width: '16px', color: '#64748b' }}></i> Employee ID : {trainerData.profileDetails.empId}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500' }}><i className="far fa-calendar-alt" style={{ width: '16px', color: '#64748b' }}></i> Joined on : {trainerData.profileDetails.joinedOn}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500' }}><i className="far fa-id-badge" style={{ width: '16px', color: '#64748b' }}></i> Employee ID : {trainerData?.profileDetails?.empId}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500' }}><i className="far fa-calendar-alt" style={{ width: '16px', color: '#64748b' }}></i> Joined on : {trainerData?.profileDetails?.joinedOn}</div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '5px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500' }}><i className="far fa-envelope" style={{ width: '16px', marginTop: '2px', color: '#64748b' }}></i> {trainerData.profileDetails.email}</div>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500' }}><i className="fas fa-phone-alt" style={{ width: '16px', marginTop: '2px', color: '#64748b' }}></i> {trainerData.profileDetails.phone}</div>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500' }}><i className="far fa-calendar" style={{ width: '16px', marginTop: '2px', color: '#64748b' }}></i> {trainerData.profileDetails.dob}</div>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500' }}><i className="fas fa-map-marker-alt" style={{ width: '16px', marginTop: '2px', color: '#64748b' }}></i> <span style={{ whiteSpace: 'pre-line', lineHeight: '1.4' }}>{trainerData.profileDetails.location}</span></div>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500', wordBreak: 'break-all' }}><i className="far fa-envelope" style={{ width: '16px', marginTop: '2px', color: '#64748b', flexShrink: 0 }}></i> {trainerData?.profileDetails?.email}</div>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500' }}><i className="fas fa-phone-alt" style={{ width: '16px', marginTop: '2px', color: '#64748b', flexShrink: 0 }}></i> {trainerData?.profileDetails?.phone}</div>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500' }}><i className="far fa-calendar" style={{ width: '16px', marginTop: '2px', color: '#64748b', flexShrink: 0 }}></i> {trainerData?.profileDetails?.dob}</div>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', color: '#475569', fontSize: '13px', fontWeight: '500' }}><i className="fas fa-map-marker-alt" style={{ width: '16px', marginTop: '2px', color: '#64748b', flexShrink: 0 }}></i> <span style={{ whiteSpace: 'pre-line', lineHeight: '1.4' }}>{trainerData?.profileDetails?.location}</span></div>
           </div>
         </div>
       </div>
@@ -87,85 +120,85 @@ const MyProfile = ({ trainerData }) => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '25px' }}>
+      <div className="profile-info-grid">
         
         {/* COLUMN 1 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px' }}>
               <i className="far fa-user" style={{ color: '#2563eb', fontSize: '16px' }}></i>
               <h3 style={{ margin: 0, fontSize: '15px', color: '#0f172a', fontWeight: 'bold' }}>Personal Information</h3>
             </div>
-            <InfoRow label="Full Name" value={trainerData.profileDetails.fullName} />
-            <InfoRow label="Date of Birth" value={trainerData.profileDetails.dob} />
-            <InfoRow label="Gender" value={trainerData.profileDetails.gender} />
+            <InfoRow label="Full Name" value={trainerData?.profileDetails?.fullName} />
+            <InfoRow label="Date of Birth" value={trainerData?.profileDetails?.dob} />
+            <InfoRow label="Gender" value={trainerData?.profileDetails?.gender} />
           </div>
 
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px' }}>
               <i className="fas fa-phone-alt" style={{ color: '#2563eb', fontSize: '16px' }}></i>
               <h3 style={{ margin: 0, fontSize: '15px', color: '#0f172a', fontWeight: 'bold' }}>Contact Information</h3>
             </div>
-            <InfoRow label="Email Address" value={trainerData.profileDetails.email} />
-            <InfoRow label="Phone Number" value={trainerData.profileDetails.phone} />
+            <InfoRow label="Email Address" value={trainerData?.profileDetails?.email} />
+            <InfoRow label="Phone Number" value={trainerData?.profileDetails?.phone} />
           </div>
         </div>
 
         {/* COLUMN 2 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px' }}>
               <i className="fas fa-map-marker-alt" style={{ color: '#2563eb', fontSize: '16px' }}></i>
               <h3 style={{ margin: 0, fontSize: '15px', color: '#0f172a', fontWeight: 'bold' }}>Address</h3>
             </div>
             <div style={{ marginBottom: '20px' }}>
               <p style={{ margin: '0 0 6px 0', fontSize: '13px', color: '#64748b' }}>Current Address</p>
-              <p style={{ margin: 0, fontSize: '13px', color: '#1e293b', fontWeight: '600', lineHeight: '1.6', whiteSpace: 'pre-line' }}>{trainerData.profileDetails.address.current}</p>
+              <p style={{ margin: 0, fontSize: '13px', color: '#1e293b', fontWeight: '600', lineHeight: '1.6', whiteSpace: 'pre-line' }}>{trainerData?.profileDetails?.address?.current}</p>
             </div>
             <div>
               <p style={{ margin: '0 0 6px 0', fontSize: '13px', color: '#64748b' }}>Permanent Address</p>
-              <p style={{ margin: 0, fontSize: '13px', color: '#1e293b', fontWeight: '600', lineHeight: '1.6', whiteSpace: 'pre-line' }}>{trainerData.profileDetails.address.permanent}</p>
+              <p style={{ margin: 0, fontSize: '13px', color: '#1e293b', fontWeight: '600', lineHeight: '1.6', whiteSpace: 'pre-line' }}>{trainerData?.profileDetails?.address?.permanent}</p>
             </div>
           </div>
 
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px' }}>
               <i className="fas fa-shield-alt" style={{ color: '#2563eb', fontSize: '16px' }}></i>
               <h3 style={{ margin: 0, fontSize: '15px', color: '#0f172a', fontWeight: 'bold' }}>Account Information</h3>
             </div>
-            <InfoRow label="Username" value={trainerData.profileDetails.account.username} />
-            <InfoRow label="Employee ID" value={trainerData.profileDetails.empId} />
-            <InfoRow label="Last Login" value={trainerData.profileDetails.account.lastLogin} />
+            <InfoRow label="Username" value={trainerData?.profileDetails?.account?.username} />
+            <InfoRow label="Employee ID" value={trainerData?.profileDetails?.empId} />
+            <InfoRow label="Last Login" value={trainerData?.profileDetails?.account?.lastLogin} />
           </div>
         </div>
 
         {/* COLUMN 3: Profile Summary */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px' }}>
               <i className="far fa-id-card" style={{ color: '#2563eb', fontSize: '16px' }}></i>
               <h3 style={{ margin: 0, fontSize: '15px', color: '#0f172a', fontWeight: 'bold' }}>Profile Summary</h3>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '15px' }}>
               {/* Experience */}
               <div style={{ background: '#f4ebff', padding: '20px 15px', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ color: '#9333ea', fontSize: '20px' }}><i className="far fa-calendar-alt"></i></div>
-                <h4 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData.profileDetails.summary.experience}</h4>
+                <h4 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData?.profileDetails?.summary?.experience}</h4>
                 <span style={{ fontSize: '11px', color: '#7e22ce', fontWeight: '500' }}>Total Experience</span>
               </div>
 
               {/* Batches Taken */}
               <div style={{ background: '#dcfce7', padding: '20px 15px', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ color: '#16a34a', fontSize: '20px' }}><i className="fas fa-layer-group"></i></div>
-                <h4 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData.profileDetails.summary.batches}</h4>
+                <h4 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData?.profileDetails?.summary?.batches}</h4>
                 <span style={{ fontSize: '11px', color: '#166534', fontWeight: '500' }}>Batches Taken</span>
               </div>
 
               {/* Students Trained */}
               <div style={{ background: '#ffedd5', padding: '20px 15px', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ color: '#ea580c', fontSize: '20px' }}><i className="fas fa-users"></i></div>
-                <h4 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData.profileDetails.summary.students}</h4>
+                <h4 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData?.profileDetails?.summary?.students}</h4>
                 <span style={{ fontSize: '11px', color: '#9a3412', fontWeight: '500' }}>Students Trained</span>
               </div>
 

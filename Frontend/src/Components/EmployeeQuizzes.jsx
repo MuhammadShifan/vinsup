@@ -387,7 +387,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
           <div className="cq-card">
             <h2 className="cq-card-title">Quiz Details</h2>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr', gap: '15px' }}>
+            <div className="cq-details-grid">
               <div className="cq-input-group">
                 <label>Quiz Title <span className="req">*</span></label>
                 <input type="text" className="cq-input" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. JS Basics Quiz" />
@@ -439,7 +439,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
                 
                 <div className="cq-q-top">
                   <div className="cq-q-num">{idx + 1}</div>
-                  <div className="cq-input-group" style={{flex: 1, margin: 0}}>
+                  <div className="cq-input-group" style={{flex: 1, margin: 0, minWidth: '200px'}}>
                     <label>Question <span className="req">*</span></label>
                     <input type="text" className="cq-input" value={q.question} onChange={(e) => handleQuestionChange(q.id, 'question', e.target.value)} placeholder="Enter your question here..." />
                   </div>
@@ -481,21 +481,21 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
       )}
 
       <style>{`
-        .quiz-wrapper { padding: 32px 40px; font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; box-sizing: border-box; color: #0f172a; }
+        .quiz-wrapper { padding: clamp(16px, 2.5vw, 40px); font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; box-sizing: border-box; color: #0f172a; }
         .quiz-header-container { margin-bottom: 24px; }
-        .quiz-page-title { font-size: 24px; font-weight: 800; color: #020617; margin: 0 0 6px 0; letter-spacing: -0.5px; }
+        .quiz-page-title { font-size: clamp(20px, 3vw, 24px); font-weight: 800; color: #020617; margin: 0 0 6px 0; letter-spacing: -0.5px; }
         .quiz-page-subtitle { font-size: 14px; color: #475569; margin: 0; }
 
-        .quiz-tabs-header-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #e2e8f0; margin-bottom: 30px; padding-bottom: 0px; }
-        .quiz-tabs { display: flex; gap: 32px; }
-        .quiz-tab-btn { background: transparent; border: none; font-size: 14px; font-weight: 600; color: #64748b; padding: 0 0 12px 0; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; transform: translateY(1px); }
+        .quiz-tabs-header-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #e2e8f0; margin-bottom: 30px; padding-bottom: 0px; flex-wrap: wrap; gap: 15px; }
+        .quiz-tabs { display: flex; gap: clamp(16px, 3vw, 32px); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .quiz-tab-btn { background: transparent; border: none; font-size: 14px; font-weight: 600; color: #64748b; padding: 0 0 12px 0; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; transform: translateY(1px); white-space: nowrap; }
         .quiz-tab-btn:hover { color: #0f172a; }
         .quiz-tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; }
 
         .quiz-create-btn { background: #2563eb; color: #ffffff; border: none; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; margin-bottom: 12px; }
         .quiz-create-btn:hover { background: #1d4ed8; }
 
-        .quiz-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 32px; }
+        .quiz-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 20px; margin-bottom: 32px; }
         .quiz-stat-card { background: #ffffff; padding: 20px 24px; border-radius: 12px; border: 1px solid #f1f5f9; display: flex; gap: 16px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .quiz-stat-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; flex-shrink: 0; }
         .quiz-stat-info { display: flex; flex-direction: column; }
@@ -505,13 +505,13 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
         .quiz-stat-desc { font-size: 12px; color: #64748b; margin-top: 4px; }
 
         .quiz-search-container { margin-bottom: 20px; }
-        .quiz-search-box { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 16px; width: 340px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; }
+        .quiz-search-box { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 16px; width: min(340px, 100%); max-width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; background: #ffffff; }
         .quiz-search-box input { border: none; outline: none; font-size: 13px; color: #0f172a; width: 100%; font-family: inherit; }
         .quiz-search-box input::placeholder { color: #94a3b8; }
         .quiz-search-box i { color: #94a3b8; font-size: 14px; }
 
-        .quiz-table-container { border-radius: 12px; border: 1px solid #f1f5f9; overflow: hidden; background: #ffffff; max-height: 500px; overflow-y: auto;}
-        .quiz-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .quiz-table-container { border-radius: 12px; border: 1px solid #f1f5f9; overflow-x: auto; -webkit-overflow-scrolling: touch; background: #ffffff; max-height: 500px; overflow-y: auto;}
+        .quiz-table { width: 100%; min-width: 650px; border-collapse: collapse; text-align: left; }
         .quiz-table th { background: #f8fafc; padding: 16px 24px; font-size: 12px; font-weight: 700; color: #1e293b; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; z-index: 10;}
         .quiz-table td { padding: 16px 24px; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
         .quiz-table tr:last-child td { border-bottom: none; }
@@ -520,7 +520,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
         .q-title { font-size: 14px; font-weight: 700; color: #020617; }
         .q-desc { font-size: 12px; color: #64748b; }
         
-        .q-batch-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .q-batch-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; white-space: nowrap; }
         .q-batch-badge.blue { background: #eff6ff; color: #2563eb; }
         
         .q-bold-text { font-size: 13px; font-weight: 700; color: #0f172a; }
@@ -535,13 +535,19 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
         .cq-view { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        .cq-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .cq-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 15px; }
         .cq-back-btn { background: #ffffff; border: 1px solid #cbd5e1; color: #2563eb; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
         .cq-back-btn:hover { background: #f1f5f9; }
 
-        .cq-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        .cq-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: clamp(16px, 2.5vw, 24px); margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
         .cq-card-title { font-size: 16px; font-weight: 800; color: #020617; margin: 0 0 20px 0; }
         
+        .cq-details-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+          gap: 15px;
+        }
+
         .cq-input-group label { display: block; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
         .req { color: #ef4444; }
         .cq-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; font-size: 13px; font-family: inherit; color: #0f172a; outline: none; transition: 0.2s; box-sizing: border-box; }
@@ -549,14 +555,14 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
         .cq-select { appearance: none; background: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 14px center; background-size: 14px; padding-right: 32px; }
         .mt-3 { margin-top: 20px; }
 
-        .cq-qheader-row { display: flex; justifyContent: space-between; align-items: center; margin-bottom: 16px; }
+        .cq-qheader-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
         .cq-add-q-btn { background: #ffffff; border: 1px solid #cbd5e1; color: #2563eb; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
         .cq-add-q-btn:hover { background: #f8fafc; border-color: #94a3b8; }
 
         .cq-questions-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 30px; }
-        .cq-q-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        .cq-q-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: clamp(16px, 2vw, 24px); box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
         
-        .cq-q-top { display: flex; gap: 16px; align-items: flex-end; margin-bottom: 24px; }
+        .cq-q-top { display: flex; gap: 16px; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; }
         .cq-q-num { width: 34px; height: 34px; border-radius: 50%; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: 800; color: #0f172a; flex-shrink: 0; margin-bottom: 3px;}
         .cq-del-btn { background: #fef2f2; border: 1px solid #fca5a5; color: #ef4444; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; height: 42px; }
         .cq-del-btn:hover { background: #fee2e2; }
@@ -566,7 +572,17 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
         .cq-opt-circle { width: 28px; height: 28px; border-radius: 50%; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: 700; color: #475569; flex-shrink: 0; }
         .cq-radio { width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; margin: 0; }
 
-        .cq-footer { display: flex; justifyContent: flex-end; gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 24px; margin-top: 10px; }
+        @media (max-width: 768px) {
+          .cq-opt-grid {
+            grid-template-columns: 1fr;
+            padding-left: 0;
+          }
+          .cq-q-top {
+            align-items: stretch;
+          }
+        }
+
+        .cq-footer { display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 24px; margin-top: 10px; flex-wrap: wrap; }
         .cq-cancel-btn { background: #ffffff; border: 1px solid #cbd5e1; color: #475569; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .cq-cancel-btn:hover { background: #f8fafc; color: #0f172a; }
         .cq-save-btn { background: #2563eb; border: none; color: #ffffff; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
@@ -579,10 +595,10 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
         .cls-td-user img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
         .badge-pending { background: #f1f5f9; color: #64748b; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
         
-        .quiz-pagination-container { display: flex; justifyContent: space-between; align-items: center; margin-top: 24px; }
+        .quiz-pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; flex-wrap: wrap; gap: 15px; }
         .q-page-text { font-size: 13px; color: #64748b; }
         .q-pagination { display: flex; gap: 6px; }
-        .q-page-btn { width: 32px; height: 32px; display: flex; justifyContent: center; align-items: center; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; font-size: 13px; font-weight: 600; color: #475569; cursor: pointer; transition: 0.2s; }
+        .q-page-btn { width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; font-size: 13px; font-weight: 600; color: #475569; cursor: pointer; transition: 0.2s; }
         .q-page-btn:hover { background: #f8fafc; }
         .q-page-btn.active { background: #2563eb; border-color: #2563eb; color: #ffffff; }
         

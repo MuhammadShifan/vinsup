@@ -154,21 +154,57 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
   const filteredHistory = filter === 'All' ? history : history.filter(h => h.status === filter);
 
   return (
-    <div style={{ padding: '30px', maxWidth: '1400px', margin: '0 auto', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ padding: 'clamp(14px, 2.5vw, 30px)', maxWidth: '1400px', margin: '0 auto', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        .leave-main-grid {
+          display: grid;
+          grid-template-columns: 1fr 1.2fr;
+          gap: 30px;
+        }
+        .leave-balance-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+          gap: 15px;
+        }
+        .leave-form-dates-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+        .leave-history-table-wrap {
+          width: 100%;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+        @media (max-width: 992px) {
+          .leave-main-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        @media (max-width: 576px) {
+          .leave-form-dates-grid {
+            grid-template-columns: 1fr;
+          }
+          .leave-form-dates-grid > div {
+            grid-column: span 1 !important;
+          }
+        }
+      `}</style>
       
       <div style={{ marginBottom: '25px' }}>
         <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>Leave Request</h1>
         <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Apply for leave and track your leave status</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+      <div className="leave-main-grid">
         
         {/* LEFT COLUMN: APPLY FORM */}
-        <div style={{ background: '#fff', borderRadius: '12px', padding: '30px', border: '1px solid #e2e8f0' }}>
+        <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 30px)', border: '1px solid #e2e8f0' }}>
           <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a' }}>Apply for Leave</h3>
           
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+            <div className="leave-form-dates-grid">
                 <div style={{ gridColumn: 'span 2' }}>
                 <label style={{ display: 'block', fontSize: '13px', color: '#475569', marginBottom: '8px', fontWeight: '500' }}>Leave Type</label>
                 <select 
@@ -227,7 +263,7 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
                 <div style={{ textAlign: 'right', fontSize: '11px', color: '#94a3b8', marginTop: '5px' }}>{leaveData.reason.length}/500</div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginBottom: '25px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginBottom: '25px', flexWrap: 'wrap' }}>
                 <button type="button" onClick={() => setLeaveData({ leaveType: '', startDate: '', endDate: '', reason: '' })} style={{ padding: '10px 20px', background: '#fff', border: '1px solid #2563eb', color: '#2563eb', borderRadius: '6px', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}>Cancel</button>
                 <button type="submit" disabled={isSubmitting} style={{ padding: '10px 20px', background: isSubmitting ? '#93c5fd' : '#2563eb', border: 'none', color: '#fff', borderRadius: '6px', fontWeight: '600', cursor: isSubmitting ? 'not-allowed' : 'pointer', fontSize: '14px' }}>
                     {isSubmitting ? 'Submitting...' : 'Submit Request'}
@@ -251,13 +287,13 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
         {/* RIGHT COLUMN: BALANCE & HISTORY */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
           
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #e2e8f0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
               <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>Leave Balance for a month</h3>
               <a href="#" style={{ fontSize: '13px', color: '#2563eb', fontWeight: '600', textDecoration: 'none' }}>View Details</a>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px' }}>
+            <div className="leave-balance-grid">
               {leaveBalances.map((leave, index) => (
                 <div key={index} style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px' }}>
@@ -278,8 +314,8 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
             </div>
           </div>
 
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #e2e8f0', flex: 1, overflowY: 'auto', maxHeight: '400px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #e2e8f0', flex: 1, overflowY: 'auto', maxHeight: '400px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
               <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>Leave Request History</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontSize: '13px', color: '#475569' }}>Filter</span>
@@ -292,42 +328,44 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
               </div>
             </div>
 
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <th style={{ padding: '15px 10px', fontSize: '13px', color: '#475569', fontWeight: '600' }}>Applied On</th>
-                  <th style={{ padding: '15px 10px', fontSize: '13px', color: '#475569', fontWeight: '600' }}>Leave Type</th>
-                  <th style={{ padding: '15px 10px', fontSize: '13px', color: '#475569', fontWeight: '600' }}>Date Range</th>
-                  <th style={{ padding: '15px 10px', fontSize: '13px', color: '#475569', fontWeight: '600' }}>Days</th>
-                  <th style={{ padding: '15px 10px', fontSize: '13px', color: '#475569', fontWeight: '600' }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredHistory.length > 0 ? filteredHistory.map((item, index) => {
-                  const style = getStatusStyle(item.status);
-                  return (
-                  <tr key={index} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '15px 10px', fontSize: '13px', color: '#1e293b' }}>{item.appliedOn}</td>
-                    <td style={{ padding: '15px 10px', fontSize: '13px', color: '#1e293b' }}>{item.leaveType}</td>
-                    <td style={{ padding: '15px 10px', fontSize: '13px', color: '#475569' }}>
-                        {item.startDate === item.endDate ? item.startDate : `${item.startDate} to ${item.endDate}`}
-                    </td>
-                    <td style={{ padding: '15px 10px', fontSize: '13px', color: '#1e293b' }}>{item.totalDays}</td>
-                    <td style={{ padding: '15px 10px' }}>
-                      <span style={{ background: style.bg, color: style.color, padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '600' }}>
-                        {item.status}
-                      </span>
-                    </td>
+            <div className="leave-history-table-wrap">
+              <table style={{ width: '100%', minWidth: '480px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                    <th style={{ padding: '15px 10px', fontSize: '13px', color: '#475569', fontWeight: '600' }}>Applied On</th>
+                    <th style={{ padding: '15px 10px', fontSize: '13px', color: '#475569', fontWeight: '600' }}>Leave Type</th>
+                    <th style={{ padding: '15px 10px', fontSize: '13px', color: '#475569', fontWeight: '600' }}>Date Range</th>
+                    <th style={{ padding: '15px 10px', fontSize: '13px', color: '#475569', fontWeight: '600' }}>Days</th>
+                    <th style={{ padding: '15px 10px', fontSize: '13px', color: '#475569', fontWeight: '600' }}>Status</th>
                   </tr>
-                )}) : (
-                    <tr>
-                        <td colSpan="5" style={{ textAlign: 'center', padding: '20px', color: '#94a3b8', fontSize: '13px' }}>
-                            No leave requests found.
-                        </td>
+                </thead>
+                <tbody>
+                  {filteredHistory.length > 0 ? filteredHistory.map((item, index) => {
+                    const style = getStatusStyle(item.status);
+                    return (
+                    <tr key={index} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '15px 10px', fontSize: '13px', color: '#1e293b' }}>{item.appliedOn}</td>
+                      <td style={{ padding: '15px 10px', fontSize: '13px', color: '#1e293b' }}>{item.leaveType}</td>
+                      <td style={{ padding: '15px 10px', fontSize: '13px', color: '#475569' }}>
+                          {item.startDate === item.endDate ? item.startDate : `${item.startDate} to ${item.endDate}`}
+                      </td>
+                      <td style={{ padding: '15px 10px', fontSize: '13px', color: '#1e293b' }}>{item.totalDays}</td>
+                      <td style={{ padding: '15px 10px' }}>
+                        <span style={{ background: style.bg, color: style.color, padding: '4px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '600' }}>
+                          {item.status}
+                        </span>
+                      </td>
                     </tr>
-                )}
-              </tbody>
-            </table>
+                  )}) : (
+                      <tr>
+                          <td colSpan="5" style={{ textAlign: 'center', padding: '20px', color: '#94a3b8', fontSize: '13px' }}>
+                              No leave requests found.
+                          </td>
+                      </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

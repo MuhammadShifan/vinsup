@@ -59,20 +59,20 @@ const TicketNotification = () => {
       </div>
       
       {isOpen && (
-        <div style={{ position: 'absolute', top: '50px', right: '-10px', width: '360px', background: '#fff', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0', zIndex: 1000, overflow: 'hidden' }}>
-          <div style={{ padding: '15px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ position: 'absolute', top: '50px', right: 0, width: 'min(360px, calc(100vw - 32px))', maxWidth: 'calc(100vw - 32px)', background: '#fff', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.12)', border: '1px solid #e2e8f0', zIndex: 1000, overflow: 'hidden' }}>
+          <div style={{ padding: '14px 18px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0, fontSize: '15px', color: '#0f172a', fontWeight: 'bold' }}>Updates & Notifications</h3>
             <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: '600', cursor: 'pointer' }} onClick={() => setIsOpen(false)}>Close</span>
           </div>
           
-          <div style={{ maxHeight: '350px', overflowY: 'auto' }} className="custom-scroll">
+          <div style={{ maxHeight: 'min(350px, 60vh)', overflowY: 'auto' }} className="custom-scroll">
             {notifications.length > 0 ? notifications.map(notif => (
-              <div key={notif._id} style={{ padding: '15px 20px', borderBottom: '1px solid #f1f5f9', background: notif.isRead ? '#fff' : '#eff6ff', transition: '0.2s' }}>
+              <div key={notif._id} style={{ padding: '14px 18px', borderBottom: '1px solid #f1f5f9', background: notif.isRead ? '#fff' : '#eff6ff', transition: '0.2s' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <h4 style={{ margin: 0, fontSize: '14px', color: '#0f172a', fontWeight: '600' }}>{notif.title}</h4>
+                  <h4 style={{ margin: 0, fontSize: '13px', color: '#0f172a', fontWeight: '600' }}>{notif.title}</h4>
                   
-                  {/* 🔥 Update: Time and Delete Icon combined 🔥 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '10px' }}>
+                  {/* Time and Delete Icon combined */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '10px', flexShrink: 0 }}>
                     <span style={{ fontSize: '11px', color: '#64748b', whiteSpace: 'nowrap' }}>
                        {new Date(notif.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </span>

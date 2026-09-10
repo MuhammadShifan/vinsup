@@ -3,7 +3,7 @@ const router = express.Router();
 const Quiz = require('../models/Quiz');
 const QuizResult = require('../models/QuizResult'); // 🔥 Pudhusa add pannadhu
 
-// 1. Get ALL Quizzes (For students to filter by batch)
+
 router.get('/all', async (req, res) => {
   try {
     const quizzes = await Quiz.find().sort({ createdAt: -1 });
@@ -13,7 +13,7 @@ router.get('/all', async (req, res) => {
   }
 });
 
-// 🔥 Pudhusa add panna route: Trainer panel-kku specific quiz results edukka 🔥
+
 router.get('/:id/results', async (req, res) => {
   try {
     const QuizResult = require('../models/QuizResult');
@@ -24,7 +24,7 @@ router.get('/:id/results', async (req, res) => {
   }
 });
 
-// 🔥 2. Get Quiz Results for a specific student 🔥
+
 router.get('/results/:email', async (req, res) => {
   try {
     const results = await QuizResult.find({ studentEmail: req.params.email });
@@ -34,17 +34,14 @@ router.get('/results/:email', async (req, res) => {
   }
 });
 
-// 🔥 3. Submit Quiz Answers 🔥
+
 router.post('/submit', async (req, res) => {
   try {
     const { quizId, studentEmail, answers } = req.body;
-    
-    // Calculate Score
     const quiz = await Quiz.findById(quizId);
     let score = 0;
-    
     quiz.questions.forEach((q, idx) => {
-      // Assuming answers is an object like { 0: 'A', 1: 'C' }
+
       if (answers[idx] === q.correct) {
         score += (q.marks || 1);
       }
@@ -65,7 +62,7 @@ router.post('/submit', async (req, res) => {
   }
 });
 
-// 4. Create a new Quiz (POST /api/quizzes/)
+
 router.post('/', async (req, res) => {
   try {
     const newQuiz = new Quiz(req.body);
@@ -76,7 +73,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// 5. Get Quizzes filtered by trainer email (GET /api/quizzes/:email)
+
 router.get('/:email', async (req, res) => {
   try {
     const quizzes = await Quiz.find({ trainerEmail: req.params.email }).sort({ createdAt: -1 });
@@ -86,7 +83,7 @@ router.get('/:email', async (req, res) => {
   }
 });
 
-// 6. Update a Quiz (PUT /api/quizzes/:id)
+
 router.put('/:id', async (req, res) => {
   try {
     const updatedQuiz = await Quiz.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -96,7 +93,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// 7. Delete a Quiz (DELETE /api/quizzes/:id)
+
 router.delete('/:id', async (req, res) => {
   try {
     await Quiz.findByIdAndDelete(req.params.id);

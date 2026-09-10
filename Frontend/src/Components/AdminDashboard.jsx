@@ -181,6 +181,13 @@ const AdminDashboard = ({ userName, onLogout }) => {
         `}
       </style>
 
+      {isSidebarOpen && (
+        <div 
+          className="sidebar-backdrop active" 
+          onClick={() => setIsSidebarOpen(false)} 
+        />
+      )}
+
       <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-logo">
           <img src={logoImage} alt="Vinsup Logo" />
@@ -193,6 +200,7 @@ const AdminDashboard = ({ userName, onLogout }) => {
                 onClick={(e) => { 
                   e.preventDefault(); 
                   setActiveTab(item.name); 
+                  if (window.innerWidth <= 992) setIsSidebarOpen(false);
                 }}
                 style={{ display: 'flex', alignItems: 'center' }}
               >

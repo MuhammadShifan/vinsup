@@ -134,16 +134,16 @@ const EmployeeAnnouncements = ({ trainerData }) => {
   });
 
   return (
-    <div style={{ padding: '30px 40px', fontFamily: "'Inter', sans-serif", background: '#f8fafc', minHeight: '100vh', boxSizing: 'border-box' }}>
+    <div style={{ padding: 'clamp(14px, 2.5vw, 40px)', fontFamily: "'Inter', sans-serif", background: '#f8fafc', minHeight: '100vh', boxSizing: 'border-box' }}>
       
       {activeTab === 'list' ? (
         /* 🔥 1. ALL ANNOUNCEMENTS LIST VIEW 🔥 */
         <div className="anc-list-view" style={{ animation: 'fadeIn 0.3s ease-out' }}>
           
           {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' }}>
             <div>
-              <h1 style={{ margin: '0 0 6px 0', fontSize: '24px', color: '#020617', fontWeight: '800', letterSpacing: '-0.5px' }}>Announcements</h1>
+              <h1 style={{ margin: '0 0 6px 0', fontSize: 'clamp(20px, 3vw, 24px)', color: '#020617', fontWeight: '800', letterSpacing: '-0.5px' }}>Announcements</h1>
               <p style={{ margin: 0, fontSize: '14px', color: '#475569' }}>Create and manage announcements to keep students informed.</p>
             </div>
             <button 
@@ -156,7 +156,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
 
           {/* Search Bar */}
           <div style={{ marginBottom: '24px' }}>
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 16px', width: '340px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff' }}>
+            <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 16px', width: 'min(340px, 100%)', maxWidth: '100%', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff' }}>
               <input 
                 type="text" 
                 placeholder="Search announcements by title..." 
@@ -169,8 +169,8 @@ const EmployeeAnnouncements = ({ trainerData }) => {
           </div>
 
           {/* Table Section */}
-          <div className="custom-scroll" style={{ borderRadius: '12px', border: '1px solid #f1f5f9', overflow: 'hidden', background: '#fff', maxHeight: '600px', overflowY: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <div className="custom-scroll" style={{ borderRadius: '12px', border: '1px solid #f1f5f9', overflowX: 'auto', WebkitOverflowScrolling: 'touch', background: '#fff', maxHeight: '600px', overflowY: 'auto' }}>
+            <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr>
                   <th style={{ background: '#fff', padding: '16px 24px', fontSize: '12px', fontWeight: '700', color: '#0f172a', borderBottom: '1px solid #f1f5f9', position: 'sticky', top: 0, zIndex: 10 }}>Title</th>
@@ -239,7 +239,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
           </div>
 
           {/* Pagination */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', flexWrap: 'wrap', gap: '15px' }}>
             <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>Showing 1 to {filteredAnnouncements.length} of {announcements.length} announcements</span>
             <div style={{ display: 'flex', gap: '6px' }}>
               <button className="anc-page-btn"><i className="fas fa-chevron-left"></i></button>
@@ -255,12 +255,12 @@ const EmployeeAnnouncements = ({ trainerData }) => {
         <div className="anc-create-view" style={{ animation: 'fadeIn 0.3s ease-out' }}>
           
           {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
             <div>
-              <h1 style={{ margin: '0 0 5px 0', fontSize: '24px', color: '#0f172a', fontWeight: 'bold' }}>Send Announcement</h1>
+              <h1 style={{ margin: '0 0 5px 0', fontSize: 'clamp(20px, 3vw, 24px)', color: '#0f172a', fontWeight: 'bold' }}>Send Announcement</h1>
               <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>Dashboard &gt; Announcements &gt; Send Announcement</p>
             </div>
-            <div style={{ display: 'flex', gap: '15px' }}>
+            <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
               <button 
                 onClick={() => setActiveTab('list')}
                 style={{ padding: '10px 20px', background: '#fff', border: '1px solid #cbd5e1', color: '#2563eb', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', transition: '0.2s' }}
@@ -276,10 +276,10 @@ const EmployeeAnnouncements = ({ trainerData }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '25px' }}>
+          <div className="emp-anc-grid">
             
             {/* LEFT COLUMN - FORM */}
-            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '25px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: 'clamp(16px, 2.5vw, 25px)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
               <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>Announcement Details</h3>
               
               <div style={{ marginBottom: '20px' }}>
@@ -316,7 +316,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
               {/* Audience */}
               <div style={{ marginBottom: '25px' }}>
                 <label style={{ display: 'block', fontSize: '13px', color: '#0f172a', marginBottom: '12px', fontWeight: '600' }}>Audience <span style={{ color: '#ef4444' }}>*</span></label>
-                <div style={{ display: 'flex', gap: '40px' }}>
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
                   
                   <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
                     <input 
@@ -352,7 +352,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
                     <select 
                       value={selectedBatch} 
                       onChange={(e) => setSelectedBatch(e.target.value)}
-                      style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', color: '#1e293b', background: '#fff' }}
+                      style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', color: '#1e293b', background: '#fff', boxSizing: 'border-box' }}
                     >
                       <option value="">-- Select Your Batch --</option>
                       {myBatches.map(b => {
@@ -378,10 +378,10 @@ const EmployeeAnnouncements = ({ trainerData }) => {
             {/* RIGHT COLUMN - PREVIEW & TIPS */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
               
-              <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '25px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+              <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: 'clamp(16px, 2.5vw, 25px)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                 <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>Preview</h3>
                 
-                <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '12px', padding: '25px' }}>
+                <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '12px', padding: 'clamp(16px, 2vw, 25px)' }}>
                   <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
                     <div style={{ width: '45px', height: '45px', background: '#eff6ff', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#2563eb', fontSize: '18px', flexShrink: 0 }}>
                       <i className="fas fa-bullhorn"></i>
@@ -397,7 +397,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
                     </div>
                   </div>
                   
-                  <div style={{ fontSize: '14px', color: '#334155', lineHeight: '1.6', marginBottom: '25px', whiteSpace: 'pre-wrap', minHeight: '60px' }}>
+                  <div style={{ fontSize: '14px', color: '#334155', lineHeight: '1.6', marginBottom: '25px', whiteSpace: 'pre-wrap', minHeight: '60px', wordBreak: 'break-word' }}>
                     {message || "This is how your announcement will appear to the students. Please make sure the information is correct before sending."}
                   </div>
 
@@ -407,7 +407,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
                 </div>
               </div>
 
-              <div style={{ background: '#fef3c7', borderRadius: '12px', border: '1px solid #fde68a', padding: '25px' }}>
+              <div style={{ background: '#fef3c7', borderRadius: '12px', border: '1px solid #fde68a', padding: 'clamp(16px, 2.5vw, 25px)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
                   <i className="far fa-lightbulb" style={{ color: '#d97706', fontSize: '18px' }}></i>
                   <h3 style={{ margin: 0, fontSize: '16px', color: '#92400e', fontWeight: 'bold' }}>Tips</h3>
@@ -427,6 +427,18 @@ const EmployeeAnnouncements = ({ trainerData }) => {
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
+        .emp-anc-grid {
+          display: grid;
+          grid-template-columns: 1.2fr 1fr;
+          gap: 25px;
+        }
+
+        @media (max-width: 992px) {
+          .emp-anc-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
         .anc-action-btn { width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e2e8f0; background: #ffffff; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; }
         .anc-action-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
         .anc-action-btn.view i { color: #64748b; font-size: 13px; }

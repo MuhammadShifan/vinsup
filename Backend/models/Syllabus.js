@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 
-// Sub-schema for dynamic modules and topics
 const moduleSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  topics: [{ type: String }] // Array of strings for topics
+  topics: [{ type: String }] 
 });
 
 const syllabusSchema = new mongoose.Schema({
@@ -18,7 +17,7 @@ const syllabusSchema = new mongoose.Schema({
   description: { 
     type: String 
   },
-  modules: [moduleSchema] // Array of module objects
+  modules: [moduleSchema]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Syllabus', syllabusSchema);

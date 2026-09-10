@@ -214,8 +214,8 @@ const Courses = () => {
         </button>
       </div>
 
-      <div className="filters-bar" style={{ display: 'flex', gap: '10px', background: '#fff', padding: '15px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
-        <div className="search-box" style={{ flex: 1 }}>
+      <div className="filters-bar" style={{ display: 'flex', gap: '10px', background: '#fff', padding: '15px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', flexWrap: 'wrap' }}>
+        <div className="search-box" style={{ flex: 1, minWidth: 'min(100%, 260px)' }}>
           <i className="fas fa-search"></i>
           <input 
             type="text" 
@@ -226,8 +226,8 @@ const Courses = () => {
         </div>
       </div>
 
-      <div className="table-container" style={{ marginTop: '20px', borderRadius: '10px', overflow: 'hidden' }}>
-        <table>
+      <div className="table-container" style={{ marginTop: '20px', borderRadius: '10px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table style={{ minWidth: '750px', width: '100%' }}>
           <thead>
             <tr>
               <th style={{ textAlign: 'center' }}>#</th>

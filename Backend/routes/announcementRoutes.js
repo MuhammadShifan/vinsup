@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Announcement = require('../models/Announcement');
 
-// 1. Create a new Announcement
+
 router.post('/', async (req, res) => {
   try {
     const newAnnouncement = new Announcement(req.body);
@@ -13,7 +13,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// 2. Get Announcements for a specific trainer (Using trainerId)
+
 router.get('/trainer/:trainerId', async (req, res) => {
   try {
     const announcements = await Announcement.find({ trainerId: req.params.trainerId }).sort({ createdAt: -1 });
@@ -23,7 +23,7 @@ router.get('/trainer/:trainerId', async (req, res) => {
   }
 });
 
-// 3. Delete an Announcement
+
 router.delete('/:id', async (req, res) => {
   try {
     await Announcement.findByIdAndDelete(req.params.id);
@@ -33,7 +33,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Optional: Get ALL announcements (For Admin or All Students view later)
+
 router.get('/', async (req, res) => {
   try {
     const announcements = await Announcement.find().sort({ createdAt: -1 });

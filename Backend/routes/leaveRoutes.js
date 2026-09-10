@@ -1,21 +1,14 @@
-// routes/leaveRoutes.js
 const express = require('express');
 const router = express.Router();
 const LeaveRequest = require('../models/LeaveRequest');
 const Notification = require('../models/Notification');
 const Employee = require('../models/Employee'); // 🔥 Employee Name edukka import pandrom
 
-// ==========================================
-// USER APIs
-// ==========================================
 
-// User applying for leave & Notify Admin 🔥
 router.post('/apply', async (req, res) => {
   try {
     const newLeave = new LeaveRequest(req.body);
     await newLeave.save();
-
-    // Employee-oda name-a thedi edukrom
     let empName = newLeave.empEmail || 'Staff';
     try {
       const emp = await Employee.findOne({ email: newLeave.empEmail });
@@ -23,8 +16,6 @@ router.post('/apply', async (req, res) => {
         empName = emp.name || emp.fullName || emp.firstName;
       }
     } catch (e) {}
-
-    // 1. Create Notification for Admin with Employee Name
     try {
       const adminNotification = new Notification({
         type: 'leave',
@@ -44,7 +35,7 @@ router.post('/apply', async (req, res) => {
   }
 });
 
-// Get leave history for a specific employee
+
 router.get('/user/:email', async (req, res) => {
   try {
     const leaves = await LeaveRequest.find({ empEmail: req.params.email }).sort({ createdAt: -1 });
@@ -54,11 +45,7 @@ router.get('/user/:email', async (req, res) => {
   }
 });
 
-// ==========================================
-// ADMIN APIs 
-// ==========================================
 
-// Admin: Get ALL leave requests
 router.get('/', async (req, res) => {
   try {
     console.log("Fetching all leaves from database..."); 
@@ -71,7 +58,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Admin: Update leave status & Notify User 🔥
+
 router.put('/:id/status', async (req, res) => {
   try {
     const { status } = req.body; 
@@ -81,7 +68,7 @@ router.put('/:id/status', async (req, res) => {
       { new: true }
     );
 
-    // 2. Create Notification for User when Approved/Rejected
+
     if (updatedLeave && updatedLeave.empEmail) {
       try {
         const userNotification = new Notification({

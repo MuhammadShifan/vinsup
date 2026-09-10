@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const BatchMessage = require('../models/BatchMessage');
 
-// Get messages for a specific batch
+
 router.get('/:batch', async (req, res) => {
   try {
     const messages = await BatchMessage.find({ batch: req.params.batch }).sort({ timestamp: 1 });
@@ -12,12 +12,10 @@ router.get('/:batch', async (req, res) => {
   }
 });
 
-// Send a new message to a batch
+
 router.post('/send', async (req, res) => {
   try {
     const { batch, senderName, senderEmail, senderRole, senderAvatar, text, attachments } = req.body;
-    
-    // 🔥 FIX: Check if at least "text" OR "attachments" are present 🔥
     if (!batch || (!text && (!attachments || attachments.length === 0))) {
       return res.status(400).json({ success: false, message: 'Batch and content (text or file) are required' });
     }

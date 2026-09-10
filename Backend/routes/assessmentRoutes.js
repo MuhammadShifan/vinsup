@@ -3,11 +3,7 @@ const router = express.Router();
 const Assignment = require('../models/Assignment');
 const Quiz = require('../models/Quiz');
 
-// ========================
-// ASSIGNMENT APIs
-// ========================
 
-// Create Assignment
 router.post('/assignment/create', async (req, res) => {
   try {
     const newAssignment = new Assignment(req.body);
@@ -19,11 +15,11 @@ router.post('/assignment/create', async (req, res) => {
   }
 });
 
-// Get all Assignments for a specific trainer
+
 router.get('/assignments/:trainerEmail', async (req, res) => {
   try {
     const assignments = await Assignment.find({ createdBy: req.params.trainerEmail })
-      .populate('batchId', 'courseName batchName') // Batch details-a serthu eduka
+      .populate('batchId', 'courseName batchName') 
       .sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: assignments });
   } catch (error) {
@@ -31,11 +27,7 @@ router.get('/assignments/:trainerEmail', async (req, res) => {
   }
 });
 
-// ========================
-// QUIZ APIs
-// ========================
 
-// Create Quiz
 router.post('/quiz/create', async (req, res) => {
   try {
     const newQuiz = new Quiz(req.body);
@@ -47,7 +39,7 @@ router.post('/quiz/create', async (req, res) => {
   }
 });
 
-// Get all Quizzes for a specific trainer
+
 router.get('/quizzes/:trainerEmail', async (req, res) => {
   try {
     const quizzes = await Quiz.find({ createdBy: req.params.trainerEmail })

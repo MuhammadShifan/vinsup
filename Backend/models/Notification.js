@@ -9,5 +9,4 @@ const NotificationSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now }
 });
 
-// 🔥 Indha line-a mattum change pannunga 🔥
 module.exports = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);

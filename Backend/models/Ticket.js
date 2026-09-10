@@ -7,7 +7,7 @@ const TicketSchema = new mongoose.Schema({
   description: String,
   date: String,
   status: { type: String, default: 'In Progress' },
-  employeeId: { type: String, required: true } // 🔥 ObjectId-la irundhu String-ku mathiyachu 🔥
+  employeeId: { type: String, required: true } 
 });
 
 module.exports = mongoose.model('Ticket', TicketSchema);

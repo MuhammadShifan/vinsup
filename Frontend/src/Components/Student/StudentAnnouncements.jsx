@@ -290,25 +290,31 @@ const StudentAnnouncements = ({ userEmail }) => {
       </div>
 
       <style>{`
-        .sa-main-container { padding: 24px 32px; font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; box-sizing: border-box; color: #0f172a; width: 100%; overflow-x: hidden;}
+        .sa-main-container { padding: clamp(14px, 2.5vw, 32px); font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; box-sizing: border-box; color: #0f172a; width: 100%; overflow-x: hidden;}
         
         .sa-page-header { margin-bottom: 24px; }
-        .sa-page-header h1 { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.5px;}
+        .sa-page-header h1 { font-size: clamp(20px, 3vw, 22px); font-weight: 800; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.5px;}
         .breadcrumb { font-size: 13px; color: #64748b; font-weight: 500; margin: 0;}
         
         /* Banner */
-        .sa-info-banner { background: #eff6ff; border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; gap: 20px; margin-bottom: 30px; border: 1px solid #dbeafe; }
-        .sa-banner-icon { width: 48px; height: 48px; background: #dbeafe; color: #2563eb; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; flex-shrink: 0; }
-        .sa-info-banner h4 { margin: 0 0 4px 0; color: #1e3a8a; font-size: 15px; font-weight: 700; }
+        .sa-info-banner { background: #eff6ff; border-radius: 12px; padding: clamp(14px, 2vw, 20px); display: flex; align-items: center; gap: 16px; margin-bottom: 24px; border: 1px solid #dbeafe; flex-wrap: wrap; }
+        .sa-banner-icon { width: 44px; height: 44px; background: #dbeafe; color: #2563eb; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; flex-shrink: 0; }
+        .sa-info-banner h4 { margin: 0 0 4px 0; color: #1e3a8a; font-size: 14px; font-weight: 700; }
         .sa-info-banner p { margin: 0; color: #3b82f6; font-size: 13px; font-weight: 500; }
 
         /* Grid Layout */
         .sa-content-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 24px; align-items: start; }
         
+        @media (max-width: 992px) {
+          .sa-content-layout {
+            grid-template-columns: 1fr;
+          }
+        }
+
         /* Left Panel */
         .sa-list-panel { display: flex; flex-direction: column; gap: 0; background: transparent; }
         
-        .sa-list-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #cbd5e1; margin-bottom: 20px; padding-bottom: 0; }
+        .sa-list-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #cbd5e1; margin-bottom: 20px; padding-bottom: 0; flex-wrap: wrap; gap: 10px; }
         .sa-tabs { display: flex; gap: 24px; }
         .sa-tab { background: none; border: none; font-size: 14px; font-weight: 700; color: #64748b; padding: 0 0 12px 0; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
         .sa-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
@@ -316,30 +322,30 @@ const StudentAnnouncements = ({ userEmail }) => {
         .sa-filter { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: #64748b; font-size: 13px; font-weight: 600;}
         .sa-filter select { border: none; background: transparent; color: #0f172a; font-weight: 600; font-size: 13px; outline: none; cursor: pointer; font-family: inherit;}
         
-        .sa-cards-container { display: flex; flex-direction: column; gap: 16px; max-height: 600px; overflow-y: auto; padding-right: 8px; }
+        .sa-cards-container { display: flex; flex-direction: column; gap: 16px; max-height: 600px; overflow-y: auto; padding-right: 4px; }
         
         /* Announcement Card */
-        .sa-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; display: flex; gap: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        .sa-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: clamp(14px, 2vw, 20px); display: flex; gap: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
         .sa-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .sa-card.active { border-color: #2563eb; background: #fafafa; }
         
-        .sa-card-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; flex-shrink: 0; }
+        .sa-card-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; flex-shrink: 0; }
         
         .sa-card-content { flex: 1; min-width: 0; }
-        .sa-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 10px; }
-        .sa-card-title-row { display: flex; align-items: center; gap: 8px; }
+        .sa-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 10px; flex-wrap: wrap; }
+        .sa-card-title-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
         .sa-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;}
-        .sa-card-title { font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .sa-card-title { font-size: 14px; font-weight: 800; color: #0f172a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         
         .sa-card-datetime { text-align: right; display: flex; gap: 6px; align-items: flex-start; color: #64748b; font-size: 11px; font-weight: 500; line-height: 1.4; flex-shrink: 0;}
         .sa-card-datetime i { margin-top: 2px; }
         
-        .sa-card-desc { font-size: 13px; color: #475569; margin: 0 0 16px 0; line-height: 1.5; }
+        .sa-card-desc { font-size: 13px; color: #475569; margin: 0 0 16px 0; line-height: 1.5; word-break: break-word; }
         
         .sa-audience-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; text-transform: capitalize;}
 
         /* Pagination */
-        .sa-pagination-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0;}
+        .sa-pagination-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;}
         .sa-page-info { font-size: 13px; color: #64748b; font-weight: 500;}
         .sa-page-controls { display: flex; gap: 6px; }
         .sa-page-btn { width: 32px; height: 32px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-size: 13px; font-weight: 600; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s;}
@@ -350,14 +356,14 @@ const StudentAnnouncements = ({ userEmail }) => {
         .sa-details-panel { display: flex; flex-direction: column; }
         .sa-details-header-title { font-size: 16px; font-weight: 800; color: #0f172a; margin: 0 0 16px 0; }
         
-        .sa-details-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); min-height: 500px; }
+        .sa-details-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: clamp(16px, 2.5vw, 24px); box-shadow: 0 1px 3px rgba(0,0,0,0.02); min-height: 350px; }
         
-        .sa-details-top-box { background: #f8fafc; border-radius: 10px; padding: 20px; display: flex; gap: 16px; align-items: flex-start; margin-bottom: 24px; }
-        .sa-details-icon { width: 50px; height: 50px; background: #eff6ff; color: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 22px; flex-shrink: 0;}
-        .sa-details-meta h3 { margin: 0 0 6px 0; font-size: 16px; font-weight: 800; color: #0f172a; }
+        .sa-details-top-box { background: #f8fafc; border-radius: 10px; padding: clamp(14px, 2vw, 20px); display: flex; gap: 16px; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; }
+        .sa-details-icon { width: 44px; height: 44px; background: #eff6ff; color: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; flex-shrink: 0;}
+        .sa-details-meta h3 { margin: 0 0 6px 0; font-size: 16px; font-weight: 800; color: #0f172a; word-break: break-word; }
         .sa-details-time { margin: 0 0 12px 0; font-size: 12px; color: #64748b; font-weight: 500; }
         
-        .sa-details-body { font-size: 14px; color: #1e293b; line-height: 1.8; }
+        .sa-details-body { font-size: 14px; color: #1e293b; line-height: 1.8; word-break: break-word; }
         .sa-details-body p { margin: 0 0 16px 0; }
 
         .custom-scroll::-webkit-scrollbar { width: 6px; }

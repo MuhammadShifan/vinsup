@@ -83,10 +83,60 @@ const AdminIDCards = () => {
   const currentData = activeTab === 'employee' ? employees : students;
 
   return (
-    <div style={{ padding: '30px', maxWidth: '1200px', margin: '0 auto', fontFamily: "'Inter', sans-serif" }}>
+    <div className="id-cards-container">
       
       {/* 🔥 FIX: Perfect Print CSS - Hides everything EXCEPT the card */}
       <style>{`
+        .id-cards-container {
+          padding: clamp(14px, 2.5vw, 30px);
+          max-width: 1200px;
+          margin: 0 auto;
+          font-family: 'Inter', sans-serif;
+          box-sizing: border-box;
+          width: 100%;
+        }
+        .id-cards-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+          gap: 15px;
+          flex-wrap: wrap;
+        }
+        .id-cards-grid {
+          display: grid;
+          grid-template-columns: 300px 1fr;
+          gap: 25px;
+          align-items: start;
+        }
+        .id-card-preview-box {
+          display: flex;
+          justify-content: center;
+          background: #f8fafc;
+          padding: clamp(16px, 3vw, 40px);
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+          overflow-x: auto;
+          box-sizing: border-box;
+        }
+        @media (max-width: 900px) {
+          .id-cards-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        @media (max-width: 576px) {
+          .id-cards-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          .id-cards-header button {
+            width: 100%;
+            justify-content: center;
+          }
+          .printable-card {
+            width: min(350px, 100%) !important;
+          }
+        }
         @media print {
           body * {
             visibility: hidden; /* Hides sidebar, header, etc. */
@@ -112,25 +162,25 @@ const AdminIDCards = () => {
         }
       `}</style>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+      <div className="id-cards-header">
         <div>
-          <h1 style={{ margin: '0 0 5px 0', color: TEXT_DARK, fontSize: '24px', fontWeight: 'bold' }}>ID Cards Generator</h1>
+          <h1 style={{ margin: '0 0 5px 0', color: TEXT_DARK, fontSize: 'clamp(1.25rem, 2vw, 1.5rem)', fontWeight: 'bold' }}>ID Cards Generator</h1>
           <p style={{ margin: 0, color: TEXT_GRAY, fontSize: '14px' }}>Generate and print professional ID cards for Employees and Students</p>
         </div>
         <button 
           onClick={handlePrint}
-          style={{ background: THEME_BLUE, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+          style={{ background: THEME_BLUE, color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', minHeight: '40px' }}
         >
           Print {activeTab === 'employee' ? 'Employee' : 'Student'} ID
         </button>
       </div>
 
-      <div style={{ display: 'flex', borderBottom: `1px solid ${BORDER_COLOR}`, marginBottom: '25px', background: '#fff', borderRadius: '8px 8px 0 0' }}>
+      <div style={{ display: 'flex', borderBottom: `1px solid ${BORDER_COLOR}`, marginBottom: '25px', background: '#fff', borderRadius: '8px 8px 0 0', flexWrap: 'wrap' }}>
         <TabButton id="employee" label="Employees" />
         <TabButton id="student" label="Students" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '30px', alignItems: 'start' }}>
+      <div className="id-cards-grid">
         
         <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: `1px solid ${BORDER_COLOR}`, maxHeight: '600px', overflowY: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
           <h3 style={{ margin: '0 0 15px 0', fontSize: '15px', color: TEXT_DARK }}>Select {activeTab === 'employee' ? 'Employee' : 'Student'}</h3>
@@ -165,14 +215,14 @@ const AdminIDCards = () => {
         </div>
 
         {/* 100% PERFECT EXACT ID CARD PREVIEW */}
-        <div style={{ display: 'flex', justifyContent: 'center', background: '#f8fafc', padding: '40px', borderRadius: '12px', border: `1px solid ${BORDER_COLOR}` }}>
+        <div className="id-card-preview-box">
           {selectedPerson ? (
             
             /* 🔥 FIX: Added 'printable-card' class here */
             <div className="printable-card" style={{ 
-              width: '350px', height: '530px', background: '#fff', borderRadius: '16px', 
+              width: '350px', maxWidth: '100%', minHeight: '530px', background: '#fff', borderRadius: '16px', 
               boxShadow: '0 10px 25px rgba(0,0,0,0.1)', overflow: 'hidden', position: 'relative',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', border: '1px solid #cbd5e1'
+              display: 'flex', flexDirection: 'column', alignItems: 'center', border: '1px solid #cbd5e1', boxSizing: 'border-box'
             }}>
               
               <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '120px', zIndex: 1 }} viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -227,7 +277,7 @@ const AdminIDCards = () => {
 
                 <hr style={{ width: '85%', border: '0', borderTop: `1px solid ${BORDER_COLOR}`, margin: '15px 0 12px 0' }} />
 
-                <div style={{ width: '100%', padding: '0 30px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', boxSizing: 'border-box' }}>
+                <div style={{ width: '100%', padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', boxSizing: 'border-box' }}>
                   
                   <div style={{ display: 'grid', gridTemplateColumns: '110px 10px 1fr', alignItems: 'center' }}>
                     <span style={{ color: '#475569', fontWeight: '500' }}>{activeTab === 'employee' ? 'Employee ID' : 'Student ID'}</span><span style={{ color: '#475569' }}>:</span>

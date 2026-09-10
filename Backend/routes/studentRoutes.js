@@ -3,11 +3,9 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const Student = require('../models/Student');
-
-// Image Upload-kku Multer Setup
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Backend-la 'uploads' folder kandippa irukanum
+    cb(null, 'uploads/'); 
   },
   filename: function (req, file, cb) {
     cb(null, 'student_' + Date.now() + path.extname(file.originalname));
@@ -15,12 +13,10 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// 1. ADD STUDENT (POST)
+
 router.post('/add', upload.single('profilePhoto'), async (req, res) => {
   try {
     const studentData = { ...req.body };
-    
-    // Photo upload aagirundha andha path-a save pannanum
     if (req.file) {
       studentData.profilePhoto = req.file.path;
     }
@@ -38,13 +34,11 @@ router.post('/add', upload.single('profilePhoto'), async (req, res) => {
   }
 });
 
-// 🔥 2. GET ALL STUDENTS / FILTER BY TRAINER (GET) 🔥
+
 router.get('/', async (req, res) => {
   try {
-    const { trainer } = req.query; // Frontend-la irundhu trainer name varudha nu paakurom
+    const { trainer } = req.query; 
     let query = {};
-    
-    // Trainer query parameter irundha, andha trainer students-a mattum filter pannu
     if (trainer) {
       query.trainer = trainer;
     }
@@ -56,7 +50,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 3. DELETE STUDENT (DELETE)
+
 router.delete('/delete/:id', async (req, res) => {
   try {
     await Student.findByIdAndDelete(req.params.id);
@@ -66,18 +60,14 @@ router.delete('/delete/:id', async (req, res) => {
   }
 });
 
-// 4. UPDATE STUDENT API (PUT)
+
 router.put('/update/:id', upload.single('profilePhoto'), async (req, res) => {
   try {
-    const dbId = req.params.id; // Database _id
-    
-    // Pazhaya student data-va thedurom
+    const dbId = req.params.id; 
     let student = await Student.findById(dbId);
     if (!student) {
       return res.status(404).json({ success: false, message: 'Student not found' });
     }
-
-    // Frontend-la irundhu vandha pudhu data-va update pandrom
     const updateFields = [
       'studentId', 'fullName', 'email', 'phone', 'dob', 'gender', 'address',
       'emergencyName', 'emergencyPhone', 'course', 'batch', 'trainer', 'doj',
@@ -90,12 +80,12 @@ router.put('/update/:id', upload.single('profilePhoto'), async (req, res) => {
       }
     });
 
-    // Pudhusa image edhavadhu upload pannirundha adhayum mathurom
+
     if (req.file) {
       student.profilePhoto = req.file.path; 
     }
 
-    // DB-la save pandrom
+
     await student.save();
 
     res.status(200).json({ success: true, message: 'Student updated successfully!', data: student });
@@ -110,19 +100,15 @@ router.put('/update/:id', upload.single('profilePhoto'), async (req, res) => {
   }
 });
 
-// 🔥 5. UPDATE SYLLABUS PROGRESS API (PUT) 🔥
+
 router.put('/update-syllabus/:studentId', async (req, res) => {
   try {
-    const { studentId } = req.params; // Idhu database ID illa, STU001 maari varra ID
+    const { studentId } = req.params; 
     const { overallProgress, moduleProgress } = req.body;
-
-    // Student ID vachu thedurom
     const student = await Student.findOne({ studentId: studentId });
     if (!student) {
       return res.status(404).json({ success: false, message: 'Student not found' });
     }
-
-    // Progress data-va DB-la update pandrom
     student.syllabusProgress = overallProgress;
     if (moduleProgress) {
       student.moduleProgress = moduleProgress;

@@ -1,4 +1,3 @@
-// models/LeaveRequest.js
 const mongoose = require('mongoose');
 
 const LeaveRequestSchema = new mongoose.Schema({

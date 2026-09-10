@@ -757,12 +757,31 @@ const Students = () => {
         .upload-box:hover { border-color: #2563eb; background: #eff6ff; }
         .alert-blue { background: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 8px; }
         
-        .form-footer { background: #fff; padding: 24px 32px; display: flex; justify-content: space-between; border-radius: 0 0 12px 12px; border: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; }
-        .footer-right { display: flex; }
-
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        @media (max-width: 1024px) {
+          .main-layout { flex-direction: column; }
+          .students-list-sidebar { width: 100%; max-height: 400px; }
+          .sidebar-list { max-height: 250px; }
+          .bottom-grid { grid-template-columns: 1fr; }
+          .form-container { grid-template-columns: 1fr; gap: 20px; padding: 20px; }
+        }
+
+        @media (max-width: 768px) {
+          .students-wrapper { padding: 14px 12px; }
+          .page-header { flex-direction: column; gap: 12px; align-items: stretch; }
+          .page-header button { width: 100%; justify-content: center; }
+          .profile-card { flex-direction: column; text-align: center; padding: 20px 16px; }
+          .profile-card .d-flex.justify-content-between { flex-direction: column; gap: 10px; align-items: center !important; }
+          .profile-contact { justify-content: center; }
+          .quick-info-grid { grid-template-columns: 1fr; }
+          .form-grid-2 { grid-template-columns: 1fr; }
+          .form-footer { flex-direction: column-reverse; gap: 12px; padding: 16px; }
+          .footer-right { width: 100%; flex-direction: column-reverse; gap: 8px; }
+          .footer-right button, .form-footer button { width: 100%; justify-content: center; margin: 0 !important; }
+        }
       `}</style>
 
       {showAddForm ? renderAddStudentForm() : renderMainView()}

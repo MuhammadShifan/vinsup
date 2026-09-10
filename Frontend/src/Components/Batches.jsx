@@ -255,7 +255,7 @@ const Batches = () => {
         </button>
       </div>
 
-      <div className="emp-stats-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', gap: '15px', marginBottom: '25px' }}>
+      <div className="emp-stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px', marginBottom: '25px' }}>
         <div className="emp-stat-card">
             <div className="icon" style={{ background: '#fff7ed', color: '#ea580c', width: '45px', height: '45px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '20px' }}>
                 <i className="fas fa-spinner"></i>
@@ -282,23 +282,23 @@ const Batches = () => {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '30px', borderBottom: '1px solid #e2e8f0', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', gap: '25px', borderBottom: '1px solid #e2e8f0', marginBottom: '20px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', whiteSpace: 'nowrap', paddingBottom: '2px' }}>
         <div 
           onClick={() => setActiveBatchTab('Active')} 
-          style={{ paddingBottom: '12px', cursor: 'pointer', fontWeight: '600', color: activeBatchTab === 'Active' ? '#2563eb' : '#64748b', borderBottom: activeBatchTab === 'Active' ? '3px solid #2563eb' : '3px solid transparent', transition: '0.2s' }}
+          style={{ paddingBottom: '12px', cursor: 'pointer', fontWeight: '600', color: activeBatchTab === 'Active' ? '#2563eb' : '#64748b', borderBottom: activeBatchTab === 'Active' ? '3px solid #2563eb' : '3px solid transparent', transition: '0.2s', flexShrink: 0 }}
         >
           Active Batches
         </div>
         <div 
           onClick={() => setActiveBatchTab('History')} 
-          style={{ paddingBottom: '12px', cursor: 'pointer', fontWeight: '600', color: activeBatchTab === 'History' ? '#16a34a' : '#64748b', borderBottom: activeBatchTab === 'History' ? '3px solid #16a34a' : '3px solid transparent', transition: '0.2s' }}
+          style={{ paddingBottom: '12px', cursor: 'pointer', fontWeight: '600', color: activeBatchTab === 'History' ? '#16a34a' : '#64748b', borderBottom: activeBatchTab === 'History' ? '3px solid #16a34a' : '3px solid transparent', transition: '0.2s', flexShrink: 0 }}
         >
           Old Batches
         </div>
       </div>
 
-      <div className="filters-bar" style={{ display: 'flex', gap: '10px', background: '#fff', padding: '15px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
-        <div className="search-box" style={{ flex: 1 }}>
+      <div className="filters-bar" style={{ display: 'flex', gap: '10px', background: '#fff', padding: '15px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', flexWrap: 'wrap' }}>
+        <div className="search-box" style={{ flex: 1, minWidth: 'min(100%, 260px)' }}>
           <i className="fas fa-search"></i>
           <input 
             type="text" 
@@ -309,8 +309,8 @@ const Batches = () => {
         </div>
       </div>
 
-      <div className="table-container" style={{ marginTop: '20px', borderRadius: '10px', overflow: 'hidden' }}>
-        <table>
+      <div className="table-container" style={{ marginTop: '20px', borderRadius: '10px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table style={{ minWidth: '850px', width: '100%' }}>
           <thead>
             <tr>
               <th>#</th>
@@ -386,137 +386,137 @@ const Batches = () => {
       </div>
 
       {viewBatch && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ background: '#fff', width: '95%', maxWidth: '900px', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '15px' }}>
+          <div style={{ background: '#fff', width: 'min(900px, 100%)', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
             
-            <div style={{ padding: '20px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0' }}>
-              <h2 style={{ margin: '0 0 20px', color: '#1e293b' }}>Batch Details</h2>
+            <div style={{ padding: '16px clamp(16px, 2.5vw, 25px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0' }}>
+              <h2 style={{ margin: 0, color: '#1e293b', fontSize: '18px' }}>Batch Details</h2>
               <button onClick={() => setViewBatch(null)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#64748b' }}><i className="fas fa-times"></i></button>
             </div>
 
-            <div style={{ overflowY: 'auto', padding: '25px' }}>
+            <div style={{ overflowY: 'auto', padding: 'clamp(14px, 2.5vw, 25px)' }}>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
-                <div style={{ width: '55px', height: '55px', background: '#ef4444', color: '#fff', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
+                <div style={{ width: '48px', height: '48px', background: '#ef4444', color: '#fff', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '18px', flexShrink: 0 }}>
                   {viewBatch.batchName.substring(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '24px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <h3 style={{ margin: 0, fontSize: '20px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     {viewBatch.batchName} 
                   </h3>
                   <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>Status: {viewBatch.status || 'Ongoing'}</span>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '20px', background: '#f8fafc', borderRadius: '10px', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', background: '#f8fafc', borderRadius: '10px', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
                 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '130px' }}>
                   <div>
                     <span style={{ display: 'block', fontSize: '12px', color: '#64748b', marginBottom: '3px' }}>Course</span>
-                    <strong style={{ color: '#334155', fontSize: '15px' }}>{viewBatch.courseName}</strong>
+                    <strong style={{ color: '#334155', fontSize: '14px' }}>{viewBatch.courseName}</strong>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  <img src={getTrainerDetails(viewBatch.trainerName).displayImage} alt="Trainer" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '130px' }}>
+                  <img src={getTrainerDetails(viewBatch.trainerName).displayImage} alt="Trainer" style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} />
                   <div>
                     <span style={{ display: 'block', fontSize: '12px', color: '#64748b', marginBottom: '3px' }}>Trainer</span>
-                    <strong style={{ color: '#334155', fontSize: '15px' }}>{viewBatch.trainerName || 'Not Assigned'}</strong>
+                    <strong style={{ color: '#334155', fontSize: '14px' }}>{viewBatch.trainerName || 'Not Assigned'}</strong>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  <div style={{ fontSize: '26px', color: '#3b82f6' }}><i className="far fa-clock"></i></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '130px' }}>
+                  <div style={{ fontSize: '22px', color: '#3b82f6' }}><i className="far fa-clock"></i></div>
                   <div>
                     <span style={{ display: 'block', fontSize: '12px', color: '#64748b', marginBottom: '3px' }}>Duration</span>
-                    <strong style={{ color: '#334155', fontSize: '15px' }}>{viewBatch.startDate || '-'} to {viewBatch.endDate || '-'}</strong>
+                    <strong style={{ color: '#334155', fontSize: '14px' }}>{viewBatch.startDate || '-'} to {viewBatch.endDate || '-'}</strong>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  <div style={{ fontSize: '26px', color: '#6366f1' }}><i className="far fa-calendar-alt"></i></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '130px' }}>
+                  <div style={{ fontSize: '22px', color: '#6366f1' }}><i className="far fa-calendar-alt"></i></div>
                   <div>
                     <span style={{ display: 'block', fontSize: '12px', color: '#64748b', marginBottom: '3px' }}>Schedule</span>
-                    <strong style={{ color: '#334155', fontSize: '15px' }}>{viewBatch.batchType || '-'}</strong>
+                    <strong style={{ color: '#334155', fontSize: '14px' }}>{viewBatch.batchType || '-'}</strong>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '100px' }}>
                   <div>
                     <span style={{ display: 'block', fontSize: '12px', color: '#64748b', marginBottom: '3px' }}>Students</span>
-                    <strong style={{ color: '#334155', fontSize: '15px' }}>{viewBatch.studentsCount || 0}</strong>
+                    <strong style={{ color: '#334155', fontSize: '14px' }}>{viewBatch.studentsCount || 0}</strong>
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '30px', borderBottom: '1px solid #e2e8f0', marginBottom: '25px' }}>
+              <div style={{ display: 'flex', gap: '25px', borderBottom: '1px solid #e2e8f0', marginBottom: '20px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', whiteSpace: 'nowrap' }}>
                 {['Overview', `Students (${viewBatch.studentsCount || 0})`].map(tab => (
-                  <div key={tab} onClick={() => setActiveViewTab(tab)} style={{ paddingBottom: '12px', cursor: 'pointer', fontWeight: '600', color: activeViewTab === tab ? '#2563eb' : '#64748b', borderBottom: activeViewTab === tab ? '3px solid #2563eb' : '3px solid transparent', transition: '0.2s' }}>
+                  <div key={tab} onClick={() => setActiveViewTab(tab)} style={{ paddingBottom: '12px', cursor: 'pointer', fontWeight: '600', color: activeViewTab === tab ? '#2563eb' : '#64748b', borderBottom: activeViewTab === tab ? '3px solid #2563eb' : '3px solid transparent', transition: '0.2s', flexShrink: 0 }}>
                     {tab}
                   </div>
                 ))}
               </div>
 
               {activeViewTab === 'Overview' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '20px' }}>
                   
-                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px' }}>
-                    <h4 style={{ margin: '0 0 15px 0', color: '#1e293b' }}>Batch Description</h4>
+                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
+                    <h4 style={{ margin: '0 0 12px 0', color: '#1e293b' }}>Batch Description</h4>
                     <p style={{ color: '#475569', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
                       This batch covers the complete {viewBatch.courseName} from basics to advanced level with real-time projects. Exclusively mapped for {viewBatch.batchType}.
                     </p>
                   </div>
 
-                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px' }}>
-                    <h4 style={{ margin: '0 0 15px 0', color: '#1e293b' }}>Progress Overview</h4>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-                      <div style={{ position: 'relative', width: '100px', height: '100px' }}>
-                        <svg width="100" height="100" viewBox="0 0 100 100">
+                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
+                    <h4 style={{ margin: '0 0 12px 0', color: '#1e293b' }}>Progress Overview</h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap' }}>
+                      <div style={{ position: 'relative', width: '90px', height: '90px' }}>
+                        <svg width="90" height="90" viewBox="0 0 100 100">
                           <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" strokeWidth="8" />
                           <circle cx="50" cy="50" r="40" fill="none" stroke={viewBatch.status === 'Completed' ? '#16a34a' : '#3b82f6'} strokeWidth="8" strokeDasharray={`${(viewBatch.progress || 0) * 2.51} 251`} strokeDashoffset="0" transform="rotate(-90 50 50)" style={{ transition: 'stroke-dasharray 1s ease-in-out' }} />
                         </svg>
                         
                         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                          <strong style={{ fontSize: '20px', color: '#0f172a' }}>{viewBatch.progress || 0}%</strong>
+                          <strong style={{ fontSize: '18px', color: '#0f172a' }}>{viewBatch.progress || 0}%</strong>
                         </div>
                         
                       </div>
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#16a34a' }}></div>
-                          <span style={{ fontSize: '14px', color: '#475569' }}>Completed</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#16a34a' }}></div>
+                          <span style={{ fontSize: '13px', color: '#475569' }}>Completed</span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#3b82f6' }}></div>
-                          <span style={{ fontSize: '14px', color: '#475569' }}>In Progress</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#3b82f6' }}></div>
+                          <span style={{ fontSize: '13px', color: '#475569' }}>In Progress</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px' }}>
-                    <h4 style={{ margin: '0 0 15px 0', color: '#1e293b' }}>Batch Information</h4>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '14px', color: '#475569' }}>
-                      <li style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><span>• Batch Type</span><strong>{viewBatch.batchType}</strong></li>
-                      <li style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><span>• Start Date</span><strong>{viewBatch.startDate || '-'}</strong></li>
-                      <li style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><span>• End Date</span><strong>{viewBatch.endDate || '-'}</strong></li>
-                      <li style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><span>• Total Students</span><strong>{viewBatch.studentsCount || 0}</strong></li>
+                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
+                    <h4 style={{ margin: '0 0 12px 0', color: '#1e293b' }}>Batch Information</h4>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '13px', color: '#475569' }}>
+                      <li style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}><span>• Batch Type</span><strong>{viewBatch.batchType}</strong></li>
+                      <li style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}><span>• Start Date</span><strong>{viewBatch.startDate || '-'}</strong></li>
+                      <li style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}><span>• End Date</span><strong>{viewBatch.endDate || '-'}</strong></li>
+                      <li style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}><span>• Total Students</span><strong>{viewBatch.studentsCount || 0}</strong></li>
                     </ul>
                   </div>
 
-                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column' }}>
-                    <h4 style={{ margin: '0 0 15px 0', color: '#1e293b' }}>Assigned Trainer</h4>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
-                      <img src={getTrainerDetails(viewBatch.trainerName).displayImage} alt="Trainer" style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
+                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column' }}>
+                    <h4 style={{ margin: '0 0 12px 0', color: '#1e293b' }}>Assigned Trainer</h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                      <img src={getTrainerDetails(viewBatch.trainerName).displayImage} alt="Trainer" style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover' }} />
                       <div>
-                        <strong style={{ display: 'block', color: '#1e293b', fontSize: '16px' }}>{viewBatch.trainerName || 'Not Assigned'}</strong>
-                        <span style={{ fontSize: '13px', color: '#64748b' }}>Primary Trainer</span>
+                        <strong style={{ display: 'block', color: '#1e293b', fontSize: '15px' }}>{viewBatch.trainerName || 'Not Assigned'}</strong>
+                        <span style={{ fontSize: '12px', color: '#64748b' }}>Primary Trainer</span>
                       </div>
                     </div>
                     {viewBatch.trainerName && (
-                      <div style={{ fontSize: '14px', color: '#475569', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><i className="fas fa-envelope"></i> {getTrainerDetails(viewBatch.trainerName).email || 'Not Provided'}</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><i className="fas fa-phone"></i> {getTrainerDetails(viewBatch.trainerName).phone || 'Not Provided'}</div>
+                      <div style={{ fontSize: '13px', color: '#475569', display: 'flex', flexDirection: 'column', gap: '8px', overflowWrap: 'anywhere' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-envelope"></i> {getTrainerDetails(viewBatch.trainerName).email || 'Not Provided'}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-phone"></i> {getTrainerDetails(viewBatch.trainerName).phone || 'Not Provided'}</div>
                       </div>
                     )}
                   </div>
@@ -525,10 +525,10 @@ const Batches = () => {
               )}
 
               {activeViewTab !== 'Overview' && (
-                <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748b', border: '1px dashed #cbd5e1', borderRadius: '8px', background: '#f8fafc' }}>
-                  <i className="fas fa-user-graduate" style={{ fontSize: '40px', marginBottom: '15px', color: '#94a3b8' }}></i>
-                  <h3 style={{ color: '#475569', margin: '0 0 10px 0' }}>Students List Coming Soon</h3>
-                  <p style={{ maxWidth: '400px', margin: '0 auto', fontSize: '14px' }}>
+                <div style={{ textAlign: 'center', padding: '40px 15px', color: '#64748b', border: '1px dashed #cbd5e1', borderRadius: '8px', background: '#f8fafc' }}>
+                  <i className="fas fa-user-graduate" style={{ fontSize: '36px', marginBottom: '12px', color: '#94a3b8' }}></i>
+                  <h3 style={{ color: '#475569', margin: '0 0 8px 0', fontSize: '16px' }}>Students List Coming Soon</h3>
+                  <p style={{ maxWidth: '400px', margin: '0 auto', fontSize: '13px' }}>
                     Student details including Name, Age, Phone Number, Std ID, Email, and DOB will be populated here directly from the user portal later.
                   </p>
                 </div>

@@ -1,9 +1,8 @@
-// routes/scheduleRoutes.js
 const express = require('express');
 const router = express.Router();
 const Schedule = require('../models/Schedule');
 
-// 1. Add a new event
+
 router.post('/add', async (req, res) => {
   try {
     const newEvent = new Schedule(req.body);
@@ -15,7 +14,7 @@ router.post('/add', async (req, res) => {
   }
 });
 
-// 2. Get all events for a specific user
+
 router.get('/:email', async (req, res) => {
   try {
     const events = await Schedule.find({ empEmail: req.params.email }).sort({ startDate: 1, startTime: 1 });
@@ -26,7 +25,7 @@ router.get('/:email', async (req, res) => {
   }
 });
 
-// 3. Delete an event
+
 router.delete('/:id', async (req, res) => {
   try {
     const deletedEvent = await Schedule.findByIdAndDelete(req.params.id);

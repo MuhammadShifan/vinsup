@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Report = require('../models/Report');
 
-// POST: Generate new report
+
 router.post('/', async (req, res) => {
   try {
     const newReport = new Report(req.body);
@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET: Fetch all reports
+
 router.get('/', async (req, res) => {
   try {
     const reports = await Report.find().sort({ createdAt: -1 });
@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 🔥 PUDHUSA ADD PANNADHU: DELETE API
+
 router.delete('/:id', async (req, res) => {
   try {
     const deletedReport = await Report.findByIdAndDelete(req.params.id);

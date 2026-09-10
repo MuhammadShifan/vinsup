@@ -7,8 +7,6 @@ const batchMessageSchema = new mongoose.Schema({
   senderRole: { type: String, enum: ['Trainer', 'Student', 'Admin'], required: true },
   senderAvatar: { type: String, default: "" }, 
   text: { type: String, default: "" },
-  
-  // 🔥 NEW: Multiple Files support pandra Array 🔥
   attachments: [{
     fileData: { type: String }, 
     fileName: { type: String }, 

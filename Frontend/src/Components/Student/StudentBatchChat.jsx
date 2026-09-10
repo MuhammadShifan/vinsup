@@ -208,14 +208,14 @@ const StudentBatchChat = ({ userName, userEmail }) => {
       </form>
 
       <style>{`
-        .chat-container { display: flex; flex-direction: column; height: calc(100vh - 120px); background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin: 20px 32px; border: 1px solid #e2e8f0; overflow: hidden; font-family: 'Inter', sans-serif;}
-        .chat-header { padding: 16px 24px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+        .chat-container { display: flex; flex-direction: column; height: calc(100vh - 120px); background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin: clamp(10px, 2vw, 20px) clamp(10px, 2.5vw, 32px); border: 1px solid #e2e8f0; overflow: hidden; font-family: 'Inter', sans-serif;}
+        .chat-header { padding: 14px clamp(14px, 2vw, 24px); background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
         .ch-info { display: flex; align-items: center; gap: 15px; }
-        .ch-avatar { width: 45px; height: 45px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 18px; }
-        .ch-info h2 { margin: 0; font-size: 16px; color: #0f172a; font-weight: 700; }
+        .ch-avatar { width: 42px; height: 42px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 16px; flex-shrink: 0; }
+        .ch-info h2 { margin: 0; font-size: 16px; color: #0f172a; font-weight: 700; word-break: break-word; }
         .ch-info p { margin: 2px 0 0 0; font-size: 12px; color: #64748b; }
         
-        .chat-body { flex: 1; padding: 24px; overflow-y: auto; background: #f1f5f9; display: flex; flex-direction: column; gap: 16px; }
+        .chat-body { flex: 1; padding: clamp(14px, 2vw, 24px); overflow-y: auto; background: #f1f5f9; display: flex; flex-direction: column; gap: 16px; }
         .no-messages { text-align: center; color: #94a3b8; margin-top: 50px; font-size: 14px; }
         .chat-msg-row { display: flex; gap: 10px; align-items: flex-end; width: 100%; }
         .chat-msg-row.me { justify-content: flex-end; }
@@ -224,7 +224,7 @@ const StudentBatchChat = ({ userName, userEmail }) => {
         .msg-avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex-shrink: 0; margin-bottom: 25px; background: #e2e8f0;}
         .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
         
-        .chat-bubble { max-width: 60%; padding: 10px 14px; border-radius: 12px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
+        .chat-bubble { max-width: min(450px, 80%); padding: 10px 14px; border-radius: 12px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
         .my-bubble { background: #2563eb; color: #fff; border-bottom-right-radius: 4px; }
         .other-bubble { background: #fff; color: #0f172a; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; }
         .trainer-bubble { border: 1px solid #3b82f6; background: #eff6ff; }
@@ -241,21 +241,31 @@ const StudentBatchChat = ({ userName, userEmail }) => {
         .chat-file-link { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 10px 14px; border-radius: 8px; color: inherit; text-decoration: none; font-size: 13px; font-weight: 600; }
         .chat-file-link:hover { background: rgba(0,0,0,0.1); }
         
-        .file-preview-area { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; max-height: 80px; overflow-y: auto;}
+        .file-preview-area { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px clamp(14px, 2vw, 24px); background: #f8fafc; border-top: 1px solid #e2e8f0; max-height: 80px; overflow-y: auto;}
         .file-preview-item { background: #fff; border: 1px solid #cbd5e1; border-radius: 20px; padding: 6px 12px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #475569; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
         .file-preview-item button { background: none; border: none; color: #ef4444; cursor: pointer; padding: 0; display: flex; font-size: 14px;}
 
-        .chat-footer { padding: 16px 24px; background: #fff; border-top: 1px solid #e2e8f0; display: flex; gap: 12px; align-items: center; }
-        .attach-btn { background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; transition: 0.2s;}
+        .chat-footer { padding: 14px clamp(14px, 2vw, 24px); background: #fff; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+        .attach-btn { background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 16px; transition: 0.2s; flex-shrink: 0;}
         .attach-btn:hover { background: #e2e8f0; }
-        .chat-footer input[type="text"] { flex: 1; padding: 12px 16px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 14px; font-family: inherit; }
+        .chat-footer input[type="text"] { flex: 1; min-width: 0; padding: 12px 16px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 13px; font-family: inherit; }
         .chat-footer input[type="text"]:focus { border-color: #3b82f6; }
-        .chat-footer button[type="submit"] { width: 44px; height: 44px; border-radius: 50%; background: #2563eb; color: #fff; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 16px; transition: 0.2s;}
+        .chat-footer button[type="submit"] { width: 42px; height: 42px; border-radius: 50%; background: #2563eb; color: #fff; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 15px; transition: 0.2s; flex-shrink: 0;}
         .chat-footer button[type="submit"]:disabled { background: #94a3b8; cursor: not-allowed; }
         
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        @media (max-width: 768px) {
+          .chat-container {
+            margin: 6px;
+            height: calc(100dvh - 80px);
+          }
+          .chat-bubble {
+            max-width: 88%;
+          }
+        }
       `}</style>
     </div>
   );

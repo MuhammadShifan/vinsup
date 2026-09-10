@@ -87,11 +87,32 @@ const MySchedule = () => {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div style={{ padding: '30px', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        .schedule-main-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+          gap: 20px;
+          align-items: start;
+        }
+        .schedule-calendar-card {
+          background: #fff;
+          padding: clamp(15px, 2vw, 25px);
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+        @media (max-width: 992px) {
+          .schedule-main-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
       
       {showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ background: '#fff', padding: '30px', borderRadius: '12px', width: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px' }}>
+          <div style={{ background: '#fff', padding: 'clamp(20px, 3vw, 30px)', borderRadius: '12px', width: 'min(400px, 100%)', boxShadow: '0 10px 25px rgba(0,0,0,0.2)', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a' }}>Add New Event</h2>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '18px', color: '#94a3b8', cursor: 'pointer' }}><i className="fas fa-times"></i></button>
@@ -112,12 +133,12 @@ const MySchedule = () => {
                 </select>
               </div>
               
-              <div style={{ display: 'flex', gap: '15px' }}>
-                <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 140px' }}>
                   <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', color: '#475569', fontWeight: '500' }}>Date</label>
                   <input type="date" value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none' }} required />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: '1 1 140px' }}>
                   <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', color: '#475569', fontWeight: '500' }}>Time</label>
                   <input type="time" value={newEvent.time} onChange={e => setNewEvent({...newEvent, time: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none' }} required />
                 </div>
@@ -132,7 +153,7 @@ const MySchedule = () => {
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
         <div>
           <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>My Schedule</h1>
           <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>View your classes, meetings and work schedule</p>
@@ -148,13 +169,13 @@ const MySchedule = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '65% 33%', gap: '2%', alignItems: 'start' }}>
+      <div className="schedule-main-grid">
 
         {/* ---------------- LEFT: CALENDAR CARD ---------------- */}
-        <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-            <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>Schedule Calendar</h3>
-            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+        <div className="schedule-calendar-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '10px' }}>
+            <h3 style={{ margin: '0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>Schedule Calendar</h3>
+            <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                 <button onClick={handlePrevMonth} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '14px', color: '#64748b' }}><i className="fas fa-chevron-left"></i></button>
                 <strong style={{ fontSize: '14px', color: '#0f172a', minWidth: '110px', textAlign: 'center' }}>{monthName} {currentYear}</strong>

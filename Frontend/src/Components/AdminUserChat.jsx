@@ -191,7 +191,7 @@ const AdminUserChat = ({ onRead }) => {
 
   return (
     // 🔥 FIX 2: Strict height 100vh with overflow hidden 🔥
-    <div style={{ padding: '20px 30px', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif", background: '#f8fafc', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ padding: 'clamp(12px, 2vw, 20px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif", background: '#f8fafc', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       
       <style>
         {`
@@ -200,6 +200,52 @@ const AdminUserChat = ({ onRead }) => {
           .scroll-bar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
           .msg-actions { opacity: 0; transition: opacity 0.2s; }
           .msg-container:hover .msg-actions { opacity: 1; }
+          
+          .admin-chat-grid {
+            display: grid;
+            grid-template-columns: 320px minmax(0, 1fr);
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            box-sizing: border-box;
+          }
+          
+          .mobile-chat-back {
+            display: none;
+            background: #f1f5f9;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #475569;
+            font-size: 14px;
+            flex-shrink: 0;
+          }
+
+          @media (max-width: 768px) {
+            .admin-chat-grid {
+              display: flex;
+              flex-direction: column;
+              gap: 0;
+            }
+            .mobile-chat-back {
+              display: inline-flex;
+            }
+            .admin-chat-users {
+              display: ${selectedUser ? 'none' : 'flex'} !important;
+              width: 100%;
+              height: 100%;
+            }
+            .admin-chat-window {
+              display: ${selectedUser ? 'flex' : 'none'} !important;
+              width: 100%;
+              height: 100%;
+            }
+          }
         `}
       </style>
 
@@ -208,10 +254,10 @@ const AdminUserChat = ({ onRead }) => {
         <p style={{ margin: 0, color: '#64748b', fontSize: '13px' }}>Manage 1-to-1 conversations with employees.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '320px minmax(0, 1fr)', gap: '20px', flex: 1, minHeight: 0, width: '100%', boxSizing: 'border-box' }}>
+      <div className="admin-chat-grid">
         
         {/* LEFT PANEL */}
-        <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
+        <div className="admin-chat-users" style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
           <div style={{ padding: '15px', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
             <div style={{ position: 'relative' }}>
               <i className="fas fa-search" style={{ position: 'absolute', left: '12px', top: '10px', color: '#94a3b8', fontSize: '13px' }}></i>
@@ -256,20 +302,23 @@ const AdminUserChat = ({ onRead }) => {
         </div>
 
         {/* RIGHT PANEL: CHAT WINDOW */}
-        <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0, height: '100%' }}>
+        <div className="admin-chat-window" style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0, height: '100%' }}>
           {selectedUser ? (
             <>
-              <div style={{ padding: '15px 25px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '15px', background: '#fff', flexShrink: 0 }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#2563eb', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff', fontSize: '16px', fontWeight: 'bold', flexShrink: 0 }}>
+              <div style={{ padding: '12px clamp(12px, 2vw, 25px)', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '12px', background: '#fff', flexShrink: 0 }}>
+                <button className="mobile-chat-back" onClick={() => setSelectedUser(null)} title="Back to employee list">
+                  <i className="fas fa-arrow-left"></i>
+                </button>
+                <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: '#2563eb', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff', fontSize: '15px', fontWeight: 'bold', flexShrink: 0 }}>
                   {(selectedUser.fullName || selectedUser.name || "E").charAt(0).toUpperCase()}
                 </div>
-                <div style={{ overflow: 'hidden' }}>
+                <div style={{ overflow: 'hidden', flex: 1 }}>
                   <h3 style={{ margin: '0 0 2px 0', fontSize: '15px', color: '#0f172a', fontWeight: 'bold', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{selectedUser.fullName || selectedUser.name}</h3>
                   <span style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{selectedUser.email}</span>
                 </div>
               </div>
 
-              <div className="scroll-bar" style={{ flex: 1, padding: '20px', overflowY: 'auto', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div className="scroll-bar" style={{ flex: 1, padding: 'clamp(12px, 2vw, 20px)', overflowY: 'auto', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 {chatMessages.length > 0 ? chatMessages.map((msg, idx) => {
                   const isMe = msg.senderEmail === adminEmail;
                   const msgTime = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -288,7 +337,7 @@ const AdminUserChat = ({ onRead }) => {
                         </div>
                       ) : (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexDirection: isMe ? 'row-reverse' : 'row' }}>
-                          <div style={{ background: isMe ? '#2563eb' : '#fff', color: isMe ? '#fff' : '#1e293b', padding: '10px 16px', borderRadius: isMe ? '16px 16px 0 16px' : '16px 16px 16px 0', maxWidth: '350px', fontSize: '14px', lineHeight: '1.5', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: isMe ? 'none' : '1px solid #e2e8f0', wordWrap: 'break-word', overflow: 'hidden' }}>
+                          <div style={{ background: isMe ? '#2563eb' : '#fff', color: isMe ? '#fff' : '#1e293b', padding: '10px 16px', borderRadius: isMe ? '16px 16px 0 16px' : '16px 16px 16px 0', maxWidth: 'min(450px, 85vw)', fontSize: '14px', lineHeight: '1.5', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: isMe ? 'none' : '1px solid #e2e8f0', wordWrap: 'break-word', overflow: 'hidden' }}>
                             
                             {msg.file && (
                               <div style={{ marginBottom: msg.message ? '8px' : '0' }}>
@@ -347,7 +396,7 @@ const AdminUserChat = ({ onRead }) => {
                 </div>
               )}
 
-              <form onSubmit={handleSendMessage} style={{ padding: '15px 25px', background: '#fff', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '15px', alignItems: 'center', width: '100%', boxSizing: 'border-box', flexShrink: 0 }}>
+              <form onSubmit={handleSendMessage} style={{ padding: '12px clamp(12px, 2vw, 25px)', background: '#fff', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '12px', alignItems: 'center', width: '100%', boxSizing: 'border-box', flexShrink: 0 }}>
                 <label style={{ cursor: 'pointer', color: '#64748b', fontSize: '18px', display: 'flex', alignItems: 'center', flexShrink: 0 }} title="Attach Files">
                   <i className="fas fa-paperclip"></i>
                   <input type="file" multiple onChange={handleFileChange} style={{ display: 'none' }} />
@@ -359,20 +408,20 @@ const AdminUserChat = ({ onRead }) => {
                   onChange={(e) => setNewMsg(e.target.value)} 
                   placeholder="Type your message to Admin..." 
                   disabled={!!editingMsgId} 
-                  style={{ flex: 1, minWidth: 0, padding: '12px 20px', borderRadius: '30px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', background: editingMsgId ? '#f1f5f9' : '#f8fafc', color: '#1e293b', boxSizing: 'border-box' }} 
+                  style={{ flex: 1, minWidth: 0, padding: '10px 18px', borderRadius: '30px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', background: editingMsgId ? '#f1f5f9' : '#f8fafc', color: '#1e293b', boxSizing: 'border-box' }} 
                 />
                 <button 
                   type="submit" 
                   disabled={(!newMsg.trim() && selectedFiles.length === 0) || !!editingMsgId} 
-                  style={{ background: (newMsg.trim() || selectedFiles.length > 0) && !editingMsgId ? '#2563eb' : '#cbd5e1', color: '#fff', border: 'none', width: '42px', height: '42px', borderRadius: '50%', cursor: (newMsg.trim() || selectedFiles.length > 0) && !editingMsgId ? 'pointer' : 'not-allowed', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '16px', transition: '0.2s', flexShrink: 0, boxShadow: (newMsg.trim() || selectedFiles.length > 0) && !editingMsgId ? '0 4px 6px rgba(37, 99, 235, 0.2)' : 'none' }}>
+                  style={{ background: (newMsg.trim() || selectedFiles.length > 0) && !editingMsgId ? '#2563eb' : '#cbd5e1', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: (newMsg.trim() || selectedFiles.length > 0) && !editingMsgId ? 'pointer' : 'not-allowed', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '15px', transition: '0.2s', flexShrink: 0, boxShadow: (newMsg.trim() || selectedFiles.length > 0) && !editingMsgId ? '0 4px 6px rgba(37, 99, 235, 0.2)' : 'none' }}>
                   <i className="fas fa-paper-plane" style={{ marginLeft: '-2px' }}></i>
                 </button>
               </form>
             </>
           ) : (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#94a3b8' }}>
-              <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '15px' }}>
-                <i className="far fa-comment-dots" style={{ fontSize: '30px', color: '#cbd5e1' }}></i>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#94a3b8', padding: '20px', textAlign: 'center' }}>
+              <div style={{ width: '70px', height: '70px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '15px' }}>
+                <i className="far fa-comment-dots" style={{ fontSize: '28px', color: '#cbd5e1' }}></i>
               </div>
               <h3 style={{ margin: '0 0 5px 0', color: '#475569', fontSize: '16px' }}>Your Messages</h3>
               <p style={{ margin: 0, fontSize: '13px' }}>Select an employee from the list to view chat.</p>

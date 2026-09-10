@@ -149,9 +149,46 @@ const AdminTasks = () => {
 
   if (currentView === 'assign') {
     return (
-      <div style={{ padding: '30px 50px', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif" }}>
+      <div className="admin-tasks-container" style={{ padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif" }}>
+        <style>{`
+          .admin-assign-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) 350px;
+            gap: 25px;
+          }
+          .admin-tasks-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+            gap: 20px;
+            align-items: start;
+          }
+          .tasks-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+          }
+          .task-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            max-height: 530px;
+          }
+          @media (max-width: 992px) {
+            .admin-assign-grid, .admin-tasks-grid {
+              grid-template-columns: 1fr;
+            }
+          }
+          @media (max-width: 576px) {
+            .task-header-row {
+              flex-direction: column;
+              align-items: flex-start !important;
+              gap: 15px;
+            }
+          }
+        `}</style>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+        <div className="task-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
           <div>
             <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>Assign Task</h1>
             <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Create a new task and assign it to a user.</p>
@@ -163,9 +200,9 @@ const AdminTasks = () => {
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) 350px', gap: '25px' }}>
+        <div className="admin-assign-grid">
           
-          <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '30px' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: 'clamp(15px, 2vw, 30px)' }}>
             
             <div style={{ marginBottom: '35px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
@@ -196,7 +233,7 @@ const AdminTasks = () => {
                     placeholder="Explain the task requirements..." 
                     style={{ width: '100%', padding: '15px', border: 'none', outline: 'none', fontSize: '14px', color: '#1e293b', boxSizing: 'border-box', resize: 'vertical' }}>
                   </textarea>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 15px', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 15px', borderTop: '1px solid #e2e8f0', background: '#f8fafc', flexWrap: 'wrap', gap: '8px' }}>
                     <div style={{ display: 'flex', gap: '15px', color: '#64748b', fontSize: '14px' }}>
                       <i className="fas fa-bold" style={{ cursor: 'pointer' }}></i>
                       <i className="fas fa-italic" style={{ cursor: 'pointer' }}></i>
@@ -250,14 +287,14 @@ const AdminTasks = () => {
 
               <div>
                 <label style={{ display: 'block', fontSize: '13px', color: '#0f172a', marginBottom: '8px', fontWeight: '600' }}>Priority <span style={{ color: '#ef4444' }}>*</span></label>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <label style={{ flex: 1, padding: '10px', border: newTask.priority === 'High' ? '1px solid #ef4444' : '1px solid #e2e8f0', background: newTask.priority === 'High' ? '#fee2e2' : '#fff', color: newTask.priority === 'High' ? '#ef4444' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <label style={{ flex: '1 1 90px', padding: '10px', border: newTask.priority === 'High' ? '1px solid #ef4444' : '1px solid #e2e8f0', background: newTask.priority === 'High' ? '#fee2e2' : '#fff', color: newTask.priority === 'High' ? '#ef4444' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}>
                     <input type="radio" name="priority" value="High" checked={newTask.priority === 'High'} onChange={handleInputChange} style={{ display: 'none' }} /> High
                   </label>
-                  <label style={{ flex: 1, padding: '10px', border: newTask.priority === 'Medium' ? '1px solid #f59e0b' : '1px solid #e2e8f0', background: newTask.priority === 'Medium' ? '#ffedd5' : '#fff', color: newTask.priority === 'Medium' ? '#f59e0b' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}>
+                  <label style={{ flex: '1 1 90px', padding: '10px', border: newTask.priority === 'Medium' ? '1px solid #f59e0b' : '1px solid #e2e8f0', background: newTask.priority === 'Medium' ? '#ffedd5' : '#fff', color: newTask.priority === 'Medium' ? '#f59e0b' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}>
                     <input type="radio" name="priority" value="Medium" checked={newTask.priority === 'Medium'} onChange={handleInputChange} style={{ display: 'none' }} /> Medium
                   </label>
-                  <label style={{ flex: 1, padding: '10px', border: newTask.priority === 'Low' ? '1px solid #10b981' : '1px solid #e2e8f0', background: newTask.priority === 'Low' ? '#dcfce7' : '#fff', color: newTask.priority === 'Low' ? '#10b981' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}>
+                  <label style={{ flex: '1 1 90px', padding: '10px', border: newTask.priority === 'Low' ? '1px solid #10b981' : '1px solid #e2e8f0', background: newTask.priority === 'Low' ? '#dcfce7' : '#fff', color: newTask.priority === 'Low' ? '#10b981' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}>
                     <input type="radio" name="priority" value="Low" checked={newTask.priority === 'Low'} onChange={handleInputChange} style={{ display: 'none' }} /> Low
                   </label>
                 </div>
@@ -266,7 +303,7 @@ const AdminTasks = () => {
 
             <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '30px 0 20px 0' }} />
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', flexWrap: 'wrap' }}>
               <button 
                 onClick={() => setCurrentView('list')}
                 style={{ padding: '10px 25px', background: '#fff', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}>
@@ -359,9 +396,46 @@ const AdminTasks = () => {
   }
 
   return (
-    <div style={{ padding: '30px 50px', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif" }}>
+    <div className="admin-tasks-container" style={{ padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        .admin-assign-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 2fr) 350px;
+          gap: 25px;
+        }
+        .admin-tasks-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+          gap: 20px;
+          align-items: start;
+        }
+        .tasks-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 20px;
+          margin-bottom: 25px;
+        }
+        .task-table-wrap {
+          width: 100%;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          max-height: 530px;
+        }
+        @media (max-width: 992px) {
+          .admin-assign-grid, .admin-tasks-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        @media (max-width: 576px) {
+          .task-header-row {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 15px;
+          }
+        }
+      `}</style>
       
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+      <div className="task-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
         <div>
           <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>Task Management</h1>
           <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Assign and monitor tasks across all employees</p>
@@ -373,7 +447,7 @@ const AdminTasks = () => {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '25px' }}>
+      <div className="tasks-stats-grid">
         <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', gap: '15px', alignItems: 'center' }}>
           <div style={{ background: '#eff6ff', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#2563eb', fontSize: '24px' }}>
             <i className="fas fa-list-ul"></i>
@@ -405,12 +479,12 @@ const AdminTasks = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '66% 32%', gap: '2%' }}>
+      <div className="admin-tasks-grid">
         
         <div style={{ minWidth: 0 }}>
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #e2e8f0', minHeight: '600px' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #e2e8f0', minHeight: '400px' }}>
             
-            <div style={{ display: 'flex', alignItems: 'flex-end', borderBottom: '1px solid #e2e8f0', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', borderBottom: '1px solid #e2e8f0', marginBottom: '20px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <div style={{ display: 'flex', gap: '25px', paddingTop: '10px' }}>
                 {['All Tasks', 'In Progress', 'Completed'].map(tab => (
                   <span 
@@ -420,7 +494,8 @@ const AdminTasks = () => {
                       paddingBottom: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginBottom: '-1px',
                       color: activeTab === tab ? '#2563eb' : '#64748b',
                       borderBottom: activeTab === tab ? '2px solid #2563eb' : '2px solid transparent',
-                      transition: 'all 0.2s'
+                      transition: 'all 0.2s',
+                      whiteSpace: 'nowrap'
                     }}
                   >
                     {tab}
@@ -429,9 +504,9 @@ const AdminTasks = () => {
               </div>
             </div>
 
-            {/* 🔥 FIX: Increased maxHeight to 530px so it fits ~8 items before scrolling 🔥 */}
-            <div style={{ maxHeight: '530px', overflowY: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            {/* Scrollable table container */}
+            <div className="task-table-wrap">
+              <table style={{ width: '100%', minWidth: '520px', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
                   <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                     <th style={{ padding: '15px 10px', fontSize: '13px', color: '#0f172a', fontWeight: '600' }}>Task Title</th>

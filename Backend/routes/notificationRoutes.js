@@ -20,8 +20,6 @@ router.post('/add', async (req, res) => {
     try {
         const { type, title, message, recipientEmail } = req.body;
         const formattedEmail = recipientEmail ? recipientEmail.toLowerCase().trim() : 'admin';
-
-        // 🔥 PUDHU FIX: Check if an identical notification was sent in the last 10 seconds to prevent duplicates 🔥
         const tenSecondsAgo = new Date(Date.now() - 10 * 1000);
         const existingDuplicate = await Notification.findOne({
             type,
@@ -51,7 +49,7 @@ router.post('/add', async (req, res) => {
     }
 });
 
-// 1. Fetch Notifications for a specific user (or 'admin')
+
 router.get('/user/:email', async (req, res) => {
     try {
         const email = req.params.email.toLowerCase().trim();
@@ -62,7 +60,7 @@ router.get('/user/:email', async (req, res) => {
     }
 });
 
-// 2. Mark Notification as Read, Resolve Ticket & Notify User
+
 router.put('/mark-read/:id', async (req, res) => {
     try {
         const notification = await Notification.findById(req.params.id);
@@ -116,7 +114,7 @@ router.put('/mark-read/:id', async (req, res) => {
     }
 });
 
-// 3. Delete Notification Route
+
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;

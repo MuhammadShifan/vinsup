@@ -265,12 +265,11 @@ const UserAttendance = ({ userName, userEmail }) => {
   const lateEnd = presentEnd + latePct;
 
   return (
-    /* 🔥 Fix: Removed maxWidth and margin to stretch full width */
-    <div style={{ padding: '30px', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ padding: 'clamp(14px, 2.5vw, 30px)', fontFamily: "'Inter', sans-serif", width: '100%', boxSizing: 'border-box' }}>
       
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', gap: '15px', flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>Attendance</h1>
+          <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: 'clamp(1.25rem, 2vw, 1.5rem)', fontWeight: 'bold' }}>Attendance</h1>
           <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Track your daily attendance and view history</p>
         </div>
         
@@ -281,7 +280,8 @@ const UserAttendance = ({ userName, userEmail }) => {
             background: attendanceState === 'idle' ? '#2563eb' : attendanceState === 'in' ? '#ef4444' : '#94a3b8',
             color: '#fff', border: 'none', padding: '12px 25px', borderRadius: '8px', 
             fontSize: '14px', fontWeight: 'bold', cursor: attendanceState === 'out' ? 'not-allowed' : 'pointer',
-            display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: '0.3s'
+            display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: '0.3s',
+            minHeight: '42px'
           }}
         >
           <i className={attendanceState === 'idle' ? "fas fa-sign-in-alt" : attendanceState === 'in' ? "fas fa-sign-out-alt" : "fas fa-check-circle"}></i>
@@ -289,32 +289,32 @@ const UserAttendance = ({ userName, userEmail }) => {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '25px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '25px' }}>
         <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', gap: '15px', alignItems: 'center' }}>
-          <div style={{ background: '#dcfce7', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#16a34a', fontSize: '24px' }}><i className="far fa-calendar-check"></i></div>
+          <div style={{ background: '#dcfce7', width: '50px', height: '50px', minWidth: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#16a34a', fontSize: '24px' }}><i className="far fa-calendar-check"></i></div>
           <div><p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#64748b' }}>Present Days</p><h3 style={{ margin: 0, fontSize: '20px', color: '#0f172a' }}>{summaryStats.present}</h3><span style={{ fontSize: '11px', color: '#64748b' }}>Total</span></div>
         </div>
         
         <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', gap: '15px', alignItems: 'center' }}>
-          <div style={{ background: '#fee2e2', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ef4444', fontSize: '24px' }}><i className="far fa-calendar-times"></i></div>
+          <div style={{ background: '#fee2e2', width: '50px', height: '50px', minWidth: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ef4444', fontSize: '24px' }}><i className="far fa-calendar-times"></i></div>
           <div><p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#64748b' }}>Absent Days</p><h3 style={{ margin: 0, fontSize: '20px', color: '#0f172a' }}>{summaryStats.absent}</h3><span style={{ fontSize: '11px', color: '#64748b' }}>Total</span></div>
         </div>
 
         <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', gap: '15px', alignItems: 'center' }}>
-          <div style={{ background: '#ffedd5', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ea580c', fontSize: '24px' }}><i className="far fa-clock"></i></div>
+          <div style={{ background: '#ffedd5', width: '50px', height: '50px', minWidth: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ea580c', fontSize: '24px' }}><i className="far fa-clock"></i></div>
           <div><p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#64748b' }}>Late Days</p><h3 style={{ margin: 0, fontSize: '20px', color: '#0f172a' }}>{summaryStats.late}</h3><span style={{ fontSize: '11px', color: '#64748b' }}>Total</span></div>
         </div>
 
         <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', gap: '15px', alignItems: 'center' }}>
-          <div style={{ background: '#f3e8ff', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#9333ea', fontSize: '24px' }}><i className="far fa-calendar-alt"></i></div>
+          <div style={{ background: '#f3e8ff', width: '50px', height: '50px', minWidth: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#9333ea', fontSize: '24px' }}><i className="far fa-calendar-alt"></i></div>
           <div><p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#64748b' }}>Attendance %</p><h3 style={{ margin: 0, fontSize: '20px', color: '#0f172a' }}>{summaryStats.percentage}%</h3><span style={{ fontSize: '11px', color: '#64748b' }}>Overall</span></div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '60% 38%', gap: '2%' }}>
-        <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '20px' }}>
+        <div style={{ background: '#fff', padding: 'clamp(16px, 2.5vw, 25px)', borderRadius: '12px', border: '1px solid #e2e8f0', boxSizing: 'border-box', overflowX: 'auto' }}>
           
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '10px', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>Attendance Calendar</h3>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <button onClick={handlePrevMonth} style={{ border: '1px solid #e2e8f0', background: '#f8fafc', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer', transition: '0.2s' }}><i className="fas fa-chevron-left"></i></button>
@@ -323,35 +323,35 @@ const UserAttendance = ({ userName, userEmail }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px', textAlign: 'center', marginBottom: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center', marginBottom: '10px' }}>
             {weekDays.map(day => (
-              <div key={day} style={{ fontWeight: '600', color: '#64748b', fontSize: '13px', paddingBottom: '10px', borderBottom: '1px solid #e2e8f0' }}>{day}</div>
+              <div key={day} style={{ fontWeight: '600', color: '#64748b', fontSize: '12px', paddingBottom: '10px', borderBottom: '1px solid #e2e8f0' }}>{day}</div>
             ))}
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px', textAlign: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center' }}>
             {calendarGrid.map((item, idx) => (
-              <div key={idx} style={{ padding: '15px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+              <div key={idx} style={{ padding: '10px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
                 {item ? (
                   <>
-                    <span style={{ fontSize: '14px', fontWeight: item.status !== 'off' ? 'bold' : '500', color: item.status === 'off' ? '#94a3b8' : item.status === 'absent' ? '#ef4444' : '#1e293b' }}>
+                    <span style={{ fontSize: '13px', fontWeight: item.status !== 'off' ? 'bold' : '500', color: item.status === 'off' ? '#94a3b8' : item.status === 'absent' ? '#ef4444' : '#1e293b' }}>
                       {item.day}
                     </span>
                     {item.status !== 'off' && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '10px', color: '#64748b', marginTop: '2px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '9px', color: '#64748b', marginTop: '2px' }}>
                         <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: item.status === 'present' ? '#10b981' : item.status === 'late' ? '#f59e0b' : '#ef4444' }}></span>
                         {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                       </div>
                     )}
                   </>
                 ) : (
-                  <span style={{ padding: '15px 0' }}></span> 
+                  <span style={{ padding: '10px 0' }}></span> 
                 )}
               </div>
             ))}
           </div>
 
-          <div style={{ display: 'flex', gap: '20px', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #e2e8f0', fontSize: '12px', color: '#64748b' }}>
+          <div style={{ display: 'flex', gap: '20px', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #e2e8f0', fontSize: '12px', color: '#64748b', flexWrap: 'wrap' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981' }}></span> Present</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f59e0b' }}></span> Late</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444' }}></span> Absent</span>
@@ -359,18 +359,18 @@ const UserAttendance = ({ userName, userEmail }) => {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+          <div style={{ background: '#fff', padding: 'clamp(16px, 2.5vw, 25px)', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
             <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a' }}>Attendance Summary</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '25px', flexWrap: 'wrap' }}>
               <div style={{ width: '120px', height: '120px', borderRadius: '50%', 
                   background: summaryStats.total === 0 ? '#f1f5f9' : `conic-gradient(#10b981 0% ${presentEnd}%, #f59e0b ${presentEnd}% ${lateEnd}%, #ef4444 ${lateEnd}% 100%)`, 
-                  display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
                 <div style={{ width: '90px', height: '90px', background: '#fff', borderRadius: '50%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                   <span style={{ fontSize: '11px', color: '#64748b' }}>Total Days</span>
                   <strong style={{ fontSize: '20px', color: '#0f172a' }}>{summaryStats.total}</strong>
                 </div>
               </div>
-              <div style={{ flex: 1, fontSize: '13px' }}>
+              <div style={{ flex: 1, minWidth: '160px', fontSize: '13px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}><span><span style={{ color: '#10b981', marginRight: '5px' }}>●</span> Present</span> <strong>{summaryStats.present}</strong></div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}><span><span style={{ color: '#f59e0b', marginRight: '5px' }}>●</span> Late</span> <strong>{summaryStats.late}</strong></div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}><span><span style={{ color: '#ef4444', marginRight: '5px' }}>●</span> Absent</span> <strong>{summaryStats.absent}</strong></div>
@@ -378,16 +378,16 @@ const UserAttendance = ({ userName, userEmail }) => {
             </div>
           </div>
 
-          <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', border: '1px solid #e2e8f0', flex: 1 }}>
+          <div style={{ background: '#fff', padding: 'clamp(16px, 2.5vw, 25px)', borderRadius: '12px', border: '1px solid #e2e8f0', flex: 1 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
               <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>Recent Attendance</h3>
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {pastRecords.length > 0 ? pastRecords.map((rec, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                   <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <div style={{ background: '#f1f5f9', color: '#2563eb', width: '36px', height: '36px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><i className="far fa-calendar-alt"></i></div>
+                    <div style={{ background: '#f1f5f9', color: '#2563eb', width: '36px', height: '36px', minWidth: '36px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><i className="far fa-calendar-alt"></i></div>
                     <div>
                       <h4 style={{ margin: '0 0 2px 0', fontSize: '13px', color: '#1e293b' }}>{rec.date}</h4>
                       <span style={{ fontSize: '11px', color: '#64748b' }}>{rec.day}</span>
@@ -406,27 +406,27 @@ const UserAttendance = ({ userName, userEmail }) => {
         </div>
       </div>
 
-      <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', border: '1px solid #e2e8f0', marginTop: '25px' }}>
+      <div style={{ background: '#fff', padding: 'clamp(16px, 2.5vw, 25px)', borderRadius: '12px', border: '1px solid #e2e8f0', marginTop: '25px' }}>
         <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a' }}>Attendance Details - Today</h3>
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '15px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '15px' }}>
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-            <div style={{ background: '#dcfce7', color: '#16a34a', width: '40px', height: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="far fa-calendar-check"></i></div>
+            <div style={{ background: '#dcfce7', color: '#16a34a', width: '40px', height: '40px', minWidth: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="far fa-calendar-check"></i></div>
             <div><p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#64748b' }}>Check In</p><strong style={{ fontSize: '14px', color: '#0f172a' }}>{checkInTime || '--:--'}</strong></div>
           </div>
           
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-            <div style={{ background: '#fee2e2', color: '#ef4444', width: '40px', height: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="far fa-calendar-times"></i></div>
+            <div style={{ background: '#fee2e2', color: '#ef4444', width: '40px', height: '40px', minWidth: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="far fa-calendar-times"></i></div>
             <div><p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#64748b' }}>Check Out</p><strong style={{ fontSize: '14px', color: '#0f172a' }}>{checkOutTime || '--:--'}</strong></div>
           </div>
 
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-            <div style={{ background: '#eff6ff', color: '#2563eb', width: '40px', height: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="far fa-clock"></i></div>
+            <div style={{ background: '#eff6ff', color: '#2563eb', width: '40px', height: '40px', minWidth: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="far fa-clock"></i></div>
             <div><p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#64748b' }}>Total Hours</p><strong style={{ fontSize: '14px', color: '#0f172a' }}>{totalHours}</strong></div>
           </div>
 
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-            <div style={{ background: '#f0fdf4', color: '#16a34a', width: '40px', height: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="fas fa-toggle-on"></i></div>
+            <div style={{ background: '#f0fdf4', color: '#16a34a', width: '40px', height: '40px', minWidth: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="fas fa-toggle-on"></i></div>
             <div>
               <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#64748b' }}>Status</p>
               <span style={{ 
@@ -440,7 +440,7 @@ const UserAttendance = ({ userName, userEmail }) => {
           </div>
 
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-            <div style={{ background: '#f3e8ff', color: '#9333ea', width: '40px', height: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="fas fa-map-marker-alt"></i></div>
+            <div style={{ background: '#f3e8ff', color: '#9333ea', width: '40px', height: '40px', minWidth: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="fas fa-map-marker-alt"></i></div>
             <div><p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#64748b' }}>Location</p><strong style={{ fontSize: '14px', color: '#0f172a' }}>Coimbatore, India</strong></div>
           </div>
         </div>

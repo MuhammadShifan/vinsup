@@ -288,9 +288,9 @@ const Reports = () => {
   });
 
   return (
-    <div className="employees-container" style={{ position: 'relative' }}>
+    <div className="employees-container" style={{ position: 'relative', padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box' }}>
       
-      <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '25px' }}>
+      <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
         <div>
           <h2 style={{ margin: '0 0 5px 0', fontSize: '24px', color: '#0f172a' }}>Reports & Analytics</h2>
           <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>Dashboard &gt; Reports</p>
@@ -303,7 +303,7 @@ const Reports = () => {
         </button>
       </div>
 
-      <div className="no-print" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '30px' }}>
+      <div className="no-print" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '30px' }}>
         <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', borderTop: activeReport === 'attendance' ? '4px solid #10b981' : '1px solid #e2e8f0', transition: '0.3s' }}>
           <i className="fas fa-user-check" style={{ fontSize: '28px', color: '#10b981', marginBottom: '15px' }}></i>
           <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', color: '#1e293b' }}>Attendance Log</h3>
@@ -616,8 +616,8 @@ const Reports = () => {
 
       {/* GENERATE REPORT MODAL */}
       {isModalOpen && (
-        <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(2px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', width: '500px', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
+        <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(2px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '16px' }}>
+          <div style={{ background: '#fff', width: 'min(500px, 100%)', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 25px', borderBottom: '1px solid #f1f5f9' }}>
               <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 'bold' }}>Send Report</h2>
               <i className="fas fa-times" onClick={() => setIsModalOpen(false)} style={{ color: '#475569', cursor: 'pointer', fontSize: '18px' }}></i>
@@ -641,17 +641,17 @@ const Reports = () => {
 
               <div>
                 <label style={{ display: 'block', fontSize: '13px', color: '#0f172a', marginBottom: '8px', fontWeight: '600' }}>Report Type <span style={{ color: '#ef4444' }}>*</span></label>
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   
-                  <label style={{ flex: 1, padding: '10px', border: formData.reportType === 'Attendance Log' ? '1px solid #16a34a' : '1px solid #e2e8f0', background: formData.reportType === 'Attendance Log' ? '#dcfce7' : '#fff', color: formData.reportType === 'Attendance Log' ? '#16a34a' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                  <label style={{ flex: '1 1 120px', padding: '10px', border: formData.reportType === 'Attendance Log' ? '1px solid #16a34a' : '1px solid #e2e8f0', background: formData.reportType === 'Attendance Log' ? '#dcfce7' : '#fff', color: formData.reportType === 'Attendance Log' ? '#16a34a' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                     <input type="radio" name="reportType" value="Attendance Log" checked={formData.reportType === 'Attendance Log'} onChange={handleInputChange} style={{ display: 'none' }} /> Attendance Log
                   </label>
                   
-                  <label style={{ flex: 1, padding: '10px', border: formData.reportType === 'Course Progress' ? '1px solid #2563eb' : '1px solid #e2e8f0', background: formData.reportType === 'Course Progress' ? '#eff6ff' : '#fff', color: formData.reportType === 'Course Progress' ? '#2563eb' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                  <label style={{ flex: '1 1 120px', padding: '10px', border: formData.reportType === 'Course Progress' ? '1px solid #2563eb' : '1px solid #e2e8f0', background: formData.reportType === 'Course Progress' ? '#eff6ff' : '#fff', color: formData.reportType === 'Course Progress' ? '#2563eb' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                     <input type="radio" name="reportType" value="Course Progress" checked={formData.reportType === 'Course Progress'} onChange={handleInputChange} style={{ display: 'none' }} /> Course Progress
                   </label>
                   
-                  <label style={{ flex: 1, padding: '10px', border: formData.reportType === 'Employee Workload' ? '1px solid #8b5cf6' : '1px solid #e2e8f0', background: formData.reportType === 'Employee Workload' ? '#f5f3ff' : '#fff', color: formData.reportType === 'Employee Workload' ? '#8b5cf6' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                  <label style={{ flex: '1 1 120px', padding: '10px', border: formData.reportType === 'Employee Workload' ? '1px solid #8b5cf6' : '1px solid #e2e8f0', background: formData.reportType === 'Employee Workload' ? '#f5f3ff' : '#fff', color: formData.reportType === 'Employee Workload' ? '#8b5cf6' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                     <input type="radio" name="reportType" value="Employee Workload" checked={formData.reportType === 'Employee Workload'} onChange={handleInputChange} style={{ display: 'none' }} /> Employee Workload
                   </label>
 

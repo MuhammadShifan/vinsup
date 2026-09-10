@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cron = require('node-cron');
 require('dotenv').config();
-
 const groupChatRoutes = require('./routes/groupChatRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const studentRoutes = require('./routes/studentRoutes');
@@ -13,32 +12,28 @@ const quizRoutes = require('./routes/quizRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const batchChatRoutes = require('./routes/batchChatRoutes');
 const Admin = require('./models/Admin'); 
-
 const app = express();
 
-// 1. Middleware Order
-app.use(cors());
 
-// 🔥 FILE ATTACHMENT-KKU PAYLOAD SIZE LIMIT 50MB INCREASE PANNIRUKEN 🔥
+app.use(cors());
 app.use(express.json({ limit: '50mb' })); 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// 2. Environment variables
+
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI;
 
-// Root Health Check Route
+
 app.get('/', (req, res) => {
   res.send("Vinsup Academy Backend is Running Successfully!");
 });
 
-// 3. Models import
+
 const Report = require('./models/Report'); 
 const Employee = require('./models/Employee'); 
 
-// 4. Routes import
+
 const authRoutes = require('./routes/authRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const courseRoutes = require('./routes/courseRoutes');
@@ -51,14 +46,10 @@ const leaveRoutes = require('./routes/leaveRoutes');
 const scheduleRoutes = require('./routes/scheduleRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const privateChatRoutes = require('./routes/privateChatRoutes');
-
-// 🔥 MIDDLEWARE IMPORT 🔥
 const { protect } = require('./middleware/authMiddleware');
 
-// 5. API URLs set
-app.use('/api/auth', authRoutes); // 🔥 Login Route: No Protection (Public) 🔥
 
-// 👇 MATTHA ELLAM ROUTES-KUM 'PROTECT' GUARD ADD PANNIYACHU 👇
+app.use('/api/auth', authRoutes); 
 app.use('/api/employees', protect, employeeRoutes);
 app.use('/api/courses', protect, courseRoutes);
 app.use('/api/batches', protect, batchRoutes); 
@@ -79,11 +70,7 @@ app.use('/api/quizzes', protect, quizRoutes);
 app.use('/api/announcements', protect, announcementRoutes);
 app.use('/api/batchchat', protect, batchChatRoutes);
 
-// ==========================================
-// 🔥 ADMIN SETTINGS & PROFILE API ROUTES (PROTECTED) 🔥
-// ==========================================
 
-// Get Admin Profile
 app.get('/api/admin/profile', protect, async (req, res) => {
   try {
     let admin = await Admin.findOne({ email: 'muhammasshifan@gmail.com' });
@@ -103,7 +90,7 @@ app.get('/api/admin/profile', protect, async (req, res) => {
   }
 });
 
-// Update Admin Name / Photo
+
 app.put('/api/admin/update', protect, async (req, res) => {
   try {
     const { name, profilePhoto } = req.body;
@@ -122,7 +109,7 @@ app.put('/api/admin/update', protect, async (req, res) => {
   }
 });
 
-// Update Admin Password
+
 app.put('/api/admin/change-password', protect, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -148,7 +135,7 @@ app.put('/api/admin/change-password', protect, async (req, res) => {
   }
 });
 
-// REPORTS API ROUTES
+
 app.get('/api/reports', protect, async (req, res) => {
   try {
     const reports = await Report.find().sort({ createdAt: -1 }).exec(); 
@@ -168,7 +155,7 @@ app.post('/api/reports', protect, async (req, res) => {
   }
 });
 
-// Cron job 1: Daily Attendance
+
 cron.schedule('59 23 * * *', async () => {
   console.log('Running Daily Attendance Reset Job...');
   try {
@@ -204,7 +191,7 @@ cron.schedule('59 23 * * *', async () => {
   }
 });
 
-// Cron job 2: Weekly Hours Reset
+
 cron.schedule('59 23 * * 0', async () => {
   console.log('Running Weekly Hours Reset Job (Sunday Night)...');
   try {
@@ -215,13 +202,11 @@ cron.schedule('59 23 * * 0', async () => {
   }
 });
 
-// 6. MongoDB Connection & Default Admin Auto-Seed
+
 if (MONGO_URI) {
   mongoose.connect(MONGO_URI)
     .then(async () => {
       console.log("MongoDB Connected Successfully");
-      
-      // Seed default admin if not exists
       const adminExists = await Admin.findOne({ email: 'muhammasshifan@gmail.com' });
       if (!adminExists) {
         await Admin.create({

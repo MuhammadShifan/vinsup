@@ -87,14 +87,39 @@ const UserTasks = ({ userName }) => {
   };
 
   return (
-    <div style={{ padding: '30px 50px', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif" }}>
+    <div className="user-tasks-container" style={{ padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        .user-tasks-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+          gap: 20px;
+          align-items: start;
+        }
+        .user-tasks-stats {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 20px;
+          margin-bottom: 25px;
+        }
+        .user-task-table-wrap {
+          width: 100%;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          max-height: 400px;
+        }
+        @media (max-width: 992px) {
+          .user-tasks-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
       
       <div style={{ marginBottom: '25px' }}>
         <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>My Tasks</h1>
         <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>View and manage tasks assigned to you</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '25px' }}>
+      <div className="user-tasks-stats">
         <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', gap: '15px', alignItems: 'center' }}>
           <div style={{ background: '#eff6ff', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#2563eb', fontSize: '24px' }}>
             <i className="far fa-calendar-alt"></i>
@@ -129,13 +154,13 @@ const UserTasks = ({ userName }) => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '66% 32%', gap: '2%', alignItems: 'start' }}>
+      <div className="user-tasks-grid">
         
         <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '25px', border: '1px solid #e2e8f0' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #e2e8f0' }}>
             
-            <div style={{ display: 'flex', alignItems: 'flex-end', borderBottom: '1px solid #e2e8f0', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', borderBottom: '1px solid #e2e8f0', marginBottom: '20px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <div style={{ display: 'flex', gap: '25px', paddingTop: '10px' }}>
                 {['All Tasks', 'In Progress', 'Completed'].map(tab => (
                   <span 
@@ -145,7 +170,8 @@ const UserTasks = ({ userName }) => {
                       paddingBottom: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginBottom: '-1px',
                       color: activeTab === tab ? '#2563eb' : '#64748b',
                       borderBottom: activeTab === tab ? '2px solid #2563eb' : '2px solid transparent',
-                      transition: 'all 0.2s'
+                      transition: 'all 0.2s',
+                      whiteSpace: 'nowrap'
                     }}
                   >
                     {tab}
@@ -154,8 +180,8 @@ const UserTasks = ({ userName }) => {
               </div>
             </div>
 
-            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div className="user-task-table-wrap">
+              <table style={{ width: '100%', minWidth: '500px', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead style={{ position: 'sticky', top: 0, background: '#f8fafc', zIndex: 1 }}>
                   <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                     <th style={{ padding: '15px 10px', fontSize: '13px', color: '#0f172a', fontWeight: '600' }}>Task Title</th>

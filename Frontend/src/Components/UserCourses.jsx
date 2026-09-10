@@ -106,68 +106,103 @@ const UserCourses = ({ userName, userEmail }) => {
   })).filter(course => course.batches.length > 0);
 
   return (
-    <div style={{ padding: '20px 30px', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif", position: 'relative' }}>
+    <div style={{ padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif", position: 'relative' }}>
       
+      <style>{`
+        .uc-stats-grid {
+          background: #fff;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+          padding: 20px 25px;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          align-items: center;
+          margin-bottom: 25px;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+          gap: 20px;
+        }
+        .uc-batch-header-grid {
+          display: grid;
+          grid-template-columns: 1.5fr 2fr;
+          gap: 20px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #f1f5f9;
+          font-size: 13px;
+          color: #64748b;
+          font-weight: 500;
+        }
+        .uc-batch-item-grid {
+          display: grid;
+          grid-template-columns: 1.5fr 2fr;
+          gap: 20px;
+          align-items: center;
+          padding: 12px 0;
+        }
+        @media (max-width: 768px) {
+          .uc-batch-header-grid {
+            display: none;
+          }
+          .uc-batch-item-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+        }
+      `}</style>
+
       {/* Header */}
-      <div style={{ marginBottom: '25px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>My Courses</h1>
         <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Track your enrolled courses and batch progress.</p>
       </div>
 
       {/* Stats */}
-      <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '25px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', boxShadow: '0 1px 4px rgba(0,0,0,0.03)', flexWrap: 'wrap', gap: '20px' }}>
+      <div className="uc-stats-grid">
         
         {/* 1. Overall Progress */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: 'bold', lineHeight: '1.4' }}>Overall<br/>Progress</span>
-          <div style={{ width: '75px', height: '75px', borderRadius: '50%', background: `conic-gradient(#2563eb ${stats.overallProgress}%, #f1f5f9 0)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: '61px', height: '61px', background: '#fff', borderRadius: '50%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#0f172a', marginBottom: '2px' }}>{stats.overallProgress}%</span>
+          <span style={{ fontSize: '13px', color: '#0f172a', fontWeight: 'bold', lineHeight: '1.4' }}>Overall<br/>Progress</span>
+          <div style={{ width: '65px', height: '65px', borderRadius: '50%', background: `conic-gradient(#2563eb ${stats.overallProgress}%, #f1f5f9 0)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: '53px', height: '53px', background: '#fff', borderRadius: '50%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#0f172a' }}>{stats.overallProgress}%</span>
             </div>
           </div>
         </div>
         
-        <div style={{ width: '1px', height: '45px', background: '#e2e8f0' }}></div>
-        
         {/* 2. Ongoing Batches */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <div style={{ background: '#fef9c3', color: '#ca8a04', width: '45px', height: '45px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="fas fa-spinner"></i></div>
-          <div><h3 style={{ margin: '0 0 4px 0', fontSize: '20px', color: '#0f172a', fontWeight: 'bold' }}>{stats.ongoingBatches}</h3><span style={{ fontSize: '12px', color: '#64748b' }}>Ongoing Batches</span></div>
+          <div style={{ background: '#fef9c3', color: '#ca8a04', width: '42px', height: '42px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px', flexShrink: 0 }}><i className="fas fa-spinner"></i></div>
+          <div><h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: '#0f172a', fontWeight: 'bold' }}>{stats.ongoingBatches}</h3><span style={{ fontSize: '12px', color: '#64748b' }}>Ongoing Batches</span></div>
         </div>
 
-        <div style={{ width: '1px', height: '45px', background: '#e2e8f0' }}></div>
-        
         {/* 3. Completed Batches */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <div style={{ background: '#dcfce7', color: '#16a34a', width: '45px', height: '45px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="fas fa-check-circle"></i></div>
-          <div><h3 style={{ margin: '0 0 4px 0', fontSize: '20px', color: '#0f172a', fontWeight: 'bold' }}>{stats.completedBatches}</h3><span style={{ fontSize: '12px', color: '#64748b' }}>Completed Batches</span></div>
+          <div style={{ background: '#dcfce7', color: '#16a34a', width: '42px', height: '42px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px', flexShrink: 0 }}><i className="fas fa-check-circle"></i></div>
+          <div><h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: '#0f172a', fontWeight: 'bold' }}>{stats.completedBatches}</h3><span style={{ fontSize: '12px', color: '#64748b' }}>Completed Batches</span></div>
         </div>
 
-        <div style={{ width: '1px', height: '45px', background: '#e2e8f0' }}></div>
-        
         {/* 4. Courses Enrolled */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <div style={{ background: '#eff6ff', color: '#2563eb', width: '45px', height: '45px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="fas fa-book-open"></i></div>
-          <div><h3 style={{ margin: '0 0 4px 0', fontSize: '20px', color: '#0f172a', fontWeight: 'bold' }}>{stats.coursesEnrolled}</h3><span style={{ fontSize: '12px', color: '#64748b' }}>Courses Enrolled</span></div>
+          <div style={{ background: '#eff6ff', color: '#2563eb', width: '42px', height: '42px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px', flexShrink: 0 }}><i className="fas fa-book-open"></i></div>
+          <div><h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: '#0f172a', fontWeight: 'bold' }}>{stats.coursesEnrolled}</h3><span style={{ fontSize: '12px', color: '#64748b' }}>Courses Enrolled</span></div>
         </div>
 
       </div>
 
       {/* Toggle Button for Ongoing / Old Batches */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
         <h3 style={{ fontSize: '16px', color: '#0f172a', margin: 0, fontWeight: 'bold' }}>
           {showOldBatches ? 'Old Batches (Completed)' : 'Active Courses (Ongoing)'}
         </h3>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button 
             onClick={() => setShowOldBatches(false)}
-            style={{ padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', border: !showOldBatches ? 'none' : '1px solid #cbd5e1', background: !showOldBatches ? '#2563eb' : '#fff', color: !showOldBatches ? '#fff' : '#475569', transition: '0.2s' }}
+            style={{ padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', border: !showOldBatches ? 'none' : '1px solid #cbd5e1', background: !showOldBatches ? '#2563eb' : '#fff', color: !showOldBatches ? '#fff' : '#475569', transition: '0.2s' }}
           >
             Ongoing Batches
           </button>
           <button 
             onClick={() => setShowOldBatches(true)}
-            style={{ padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', border: showOldBatches ? 'none' : '1px solid #cbd5e1', background: showOldBatches ? '#16a34a' : '#fff', color: showOldBatches ? '#fff' : '#475569', transition: '0.2s' }}
+            style={{ padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', border: showOldBatches ? 'none' : '1px solid #cbd5e1', background: showOldBatches ? '#16a34a' : '#fff', color: showOldBatches ? '#fff' : '#475569', transition: '0.2s' }}
           >
             Old Batches
           </button>
@@ -180,20 +215,20 @@ const UserCourses = ({ userName, userEmail }) => {
         {displayCourses.length > 0 ? displayCourses.map((course, cIdx) => (
           <div key={cIdx} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.02)' }}>
             
-            <div style={{ padding: '25px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', gap: '20px' }}>
-                <div style={{ width: '55px', height: '55px', borderRadius: '10px', background: cIdx % 2 === 0 ? '#eff6ff' : '#dcfce7', color: cIdx % 2 === 0 ? '#2563eb' : '#16a34a', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '22px' }}>
+            <div style={{ padding: 'clamp(16px, 2.5vw, 30px)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: cIdx % 2 === 0 ? '#eff6ff' : '#dcfce7', color: cIdx % 2 === 0 ? '#2563eb' : '#16a34a', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '20px', flexShrink: 0 }}>
                   <i className="fas fa-code"></i>
                 </div>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                    <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 'bold' }}>{course.courseName}</h2>
-                    <span style={{ padding: '4px 10px', borderRadius: '4px', background: showOldBatches ? '#e2e8f0' : '#dcfce7', color: showOldBatches ? '#475569' : '#16a34a', fontSize: '11px', fontWeight: 'bold' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                    <h2 style={{ margin: 0, fontSize: '17px', color: '#0f172a', fontWeight: 'bold' }}>{course.courseName}</h2>
+                    <span style={{ padding: '3px 8px', borderRadius: '4px', background: showOldBatches ? '#e2e8f0' : '#dcfce7', color: showOldBatches ? '#475569' : '#16a34a', fontSize: '11px', fontWeight: 'bold' }}>
                       {showOldBatches ? 'Archived' : 'Active'}
                     </span>
                   </div>
-                  <p style={{ margin: '0 0 12px 0', color: '#64748b', fontSize: '13px' }}>{course.description}</p>
-                  <div style={{ display: 'flex', gap: '25px', fontSize: '12px', color: '#64748b' }}>
+                  <p style={{ margin: '0 0 10px 0', color: '#64748b', fontSize: '13px' }}>{course.description}</p>
+                  <div style={{ display: 'flex', gap: '20px', fontSize: '12px', color: '#64748b', flexWrap: 'wrap' }}>
                     <span>{course.batches.length} Batch{course.batches.length > 1 ? 'es' : ''} {showOldBatches ? 'Completed' : 'Allocated'}</span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><i className="far fa-calendar-alt"></i> Started on {course.startDate}</span>
                   </div>
@@ -201,11 +236,11 @@ const UserCourses = ({ userName, userEmail }) => {
               </div>
             </div>
 
-            <div style={{ padding: '0 30px 12px 30px' }}><h4 style={{ margin: 0, fontSize: '15px', color: '#0f172a', fontWeight: 'bold' }}>Batch Progress</h4></div>
+            <div style={{ padding: '0 clamp(16px, 2.5vw, 30px) 12px clamp(16px, 2.5vw, 30px)' }}><h4 style={{ margin: 0, fontSize: '14px', color: '#0f172a', fontWeight: 'bold' }}>Batch Progress</h4></div>
 
             {/* Batch Rows */}
-            <div style={{ padding: '0 30px 25px 30px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 2fr', gap: '20px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9', fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
+            <div style={{ padding: '0 clamp(16px, 2.5vw, 30px) clamp(16px, 2.5vw, 25px) clamp(16px, 2.5vw, 30px)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="uc-batch-header-grid">
                 <div>Batch Details</div>
                 <div>Overall Progress</div>
               </div>
@@ -214,20 +249,20 @@ const UserCourses = ({ userName, userEmail }) => {
                 const isCompleted = batch.status === 'Completed';
                 
                 return (
-                <div key={batch._id || bIdx} style={{ display: 'grid', gridTemplateColumns: '1.5fr 2fr', gap: '20px', alignItems: 'center', padding: '12px 0', borderBottom: bIdx !== course.batches.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                <div key={batch._id || bIdx} className="uc-batch-item-grid" style={{ borderBottom: bIdx !== course.batches.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
                   
                   {/* Col 1: Info */}
-                  <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: `${batch.color}15`, color: batch.color, display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '16px', fontWeight: 'bold' }}>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div style={{ width: '42px', height: '42px', borderRadius: '8px', background: `${batch.color}15`, color: batch.color, display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '15px', fontWeight: 'bold', flexShrink: 0 }}>
                       {batch.iconChar}
                     </div>
                     <div>
-                      <h4 style={{ margin: '0 0 6px 0', fontSize: '14px', color: '#0f172a', fontWeight: 'bold' }}>{batch.batchName || `Batch - ${bIdx + 1}`}</h4>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#64748b' }}>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#0f172a', fontWeight: 'bold' }}>{batch.batchName || `Batch - ${bIdx + 1}`}</h4>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b', flexWrap: 'wrap' }}>
                         <span>{batch.studentsCount} Students</span>
-                        <span style={{ fontSize: '16px', lineHeight: '0' }}>•</span>
+                        <span style={{ fontSize: '14px', lineHeight: '0' }}>•</span>
                         <span>{batch.scheduleStr}</span>
-                        <span style={{ padding: '3px 8px', borderRadius: '4px', background: isCompleted ? '#dcfce7' : '#fef9c3', color: isCompleted ? '#16a34a' : '#ca8a04', fontSize: '10px', fontWeight: 'bold', marginLeft: '5px' }}>
+                        <span style={{ padding: '2px 6px', borderRadius: '4px', background: isCompleted ? '#dcfce7' : '#fef9c3', color: isCompleted ? '#16a34a' : '#ca8a04', fontSize: '10px', fontWeight: 'bold', marginLeft: '2px' }}>
                           {isCompleted ? 'Completed' : 'Ongoing'}
                         </span>
                       </div>
@@ -236,8 +271,8 @@ const UserCourses = ({ userName, userEmail }) => {
 
                   {/* Col 2: Progress Bar Only */}
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '14px', color: batch.color, fontWeight: 'bold' }}>{batch.progress}%</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '13px', color: batch.color, fontWeight: 'bold' }}>{batch.progress}%</span>
                     </div>
                     <div style={{ background: '#f1f5f9', height: '6px', borderRadius: '3px', width: '100%', overflow: 'hidden' }}>
                       <div style={{ background: batch.color, height: '100%', borderRadius: '3px', width: `${batch.progress}%`, transition: 'width 0.4s ease-in-out' }}></div>
@@ -250,7 +285,7 @@ const UserCourses = ({ userName, userEmail }) => {
 
           </div>
         )) : (
-          <div style={{ textAlign: 'center', padding: '50px', background: '#fff', borderRadius: '12px', border: '1px dashed #cbd5e1', color: '#64748b' }}>
+          <div style={{ textAlign: 'center', padding: '50px 20px', background: '#fff', borderRadius: '12px', border: '1px dashed #cbd5e1', color: '#64748b' }}>
             <i className={showOldBatches ? "fas fa-check-double" : "fas fa-book-open"} style={{ fontSize: '30px', color: '#cbd5e1', marginBottom: '10px' }}></i>
             <p style={{ margin: 0, fontSize: '14px', fontWeight: '500' }}>
               {showOldBatches ? "You have no completed batches yet." : "No active batches currently allocated to you."}

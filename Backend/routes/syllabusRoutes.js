@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Syllabus = require('../models/Syllabus');
 
-// 1. ADD NEW SYLLABUS (POST)
+
 router.post('/add', async (req, res) => {
   try {
     const { courseName, duration, description, modules } = req.body;
@@ -22,7 +22,7 @@ router.post('/add', async (req, res) => {
   }
 });
 
-// 2. GET ALL SYLLABUS (GET)
+
 router.get('/', async (req, res) => {
   try {
     // Latest first ah sort panni anupurom
@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 3. UPDATE SYLLABUS (PUT)
+
 router.put('/update/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -57,7 +57,7 @@ router.put('/update/:id', async (req, res) => {
   }
 });
 
-// 4. DELETE SYLLABUS (DELETE)
+
 router.delete('/delete/:id', async (req, res) => {
   try {
     const { id } = req.params;

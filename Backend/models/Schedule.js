@@ -1,11 +1,10 @@
-// models/Schedule.js
 const mongoose = require('mongoose');
 
 const scheduleSchema = new mongoose.Schema({
-  empEmail: { type: String, required: true }, // Endha user-oda event nu track panna
+  empEmail: { type: String, required: true },
   title: { type: String, required: true },
-  category: { type: String, required: true }, // Job Related or Personal Work
-  type: { type: String, required: true },     // Class, Lab, Meeting, etc.
+  category: { type: String, required: true }, 
+  type: { type: String, required: true },
   startDate: { type: String, required: true },
   startTime: { type: String },
   endDate: { type: String, required: true },

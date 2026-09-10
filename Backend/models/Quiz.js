@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const quizSchema = new mongoose.Schema({
   title: { type: String, required: true },
   batch: { type: String, required: true },
-  module: { type: String, default: 'General' }, // 🔥 Added this field 🔥
-  moduleName: { type: String, default: 'General' }, // 🔥 Added this field 🔥
+  module: { type: String, default: 'General' },
+  moduleName: { type: String, default: 'General' }, 
   totalQuestions: { type: Number, required: true },
   totalMarks: { type: Number, required: true },
   description: { type: String },

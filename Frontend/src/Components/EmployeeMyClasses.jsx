@@ -386,11 +386,11 @@ const EmployeeMyClasses = ({ userName, userEmail }) => {
 
       {/* --- PURE CSS DESIGN --- */}
       <style>{`
-        .cls-page-wrapper { padding: 24px 32px; font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; color: #0f172a; box-sizing: border-box; }
+        .cls-page-wrapper { padding: clamp(14px, 2.5vw, 32px); font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; color: #0f172a; box-sizing: border-box; }
         
         /* Header */
         .cls-header { margin-bottom: 20px; }
-        .cls-page-title { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; }
+        .cls-page-title { font-size: clamp(20px, 3vw, 22px); font-weight: 800; color: #0f172a; margin: 0 0 4px 0; }
         .cls-page-subtitle { font-size: 14px; color: #64748b; margin: 0; }
         
         /* Main Layout */
@@ -400,7 +400,7 @@ const EmployeeMyClasses = ({ userName, userEmail }) => {
         .cls-left-col { display: flex; flex-direction: column; }
         
         /* Stats Grid - Moved inside left col, made compact */
-        .cls-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+        .cls-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 12px; margin-bottom: 16px; }
         .cls-stat-card { background: #fff; padding: 12px 14px; border-radius: 10px; border: 1px solid #e2e8f0; display: flex; gap: 12px; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
         .cls-stat-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; flex-shrink: 0; }
         .cls-stat-content { display: flex; flex-direction: column; flex: 1; }
@@ -448,10 +448,10 @@ const EmployeeMyClasses = ({ userName, userEmail }) => {
         .cls-empty-panel i { font-size: 40px; margin-bottom: 12px; color: #cbd5e1; }
         
         /* Panel Header */
-        .cls-panel-header { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; }
-        .cls-ph-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-        .cls-ph-title { font-size: 22px; font-weight: 900; margin: 0; color: #020617; letter-spacing: -0.5px;}
-        .cls-status-pill { background: #dcfce7; color: #16a34a; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-left: 8px;}
+        .cls-panel-header { padding: clamp(14px, 2vw, 20px) clamp(16px, 2.5vw, 24px); border-bottom: 1px solid #f1f5f9; }
+        .cls-ph-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+        .cls-ph-title { font-size: clamp(18px, 2.5vw, 22px); font-weight: 900; margin: 0; color: #020617; letter-spacing: -0.5px;}
+        .cls-status-pill { background: #dcfce7; color: #16a34a; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-left: auto;}
         
         .cls-ph-meta-row { font-size: 13px; color: #475569; margin-bottom: 12px; font-weight: 500; }
         .cls-dot { margin: 0 8px; color: #cbd5e1; }
@@ -459,8 +459,8 @@ const EmployeeMyClasses = ({ userName, userEmail }) => {
         .cls-ph-icons-row span { display: flex; align-items: center; gap: 6px; }
 
         /* Panel Progress Box */
-        .cls-progress-box { display: flex; gap: 24px; padding: 16px 24px; border-bottom: 1px solid #f1f5f9; align-items: center; }
-        .cls-pb-left { flex: 2; padding-right: 20px; } 
+        .cls-progress-box { display: flex; gap: 24px; padding: 16px clamp(16px, 2.5vw, 24px); border-bottom: 1px solid #f1f5f9; align-items: center; flex-wrap: wrap; }
+        .cls-pb-left { flex: 2; min-width: 200px; padding-right: 0; } 
         .cls-pb-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
         .cls-pb-title { font-size: 14px; font-weight: 700; color: #0f172a; }
         .cls-pb-percent { font-size: 20px; font-weight: 800; color: #2563eb; line-height: 1;}
@@ -469,11 +469,11 @@ const EmployeeMyClasses = ({ userName, userEmail }) => {
         .cls-pb-desc { font-size: 12px; color: #64748b; margin: 0; }
 
         /* Syllabus Section Elements */
-        .myc-box-tabs { display: flex; gap: 8px; width: 100%; padding-bottom: 10px; }
-        .myc-box-tab { background: transparent; border: none; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: 0.2s; }
+        .myc-box-tabs { display: flex; gap: 8px; width: 100%; padding-bottom: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .myc-box-tab { background: transparent; border: none; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: 0.2s; white-space: nowrap; }
         .myc-box-tab.active { background: #eff6ff; color: #2563eb; }
 
-        .myc-panel-footer { padding: 16px 24px; border-top: 1px solid #e2e8f0; background: #fff; }
+        .myc-panel-footer { padding: 16px clamp(16px, 2.5vw, 24px); border-top: 1px solid #e2e8f0; background: #fff; }
         .myc-btn-primary { background: #2563eb; border: none; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .myc-btn-primary:hover { background: #1d4ed8; }
         .w-100 { width: 100%; }
@@ -490,9 +490,9 @@ const EmployeeMyClasses = ({ userName, userEmail }) => {
 
         /* Students Card Item */
         .stu-card-item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
-        .stu-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 1px solid #cbd5e1; }
+        .stu-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 1px solid #cbd5e1; flex-shrink: 0; }
         .stu-name { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
-        .stu-subid { font-size: 12px; color: #64748b; }
+        .stu-subid { font-size: 12px; color: #64748b; word-break: break-all; }
 
         .empty-state { text-align: center; padding: 40px 0; color: #94a3b8; font-size: 14px; font-weight: 500; }
         
@@ -500,6 +500,20 @@ const EmployeeMyClasses = ({ userName, userEmail }) => {
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* Responsive Media Queries */
+        @media (max-width: 992px) {
+          .cls-main-layout {
+            grid-template-columns: 1fr;
+          }
+          .cls-batch-list {
+            max-height: 360px;
+          }
+          .cls-details-panel, .cls-empty-panel {
+            height: auto;
+            min-height: 450px;
+          }
+        }
       `}</style>
     </div>
   );

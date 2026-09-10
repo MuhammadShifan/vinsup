@@ -324,8 +324,40 @@
 @media (max-width: 992px) {
   .login-container {
     flex-direction: column;
+    min-height: auto;
+    max-width: 550px;
   }
   .left-panel {
     display: none; /* Hide left panel on smaller screens for mobile login */
+  }
+  .right-panel {
+    padding: 40px 30px;
+  }
+}
+
+@media (max-width: 576px) {
+  .login-wrapper {
+    padding: 12px;
+  }
+  .login-container {
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+  .right-panel {
+    padding: 30px 20px;
+  }
+  .welcome-section h2 {
+    font-size: 22px;
+  }
+  .welcome-section p {
+    font-size: 13px;
+  }
+  .input-icon-wrapper input {
+    padding: 10px 12px 10px 36px;
+    font-size: 13px;
+  }
+  .login-button {
+    padding: 12px;
+    font-size: 14px;
   }
 }

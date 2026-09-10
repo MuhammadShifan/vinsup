@@ -4,14 +4,12 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const Employee = require('../models/Employee');
-
-// 📸 Upload Directory Core Resolution
 const uploadDir = path.join(__dirname, '../uploads');
+
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Storage Strategy Configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadDir); 
@@ -22,12 +20,10 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// GET: All Employees with Allocated Courses Count
+
 router.get('/', async (req, res) => {
   try {
     const employees = await Employee.find({}).sort({ createdAt: -1 }).exec();
-    
-    // Enriching employees with allocatedCoursesCount dynamically
     const enrichedEmployees = employees.map(emp => {
       const empObj = emp.toObject();
       return {
@@ -42,7 +38,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET: Single Employee By ID with Allocated Courses Count
+
 router.get('/:id', async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id).exec();
@@ -60,12 +56,10 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST: Add New Employee - Standard Direct Pipeline
+
 router.post('/add', upload.single('profilePhoto'), async (req, res) => {
   try {
     const employeeData = req.body;
-
-    // Safe Structural Object Parsing
     if (employeeData.courses && typeof employeeData.courses === 'string') {
       try { employeeData.courses = JSON.parse(employeeData.courses); } catch(e) { employeeData.courses = []; }
     }
@@ -85,7 +79,7 @@ router.post('/add', upload.single('profilePhoto'), async (req, res) => {
   }
 });
 
-// PUT: Update Employee Properties 
+
 router.put('/update/:id', upload.single('profilePhoto'), async (req, res) => {
   try {
     const employeeData = req.body;
@@ -108,7 +102,7 @@ router.put('/update/:id', upload.single('profilePhoto'), async (req, res) => {
   }
 });
 
-// PUT: Core Attendance Update Pipeline
+
 router.put('/:id', async (req, res) => {
   try {
     const employeeId = req.params.id;
@@ -152,7 +146,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE
+
 router.delete('/delete/:id', async (req, res) => {
   try {
     await Employee.findByIdAndDelete(req.params.id).exec();

@@ -241,7 +241,7 @@ const Syllabus = () => {
                     )}
                   </div>
 
-                  <div style={{ paddingLeft: '45px' }}>
+                  <div style={{ paddingLeft: 'clamp(10px, 3vw, 45px)' }}>
                     <h5 style={{ margin: '0 0 10px 0', color: '#64748b', fontSize: '13px' }}>Topics Covered:</h5>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       {mod.topics.map((topic, tIndex) => (
@@ -252,11 +252,11 @@ const Syllabus = () => {
                             placeholder="Enter topic name..." 
                             value={topic} 
                             onChange={(e) => handleTopicChange(e.target.value, mIndex, tIndex)} 
-                            style={{ flex: 1, padding: '8px 15px', border: '1px solid #e2e8f0', borderRadius: '6px', outline: 'none', fontSize: '14px' }} 
+                            style={{ flex: 1, padding: '8px 15px', border: '1px solid #e2e8f0', borderRadius: '6px', outline: 'none', fontSize: '14px', minWidth: 0 }} 
                             required 
                           />
                           {mod.topics.length > 1 && (
-                            <button type="button" onClick={() => handleRemoveTopic(mIndex, tIndex)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '5px' }}>
+                            <button type="button" onClick={() => handleRemoveTopic(mIndex, tIndex)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '5px', flexShrink: 0 }}>
                               <i className="fas fa-times"></i>
                             </button>
                           )}
@@ -296,8 +296,8 @@ const Syllabus = () => {
         </button>
       </div>
 
-      <div className="filters-bar" style={{ display: 'flex', gap: '10px', background: '#fff', padding: '15px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', marginBottom: '20px' }}>
-        <div className="search-box" style={{ flex: 1 }}>
+      <div className="filters-bar" style={{ display: 'flex', gap: '10px', background: '#fff', padding: '15px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', marginBottom: '20px', flexWrap: 'wrap' }}>
+        <div className="search-box" style={{ flex: 1, minWidth: 'min(100%, 260px)' }}>
           <i className="fas fa-search"></i>
           <input 
             type="text" 
@@ -308,8 +308,8 @@ const Syllabus = () => {
         </div>
       </div>
 
-      <div className="table-container" style={{ borderRadius: '10px', overflow: 'hidden' }}>
-        <table>
+      <div className="table-container" style={{ borderRadius: '10px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table style={{ minWidth: '700px', width: '100%' }}>
           <thead>
             <tr>
               <th>#</th>
@@ -355,13 +355,13 @@ const Syllabus = () => {
 
       {/* ===================== VIEW SYLLABUS MODAL ===================== */}
       {viewSyllabus && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ background: '#fff', width: '95%', maxWidth: '800px', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '15px' }}>
+          <div style={{ background: '#fff', width: 'min(800px, 100%)', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
             
             {/* Modal Header */}
-            <div style={{ padding: '20px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+            <div style={{ padding: '16px clamp(16px, 2.5vw, 25px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
               <div>
-                <h2 style={{ margin: 0, fontSize: '20px', color: '#1e293b' }}>{viewSyllabus.courseName}</h2>
+                <h2 style={{ margin: 0, fontSize: '18px', color: '#1e293b' }}>{viewSyllabus.courseName}</h2>
                 <span style={{ fontSize: '13px', color: '#64748b' }}>Complete Course Syllabus</span>
               </div>
               <button onClick={() => setViewSyllabus(null)} style={{ background: '#e2e8f0', border: 'none', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', color: '#475569', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -370,9 +370,9 @@ const Syllabus = () => {
             </div>
 
             {/* Modal Body (Scrollable) */}
-            <div style={{ overflowY: 'auto', padding: '25px' }}>
+            <div style={{ overflowY: 'auto', padding: 'clamp(14px, 2.5vw, 25px)' }}>
               
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '25px', background: '#eff6ff', padding: '15px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '25px', background: '#eff6ff', padding: '15px', borderRadius: '8px', border: '1px solid #bfdbfe', flexWrap: 'wrap' }}>
                 <div>
                   <span style={{ display: 'block', fontSize: '12px', color: '#3b82f6', fontWeight: 'bold' }}>Duration</span>
                   <strong style={{ color: '#1e3a8a', fontSize: '15px' }}>{viewSyllabus.duration}</strong>
@@ -400,7 +400,7 @@ const Syllabus = () => {
                   viewSyllabus.modules.map((mod, mIdx) => (
                     <div key={mIdx} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
                       <div style={{ background: '#f8fafc', padding: '12px 15px', borderBottom: '1px solid #e2e8f0', display: 'flex', gap: '12px', alignItems: 'center' }}>
-                        <div style={{ background: '#2563eb', color: '#fff', width: '28px', height: '28px', borderRadius: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '13px' }}>
+                        <div style={{ background: '#2563eb', color: '#fff', width: '28px', height: '28px', borderRadius: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '13px', flexShrink: 0 }}>
                           M{mIdx + 1}
                         </div>
                         <h5 style={{ margin: 0, fontSize: '15px', color: '#1e293b' }}>{mod.title}</h5>

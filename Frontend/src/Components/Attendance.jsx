@@ -101,7 +101,7 @@ const Attendance = () => {
         </div>
       </div>
 
-      <div className="emp-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '20px', marginBottom: '25px', width: '100%' }}>
+      <div className="emp-stats-grid" style={{ marginBottom: '25px', width: '100%' }}>
         <div className="emp-stat-card"><div className="icon blue"><i className="fas fa-users"></i></div><div className="info"><p>Total Employees</p><h3>{totalEmployees}</h3></div></div>
         <div className="emp-stat-card"><div className="icon green"><i className="fas fa-user-check"></i></div><div className="info"><p>Present Today</p><h3>{presentCount}</h3></div></div>
         <div className="emp-stat-card"><div className="icon red"><i className="fas fa-user-times"></i></div><div className="info"><p>Absent Today</p><h3>{absentCount}</h3></div></div>
@@ -120,9 +120,9 @@ const Attendance = () => {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', width: '100%' }}>
+      <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', width: '100%', flexWrap: 'wrap' }}>
         
-        <div className="table-container" style={{ flex: '1 1 0%', minWidth: 0, overflowX: 'auto', background: '#fff', borderRadius: '10px' }}>
+        <div className="table-container" style={{ flex: '1 1 600px', minWidth: 0, overflowX: 'auto', background: '#fff', borderRadius: '10px' }}>
           <table style={{ width: '100%', minWidth: '700px' }}>
             <thead>
               <tr>
@@ -134,7 +134,6 @@ const Attendance = () => {
                 <th>Check In</th>
                 <th>Check Out</th>
                 <th>Status</th>
-                {/* 🔥 Actions column thookiyachu 🔥 */}
               </tr>
             </thead>
             <tbody>
@@ -144,7 +143,6 @@ const Attendance = () => {
                 </td></tr>
               ) : filteredRecords.length > 0 ? (
                 filteredRecords.map((emp, index) => (
-                  // 🔥 Row click pannale select aagura maari onClick add panniyachu, cursor: pointer pottachu 🔥
                   <tr 
                     key={emp.id} 
                     onClick={() => setSelectedEmployee(emp)}
@@ -189,7 +187,7 @@ const Attendance = () => {
           </table>
         </div>
 
-        <div style={{ flex: '0 0 340px', width: '340px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ flex: '1 1 300px', maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ background: '#fff', borderRadius: '10px', padding: '25px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', minHeight: '300px' }}>
             {selectedEmployee ? (
               <div>

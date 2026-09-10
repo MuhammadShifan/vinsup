@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const PrivateMessage = require('../models/PrivateMessage');
 
-// 1. Get 1-to-1 conversation between this User and Admin
+
 router.get('/:userEmail', async (req, res) => {
     try {
         const userEmail = req.params.userEmail.toLowerCase().trim();
@@ -21,7 +21,7 @@ router.get('/:userEmail', async (req, res) => {
     }
 });
 
-// 2. Get TOTAL unread count for a user (Admin/User)
+
 router.get('/unread/:userEmail', async (req, res) => {
     try {
         let userEmail = req.params.userEmail.toLowerCase().trim();
@@ -38,7 +38,7 @@ router.get('/unread/:userEmail', async (req, res) => {
     }
 });
 
-// 3. Group unread counts by Sender Email
+
 router.get('/unread-senders/:receiverEmail', async (req, res) => {
     try {
         let receiverEmail = req.params.receiverEmail.toLowerCase().trim();
@@ -60,7 +60,7 @@ router.get('/unread-senders/:receiverEmail', async (req, res) => {
     }
 });
 
-// 4. Mark messages as read
+
 router.put('/mark-read', async (req, res) => {
     try {
         let { receiverEmail, senderEmail } = req.body;
@@ -78,13 +78,11 @@ router.put('/mark-read', async (req, res) => {
     }
 });
 
-// 🔥 5. Send private message (UPDATED FOR FILE ATTACHMENTS) 🔥
+
 router.post('/send', async (req, res) => {
     try {
         const receiverVal = req.body.receiverEmail || 'admin@vinsup.com';
         const senderNameVal = req.body.senderName || 'Someone';
-
-        // Validation: Message illa File rendula edhavadhu onnu irukkanum
         if (!req.body.message && !req.body.file) {
             return res.status(400).json({ success: false, error: "Message or file is required" });
         }
@@ -93,20 +91,18 @@ router.post('/send', async (req, res) => {
             senderEmail: req.body.senderEmail,
             receiverEmail: receiverVal, 
             senderName: senderNameVal,
-            message: req.body.message || "", // Null vandha empty string aakkidum
-            file: req.body.file || null,     // File irundha save aagum, illana null
+            message: req.body.message || "", 
+            file: req.body.file || null,    
             isRead: false
         });
         await newMessage.save();
-
-        // Puthusa add aana message-a frontend-ku anuppuvom
         res.json({ success: true, message: newMessage });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// 6. Edit Private Message
+
 router.put('/edit/:id', async (req, res) => {
     try {
         const updatedMsg = await PrivateMessage.findByIdAndUpdate(
@@ -120,7 +116,7 @@ router.put('/edit/:id', async (req, res) => {
     }
 });
 
-// 7. Delete Private Message
+
 router.delete('/delete/:id', async (req, res) => {
     try {
         await PrivateMessage.findByIdAndDelete(req.params.id);

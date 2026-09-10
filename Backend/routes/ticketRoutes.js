@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Ticket = require('../models/Ticket');
 const Notification = require('../models/Notification');
-const Employee = require('../models/Employee'); // 🔥 Employee Name edukka import pandrom
+const Employee = require('../models/Employee');
 
-// Get tickets ONLY for a specific employee
+
 router.get('/:employeeId', async (req, res) => {
     try {
         const tickets = await Ticket.find({ employeeId: req.params.employeeId });
@@ -14,16 +14,12 @@ router.get('/:employeeId', async (req, res) => {
     }
 });
 
-// Add ticket for a specific employee & Notify Admin
+
 router.post('/add', async (req, res) => {
     try {
         const { employeeId, subject, category, priority } = req.body;
-        
-        // 1. Create the Ticket
         const newTicket = new Ticket(req.body);
         await newTicket.save();
-
-        // Employee-oda name-a thedi edukrom (employeeId-la email irukalam illa ID irukalam)
         let empName = employeeId;
         try {
             const emp = await Employee.findOne({ 
@@ -33,8 +29,6 @@ router.post('/add', async (req, res) => {
                 empName = emp.name || emp.fullName || emp.firstName;
             }
         } catch (e) {}
-
-        // 2. Create Notification for Admin with Employee Name 🔥
         try {
             const adminNotification = new Notification({
                 type: 'helpdesk',
@@ -54,7 +48,7 @@ router.post('/add', async (req, res) => {
     }
 });
 
-// Delete Ticket by ID
+
 router.delete('/:id', async (req, res) => {
     try {
         await Ticket.findByIdAndDelete(req.params.id);
@@ -64,11 +58,7 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-// ==========================================
-// ADMIN ROUTES
-// ==========================================
 
-// 1. Get ALL tickets for Admin Panel (Latest first)
 router.get('/', async (req, res) => {
     try {
         const tickets = await Ticket.find().sort({ _id: -1 }); 
@@ -78,7 +68,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// 2. Update Ticket Status (Admin changes from Open -> Resolved) & Notify User
+
 router.put('/:id', async (req, res) => {
     try {
         const updatedTicket = await Ticket.findByIdAndUpdate(
@@ -86,8 +76,6 @@ router.put('/:id', async (req, res) => {
             { status: req.body.status }, 
             { new: true }
         );
-
-        // Notify User when ticket status changes 🔥
         if (updatedTicket) {
             try {
                 const userNotification = new Notification({

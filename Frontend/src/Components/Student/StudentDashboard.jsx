@@ -185,12 +185,27 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
   return (
     <div className="admin-layout">
       
+      {isSidebarOpen && (
+        <div 
+          className="sidebar-backdrop active" 
+          onClick={() => setIsSidebarOpen(false)} 
+        />
+      )}
+
       <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-logo"><img src={logoImage} alt="Vinsup Logo" /></div>
         <ul className="sidebar-menu">
           {sidebarMenu.map((item, index) => (
             <li key={index} className={item.name === activeTab ? 'active' : ''}>
-              <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(item.name); }} style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+              <a 
+                href="#" 
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  setActiveTab(item.name); 
+                  if (window.innerWidth <= 992) setIsSidebarOpen(false);
+                }} 
+                style={{ display: 'flex', alignItems: 'center', width: '100%' }}
+              >
                   <i className={item.icon} style={{ width: '25px' }}></i>
                   <span>{item.name}</span>
                   {item.name === 'Batch Chat' && renderBadge(unreadChatCount)}
@@ -242,14 +257,14 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
         <div style={{ flex: 1, position: 'relative' }}>
           
           {activeTab === 'Dashboard' && (
-             <div className="dashboard-container" style={{ padding: '30px 40px', background: '#f8fafc', minHeight: 'calc(100vh - 80px)', boxSizing: 'border-box' }}>
+             <div className="dashboard-container" style={{ padding: 'clamp(14px, 3vw, 40px)', background: '#f8fafc', minHeight: 'calc(100vh - 80px)', boxSizing: 'border-box' }}>
                
                <div className="page-header" style={{ marginBottom: '25px' }}>
-                 <h1 style={{ color: '#0f172a', fontWeight: 'bold', fontSize: '24px', margin: '0 0 5px 0' }}>Welcome back, {firstName}! 🚀</h1>
+                 <h1 style={{ color: '#0f172a', fontWeight: 'bold', fontSize: 'clamp(1.25rem, 2vw, 1.5rem)', margin: '0 0 5px 0' }}>Welcome back, {firstName}! 🚀</h1>
                  <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>Here is your academic overview and batch activities for today.</p>
                </div>
 
-               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '25px' }}>
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '25px' }}>
                  
                  <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #f1f5f9', display: 'flex', gap: '15px', alignItems: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                    <div style={{ background: '#eff6ff', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', fontSize: '22px' }}><i className="fas fa-book-reader"></i></div>
@@ -281,7 +296,7 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
 
                </div>
 
-               <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gap: '20px', alignItems: 'start' }}>
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '20px', alignItems: 'start' }}>
                  
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                    

@@ -1,8 +1,10 @@
 /* ================= MAIN CONTAINER ================= */
 .employees-container {
-  padding: 30px;
+  padding: clamp(14px, 2.5vw, 30px);
   background-color: #f4f7fa;
   min-height: calc(100vh - 70px);
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .flex-between {
@@ -10,12 +12,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
+  gap: 15px;
+  flex-wrap: wrap;
 }
 
 .page-header h2 {
   margin: 0;
   color: #111827;
-  font-size: 24px;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
 }
 
 .breadcrumb {
@@ -36,6 +40,8 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  min-height: 40px;
+  font-size: 14px;
 }
 
 .btn-secondary {
@@ -49,12 +55,14 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  min-height: 40px;
+  font-size: 14px;
 }
 
 /* ================= STATS GRID ================= */
 .emp-stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 🔥 PUDHUSU: 5 la irundhu 3 aakiyachu 🔥 */
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 15px;
   margin-bottom: 25px;
 }
@@ -72,6 +80,7 @@
 .emp-stat-card .icon {
   width: 50px;
   height: 50px;
+  min-width: 50px;
   border-radius: 12px;
   display: flex;
   justify-content: center;
@@ -86,6 +95,10 @@
 .icon.purple { background: #f5f3ff; color: #8b5cf6; }
 .icon.orange { background: #fff7ed; color: #f97316; }
 
+.emp-stat-card .info {
+  min-width: 0;
+}
+
 .emp-stat-card .info p {
   margin: 0;
   font-size: 12px;
@@ -94,7 +107,7 @@
 
 .emp-stat-card .info h3 {
   margin: 5px 0;
-  font-size: 22px;
+  font-size: clamp(1.2rem, 2vw, 1.375rem);
   color: #111827;
 }
 
@@ -109,17 +122,20 @@
   justify-content: space-between;
   gap: 15px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .search-box {
   flex: 1;
+  min-width: 240px;
   position: relative;
 }
 
 .search-box i {
   position: absolute;
   left: 15px;
-  top: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #9ca3af;
 }
 
@@ -129,11 +145,14 @@
   border: 1px solid #d1d5db;
   border-radius: 8px;
   box-sizing: border-box;
+  font-size: 14px;
+  min-height: 42px;
 }
 
 .filter-dropdowns {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .filter-dropdowns select {
@@ -142,6 +161,8 @@
   border-radius: 8px;
   background: #fff;
   color: #374151;
+  min-height: 42px;
+  font-size: 14px;
 }
 
 .btn-filter {
@@ -153,33 +174,39 @@
   display: flex;
   gap: 5px;
   align-items: center;
+  min-height: 42px;
+  font-size: 14px;
 }
 
 /* ================= TABLE ================= */
 .table-container {
   background: #fff;
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  max-width: 100%;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  min-width: 700px;
 }
 
 th {
   background: #f9fafb;
-  padding: 15px;
+  padding: 14px 16px;
   font-size: 13px;
   color: #6b7280;
   font-weight: 600;
   border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
 }
 
 td {
-  padding: 15px;
+  padding: 14px 16px;
   font-size: 14px;
   color: #374151;
   border-bottom: 1px solid #e5e7eb;
@@ -195,6 +222,7 @@ td {
 .emp-avatar {
   width: 35px;
   height: 35px;
+  min-width: 35px;
   border-radius: 50%;
   background: #e5e7eb;
   display: flex;
@@ -224,9 +252,10 @@ td {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 5px;
+  padding: 6px 8px;
   margin-right: 5px;
   border-radius: 5px;
+  font-size: 14px;
 }
 
 .action-btn.edit { color: #3b82f6; background: #eff6ff; }
@@ -237,6 +266,8 @@ td {
   border-radius: 20px;
   font-size: 11px;
   font-weight: 500;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .role-badge { background: #eff6ff; color: #2563eb; }
@@ -247,13 +278,13 @@ td {
 /* ================= ADD EMPLOYEE FORM ================= */
 .add-employee-form {
   background: #fff;
-  padding: 30px;
+  padding: clamp(16px, 3vw, 30px);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .form-section {
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .form-section h3 {
@@ -267,7 +298,7 @@ td {
 
 .highlight-section {
   background: #f8fafc;
-  padding: 20px;
+  padding: clamp(14px, 2.5vw, 20px);
   border-radius: 8px;
   border: 1px dashed #cbd5e1;
 }
@@ -285,7 +316,7 @@ td {
 }
 
 .input-group.full-width {
-  grid-column: span 3;
+  grid-column: 1 / -1;
 }
 
 .input-group label {
@@ -306,10 +337,14 @@ td {
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-family: inherit;
+  font-size: 14px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .input-group input:focus, 
-.input-group select:focus {
+.input-group select:focus,
+.input-group textarea:focus {
   outline: none;
   border-color: #2563eb;
 }
@@ -348,6 +383,7 @@ td {
   display: flex;
   gap: 15px;
   margin-top: 5px;
+  flex-wrap: wrap;
 }
 
 .divider {
@@ -362,6 +398,7 @@ td {
   justify-content: flex-end;
   gap: 15px;
   margin-top: 30px;
+  flex-wrap: wrap;
 }
 
 .btn-cancel {
@@ -370,6 +407,7 @@ td {
   padding: 10px 20px;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .btn-reset {
@@ -379,6 +417,7 @@ td {
   border-radius: 6px;
   cursor: pointer;
   color: #4b5563;
+  font-size: 14px;
 }
 
 .btn-save {
@@ -389,54 +428,105 @@ td {
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
+  font-size: 14px;
+}
+
+/* ================= RESPONSIVE MEDIA QUERIES ================= */
+@media (max-width: 992px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .employees-container {
+    padding: 16px 12px;
+  }
+  
+  .filters-bar {
+    flex-direction: column;
+  }
+  
+  .filter-dropdowns {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .filter-dropdowns select,
+  .btn-filter {
+    width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .form-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .emp-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .flex-between {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .flex-between .btn-primary,
+  .flex-between .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* =========================================
-   🖨️ PRINT STYLES FOR REPORTS (UPDATED)
+   🖨️ PRINT STYLES FOR REPORTS
 ========================================= */
 @media print {
-  /* Screen-la irukura ellathayum hide pannidu */
   body * {
     visibility: hidden;
   }
   
-  /* Print Area ulla irukuradha mattum theriya vai */
   .print-area, .print-area * {
     visibility: visible;
   }
   
-
   body, html, .employees-container, .main-content {
     margin: 0 !important;
     padding: 0 !important;
-    position: static !important; /* Idhu thaan secret sauce */
+    position: static !important;
   }
   
-  /* Table-a exactly Top Left-la fix pandradhu */
   .print-area {
     position: absolute;
     left: 0 !important;
     top: 0 !important;
-    width: 100vw !important; /* Full width */
+    width: 100vw !important;
     margin: 0 !important;
-    padding: 10px !important; /* Chinna gap mattum vachiruken */
+    padding: 10px !important;
     box-shadow: none !important;
     border: none !important;
   }
 
-  /* Table full width yedukka */
   .print-area table {
     width: 100% !important;
     margin-left: 0 !important;
   }
 
-  /* Print, Close buttons-a print aagumbodhu hide pandradhu */
   .no-print {
     display: none !important;
   }
   
-  /* A4 Page layout settings */
   @page {
-    margin: 1cm; /* Default A4 margin */
+    margin: 1cm;
   }
 }

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Course = require('../models/Course');
 
-// GET all courses
+
 router.get('/', async (req, res) => {
   try {
     const courses = await Course.find().sort({ createdAt: -1 });
@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST add new course
+
 router.post('/add', async (req, res) => {
   try {
     const newCourse = new Course(req.body);
@@ -23,7 +23,7 @@ router.post('/add', async (req, res) => {
   }
 });
 
-// PUT update course
+
 router.put('/update/:id', async (req, res) => {
   try {
     const updatedCourse = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -33,7 +33,7 @@ router.put('/update/:id', async (req, res) => {
   }
 });
 
-// DELETE course
+
 router.delete('/delete/:id', async (req, res) => {
   try {
     await Course.findByIdAndDelete(req.params.id);

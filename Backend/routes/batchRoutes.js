@@ -1,11 +1,10 @@
-// routes/batchRoutes.js
 const express = require('express');
 const router = express.Router();
 const Batch = require('../models/Batch');
 const Notification = require('../models/Notification');
 const Employee = require('../models/Employee');
 
-// GET: Ellam batches um eduka
+
 router.get('/', async (req, res) => {
   try {
     const batches = await Batch.find().sort({ createdAt: -1 });
@@ -15,7 +14,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST: Pudhu batch add panna & Notify ONLY the allocated Trainer
+
 router.post('/add', async (req, res) => {
   try {
     const newBatch = new Batch(req.body);
@@ -64,7 +63,7 @@ router.post('/add', async (req, res) => {
   }
 });
 
-// PUT: Batch data va update panna (Generic Admin Update)
+
 router.put('/update/:id', async (req, res) => {
   try {
     const updatedBatch = await Batch.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -74,7 +73,7 @@ router.put('/update/:id', async (req, res) => {
   }
 });
 
-// 🔥 Progress & Status Update panna & Notify Admin 🔥
+
 router.put('/:id', async (req, res) => {
   try {
     const { progress, status } = req.body;
@@ -89,7 +88,6 @@ router.put('/:id', async (req, res) => {
         return res.status(404).json({ success: false, message: "Batch not found!" });
     }
 
-    // Prepare update object
     let updateFields = {};
     if (progress !== undefined) {
         updateFields.progress = Number(progress);
@@ -106,7 +104,7 @@ router.put('/:id', async (req, res) => {
         { new: true }
     );
 
-    // Notify Admin
+
     try {
       let notifTitle = 'Batch Progress Updated';
       let notifMsg = `Batch "${updatedBatch.batchName || updatedBatch.name || 'Batch'}" progress updated to ${progress}%.`;
@@ -133,7 +131,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE: Batch a thooka
+
 router.delete('/delete/:id', async (req, res) => {
   try {
     await Batch.findByIdAndDelete(req.params.id);

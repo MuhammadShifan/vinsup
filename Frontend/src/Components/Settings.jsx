@@ -140,21 +140,106 @@ const AdminSettings = () => {
   };
 
   return (
-    <div style={{ padding: '30px', maxWidth: '1200px', margin: '0 auto', fontFamily: "'Inter', sans-serif", color: '#0f172a' }}>
-      
-      <div style={{ marginBottom: '30px' }}>
-        <h1 style={{ margin: '0 0 8px 0', fontSize: '26px', fontWeight: '700', color: '#0f172a' }}>Settings</h1>
+    <div className="settings-page-wrapper">
+      <style>{`
+        .settings-page-wrapper {
+          padding: clamp(14px, 2.5vw, 30px);
+          max-width: 1200px;
+          margin: 0 auto;
+          font-family: 'Inter', sans-serif;
+          color: #0f172a;
+          box-sizing: border-box;
+          width: 100%;
+        }
+        .settings-layout-container {
+          display: flex;
+          gap: 25px;
+          align-items: flex-start;
+        }
+        .settings-profile-card {
+          width: 320px;
+          background: #fff;
+          border-radius: 12px;
+          padding: clamp(16px, 2.5vw, 30px);
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+          box-sizing: border-box;
+          flex-shrink: 0;
+        }
+        .settings-forms-col {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 25px;
+          width: 100%;
+        }
+        .settings-card {
+          background: #fff;
+          border-radius: 12px;
+          padding: clamp(16px, 2.5vw, 30px);
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+          box-sizing: border-box;
+        }
+        .settings-card-inner {
+          display: flex;
+          gap: 25px;
+        }
+        .settings-card-header {
+          width: 240px;
+          display: flex;
+          gap: 15px;
+          flex-shrink: 0;
+        }
+        .settings-card-body {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+        }
+        .settings-input-row {
+          display: grid;
+          grid-template-columns: 140px 1fr;
+          align-items: center;
+          gap: 15px;
+        }
+        @media (max-width: 900px) {
+          .settings-layout-container {
+            flex-direction: column;
+          }
+          .settings-profile-card {
+            width: 100%;
+          }
+        }
+        @media (max-width: 650px) {
+          .settings-card-inner {
+            flex-direction: column;
+            gap: 15px;
+          }
+          .settings-card-header {
+            width: 100%;
+          }
+          .settings-input-row {
+            grid-template-columns: 1fr;
+            gap: 6px;
+          }
+        }
+      `}</style>
+
+      <div style={{ marginBottom: '25px' }}>
+        <h1 style={{ margin: '0 0 8px 0', fontSize: 'clamp(1.25rem, 2vw, 1.625rem)', fontWeight: '700', color: '#0f172a' }}>Settings</h1>
         <p style={{ margin: 0, fontSize: '14px', color: '#475569' }}>Manage your account settings and preferences.</p>
       </div>
 
-      <div style={{ display: 'flex', gap: '30px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div className="settings-layout-container">
         
         {/* Left Profile Card */}
-        <div style={{ width: '320px', background: '#fff', borderRadius: '12px', padding: '30px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)' }}>
-          <h3 style={{ margin: '0 0 30px 0', fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>Admin Profile</h3>
+        <div className="settings-profile-card">
+          <h3 style={{ margin: '0 0 25px 0', fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>Admin Profile</h3>
           
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
-            <div style={{ position: 'relative', width: '110px', height: '110px', marginBottom: '15px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '25px' }}>
+            <div style={{ position: 'relative', width: '100px', height: '100px', marginBottom: '15px' }}>
               <img 
                 src={getPhotoUrl(adminData.profilePhoto)} 
                 alt="Profile" 
@@ -165,12 +250,12 @@ const AdminSettings = () => {
             <span style={{ fontSize: '13px', color: '#2563eb', fontWeight: '600' }}>Administrator</span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '30px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', borderBottom: '1px solid #f1f5f9', paddingBottom: '15px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '15px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
               <i className="far fa-envelope" style={{ color: '#64748b', fontSize: '16px', width: '20px', textAlign: 'center' }}></i>
-              <span style={{ fontSize: '14px', color: '#1e293b', fontWeight: '500' }}>{adminData.email}</span>
+              <span style={{ fontSize: '14px', color: '#1e293b', fontWeight: '500', wordBreak: 'break-all' }}>{adminData.email}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', borderBottom: '1px solid #f1f5f9', paddingBottom: '15px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
               <i className="fas fa-phone-alt" style={{ color: '#64748b', fontSize: '16px', width: '20px', textAlign: 'center' }}></i>
               <span style={{ fontSize: '14px', color: '#1e293b', fontWeight: '500' }}>{adminData.phone}</span>
             </div>
@@ -178,12 +263,12 @@ const AdminSettings = () => {
         </div>
 
         {/* Right Settings Cards */}
-        <div style={{ flex: 1, minWidth: '600px', display: 'flex', flexDirection: 'column', gap: '25px' }}>
+        <div className="settings-forms-col">
           
           {/* Card 1: Change Profile Photo via File Upload */}
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '30px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)' }}>
-            <div style={{ display: 'flex', gap: '30px' }}>
-              <div style={{ width: '250px', display: 'flex', gap: '15px', flexShrink: 0 }}>
+          <div className="settings-card">
+            <div className="settings-card-inner">
+              <div className="settings-card-header">
                 <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: '#f3e8ff', color: '#9333ea', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px', flexShrink: 0 }}>
                   <i className="far fa-user"></i>
                 </div>
@@ -192,15 +277,15 @@ const AdminSettings = () => {
                   <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: '1.5' }}>Upload your profile image from computer.</p>
                 </div>
               </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="settings-card-body" style={{ gap: '12px' }}>
                 <input 
                   type="file" 
                   accept="image/*"
                   onChange={(e) => setSelectedFile(e.target.files[0])} 
-                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', background: '#f8fafc' }}
+                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', background: '#f8fafc', boxSizing: 'border-box' }}
                 />
                 {selectedFile && <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: '600' }}>Selected: {selectedFile.name}</span>}
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '5px' }}>
                   <button onClick={handleUpdatePhoto} style={{ padding: '10px 20px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                     Upload Photo
                   </button>
@@ -210,9 +295,9 @@ const AdminSettings = () => {
           </div>
 
           {/* Card 2: Change Name */}
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '30px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)' }}>
-            <div style={{ display: 'flex', gap: '30px' }}>
-              <div style={{ width: '250px', display: 'flex', gap: '15px', flexShrink: 0 }}>
+          <div className="settings-card">
+            <div className="settings-card-inner">
+              <div className="settings-card-header">
                 <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: '#eff6ff', color: '#3b82f6', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px', flexShrink: 0 }}>
                   <i className="far fa-user"></i>
                 </div>
@@ -221,8 +306,8 @@ const AdminSettings = () => {
                   <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: '1.5' }}>Update your full name.</p>
                 </div>
               </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: '15px' }}>
+              <div className="settings-card-body">
+                <div className="settings-input-row">
                   <label style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>Full Name</label>
                   <input 
                     type="text" 
@@ -241,9 +326,9 @@ const AdminSettings = () => {
           </div>
 
           {/* Card 3: Change Password */}
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '30px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)' }}>
-            <div style={{ display: 'flex', gap: '30px' }}>
-              <div style={{ width: '250px', display: 'flex', gap: '15px', flexShrink: 0 }}>
+          <div className="settings-card">
+            <div className="settings-card-inner">
+              <div className="settings-card-header">
                 <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: '#dcfce7', color: '#16a34a', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px', flexShrink: 0 }}>
                   <i className="fas fa-lock"></i>
                 </div>
@@ -252,9 +337,9 @@ const AdminSettings = () => {
                   <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: '1.5' }}>Update your account password securely.</p>
                 </div>
               </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div className="settings-card-body" style={{ gap: '15px' }}>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: '15px' }}>
+                <div className="settings-input-row">
                   <label style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>Current Password</label>
                   <input 
                     type="password" 
@@ -266,7 +351,7 @@ const AdminSettings = () => {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: '15px' }}>
+                <div className="settings-input-row">
                   <label style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>New Password</label>
                   <input 
                     type="password" 
@@ -278,7 +363,7 @@ const AdminSettings = () => {
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: '15px' }}>
+                <div className="settings-input-row">
                   <label style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>Confirm Password</label>
                   <input 
                     type="password" 

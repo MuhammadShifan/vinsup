@@ -119,10 +119,10 @@ const UserReports = ({ userName, userEmail }) => {
   const getStudentCount = (list) => list.reduce((sum, b) => sum + (Number(b.studentsCount || b.students?.length || 0)), 0);
 
   return (
-    <div style={{ padding: '30px', maxWidth: '100%', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif" }}>
       
       {/* Stats Cards Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '30px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '30px' }}>
         <div style={{ background: '#fff', padding: '25px 20px', borderRadius: '12px', border: '1px solid #f1f5f9', display: 'flex', gap: '15px', alignItems: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
           <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: '#ecfdf5', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
             <i className="far fa-calendar-alt"></i>
@@ -158,15 +158,15 @@ const UserReports = ({ userName, userEmail }) => {
       </div>
 
       {/* Controls Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-        <div style={{ position: 'relative', width: '300px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
+        <div style={{ position: 'relative', width: 'min(300px, 100%)' }}>
           <i className="fas fa-search" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}></i>
           <input 
             type="text" 
             placeholder="Search by report name..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ width: '100%', padding: '10px 15px 10px 40px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '13px', color: '#0f172a' }}
+            style={{ width: '100%', padding: '10px 15px 10px 40px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '13px', color: '#0f172a', boxSizing: 'border-box' }}
           />
         </div>
         <div style={{ background: '#eff6ff', color: '#2563eb', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500' }}>
@@ -176,70 +176,72 @@ const UserReports = ({ userName, userEmail }) => {
 
       {/* Main Table Container */}
       <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ background: '#fafafa', color: '#0f172a', fontSize: '13px', borderBottom: '1px solid #f1f5f9' }}>
-              <th style={{ padding: '15px 25px', fontWeight: '600' }}>Report Name</th>
-              <th style={{ padding: '15px 20px', fontWeight: '600' }}>Report Type</th>
-              <th style={{ padding: '15px 20px', fontWeight: '600' }}>Generated On</th>
-              <th style={{ padding: '15px 20px', fontWeight: '600' }}>Summary Details</th>
-              <th style={{ padding: '15px 25px', fontWeight: '600', textAlign: 'center' }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
-                  <i className="fas fa-spinner fa-spin" style={{ marginRight: '10px' }}></i> Loading reports...
-                </td>
+        <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', minWidth: '650px', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ background: '#fafafa', color: '#0f172a', fontSize: '13px', borderBottom: '1px solid #f1f5f9' }}>
+                <th style={{ padding: '15px 25px', fontWeight: '600' }}>Report Name</th>
+                <th style={{ padding: '15px 20px', fontWeight: '600' }}>Report Type</th>
+                <th style={{ padding: '15px 20px', fontWeight: '600' }}>Generated On</th>
+                <th style={{ padding: '15px 20px', fontWeight: '600' }}>Summary Details</th>
+                <th style={{ padding: '15px 25px', fontWeight: '600', textAlign: 'center' }}>Action</th>
               </tr>
-            ) : filteredReports.length > 0 ? (
-              currentReports.map((report) => {
-                const style = getTypeStyling(report.reportType);
-                const dateObj = new Date(report.createdAt || Date.now());
-                
-                return (
-                  <tr key={report._id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'} onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
-                    <td style={{ padding: '15px 25px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: style.bg, color: style.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>
-                          <i className={style.icon}></i>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                    <i className="fas fa-spinner fa-spin" style={{ marginRight: '10px' }}></i> Loading reports...
+                  </td>
+                </tr>
+              ) : filteredReports.length > 0 ? (
+                currentReports.map((report) => {
+                  const style = getTypeStyling(report.reportType);
+                  const dateObj = new Date(report.createdAt || Date.now());
+                  
+                  return (
+                    <tr key={report._id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'} onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
+                      <td style={{ padding: '15px 25px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: style.bg, color: style.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>
+                            <i className={style.icon}></i>
+                          </div>
+                          <span style={{ color: '#0f172a', fontSize: '13px', fontWeight: '500' }}>{report.reportName || "Untitled Report"}</span>
                         </div>
-                        <span style={{ color: '#0f172a', fontSize: '13px', fontWeight: '500' }}>{report.reportName || "Untitled Report"}</span>
-                      </div>
-                    </td>
-                    <td style={{ padding: '15px 20px', color: '#475569', fontSize: '13px' }}>{report.reportType || "General"}</td>
-                    <td style={{ padding: '15px 20px' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        <span style={{ color: '#0f172a', fontSize: '13px', fontWeight: '500' }}>{dateObj.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</span>
-                        <span style={{ color: '#64748b', fontSize: '12px' }}>{dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
-                    </td>
-                    <td style={{ padding: '15px 20px', color: '#475569', fontSize: '13px' }}>{report.summary && report.summary.length > 40 ? report.summary.substring(0, 40) + '...' : (report.summary || "Current Period")}</td>
-                    <td style={{ padding: '15px 25px', textAlign: 'center' }}>
-                      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                        <button onClick={() => openReportModal(report)} style={{ background: '#fff', border: '1px solid #e2e8f0', color: '#2563eb', padding: '6px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <i className="far fa-eye" style={{ fontSize: '12px' }}></i> View
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan="5" style={{ textAlign: 'center', padding: '50px 20px', color: '#64748b' }}>
-                  <div style={{ fontSize: '40px', color: '#e2e8f0', marginBottom: '15px' }}><i className="fas fa-folder-open"></i></div>
-                  <h4 style={{ margin: '0 0 5px 0', color: '#0f172a' }}>No Reports Found</h4>
-                  <p style={{ margin: 0, fontSize: '14px' }}>{searchTerm ? "No reports match your search." : "You don't have any reports yet."}</p>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                      </td>
+                      <td style={{ padding: '15px 20px', color: '#475569', fontSize: '13px' }}>{report.reportType || "General"}</td>
+                      <td style={{ padding: '15px 20px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ color: '#0f172a', fontSize: '13px', fontWeight: '500' }}>{dateObj.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</span>
+                          <span style={{ color: '#64748b', fontSize: '12px' }}>{dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '15px 20px', color: '#475569', fontSize: '13px' }}>{report.summary && report.summary.length > 40 ? report.summary.substring(0, 40) + '...' : (report.summary || "Current Period")}</td>
+                      <td style={{ padding: '15px 25px', textAlign: 'center' }}>
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                          <button onClick={() => openReportModal(report)} style={{ background: '#fff', border: '1px solid #e2e8f0', color: '#2563eb', padding: '6px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <i className="far fa-eye" style={{ fontSize: '12px' }}></i> View
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '50px 20px', color: '#64748b' }}>
+                    <div style={{ fontSize: '40px', color: '#e2e8f0', marginBottom: '15px' }}><i className="fas fa-folder-open"></i></div>
+                    <h4 style={{ margin: '0 0 5px 0', color: '#0f172a' }}>No Reports Found</h4>
+                    <p style={{ margin: 0, fontSize: '14px' }}>{searchTerm ? "No reports match your search." : "You don't have any reports yet."}</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {/* Pagination */}
-        <div style={{ padding: '15px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff' }}>
+        <div style={{ padding: '15px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', flexWrap: 'wrap', gap: '10px' }}>
           {totalPages > 1 && (
             <div style={{ display: 'flex', gap: '5px' }}>
               <button onClick={prevPage} disabled={currentPage === 1} style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', background: '#fff', borderRadius: '6px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', color: currentPage === 1 ? '#cbd5e1' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -260,8 +262,8 @@ const UserReports = ({ userName, userEmail }) => {
 
       {/* 🔥 ENHANCED VIEW REPORT MODAL 🔥 */}
       {viewReport && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', width: '850px', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '16px' }}>
+          <div style={{ background: '#fff', width: 'min(850px, 100%)', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 25px', borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
               <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
