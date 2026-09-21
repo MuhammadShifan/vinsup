@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import API, { getBaseUrl } from '../utils/api';
+import socket from '../utils/socket';
 
 const EmployeeBatchChat = ({ userName, userEmail }) => {
   const [myBatches, setMyBatches] = useState([]);
   const [activeBatch, setActiveBatch] = useState(null);
-  const [myAvatar, setMyAvatar] = useState(""); // 🔥 State for Trainer's Photo
+  const [myAvatar, setMyAvatar] = useState("");
   
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -14,6 +15,11 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
   const chatEndRef = useRef(null);
+  const activeBatchRef = useRef(activeBatch);
+
+  useEffect(() => {
+    activeBatchRef.current = activeBatch;
+  }, [activeBatch]);
 
   const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
 
@@ -22,7 +28,7 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
     if (rawPath.startsWith('http') || rawPath.startsWith('data:image')) return rawPath;
     let cleanPath = rawPath.replace(/\\/g, '/').replace(/^\/+/, '');
     if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-    return `https://vinsup-4vt5.onrender.com/${cleanPath}`;
+    return `${getBaseUrl()}/${cleanPath}`;
   };
 
   useEffect(() => {
@@ -31,7 +37,7 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
         const activeEmail = (userEmail || "").toLowerCase().trim();
         
         // 1. Fetch Batches
-        const bRes = await axios.get('https://vinsup-4vt5.onrender.com/api/batches').catch(() => null);
+        const bRes = await API.get('/batches').catch(() => null);
         const allB = Array.isArray(bRes?.data) ? bRes.data : (bRes?.data?.data || []);
         
         const trainerBatches = allB.filter(b => {
@@ -45,8 +51,11 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
         setMyBatches(uniqueBatches);
         if (uniqueBatches.length > 0) setActiveBatch(uniqueBatches[0]);
 
-        // 🔥 2. Fetch Trainer's Profile Photo 🔥
-        const empRes = await axios.get('https://vinsup-4vt5.onrender.com/api/employees').catch(() => null);
+        // Join socket rooms for each batch
+        uniqueBatches.forEach((b) => socket.emit('join_batch', b));
+
+        // 2. Fetch Trainer's Profile Photo
+        const empRes = await API.get('/employees').catch(() => null);
         const allEmp = Array.isArray(empRes?.data) ? empRes.data : (empRes?.data?.data || []);
         const currentEmp = allEmp.find(e => (e.email || '').toLowerCase().trim() === activeEmail);
         const rawPhoto = currentEmp?.profilePhoto || currentEmp?.photo || currentEmp?.image || '';
@@ -65,7 +74,7 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
     try {
       const counts = {};
       await Promise.all(batchesList.map(async (b) => {
-        const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/batchchat/${encodeURIComponent(b)}`);
+        const res = await API.get(`/batchchat/${encodeURIComponent(b)}`);
         const msgs = res.data;
         const lastRead = localStorage.getItem(`chat_last_read_${b}`) || 0;
         
@@ -79,24 +88,28 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
   useEffect(() => {
     if (myBatches.length > 0) {
       checkUnreadCounts(myBatches);
-      const intv = setInterval(() => checkUnreadCounts(myBatches), 3000);
-      return () => clearInterval(intv);
     }
   }, [myBatches]);
 
   const fetchMessages = async (batch) => {
     try {
       if (!batch) return;
-      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/batchchat/${encodeURIComponent(batch.trim())}`);
-      setMessages(res.data);
-      setTimeout(scrollToBottom, 100);
+      const res = await API.get(`/batchchat/${encodeURIComponent(batch.trim())}`);
+      if (activeBatchRef.current === batch) {
+        setMessages(Array.isArray(res.data) ? res.data : []);
+        setTimeout(scrollToBottom, 100);
+      }
     } catch (err) {
       console.error("Error fetching messages:", err);
     }
   };
 
   useEffect(() => {
-    if (activeBatch) fetchMessages(activeBatch);
+    if (activeBatch) {
+      setMessages([]);
+      fetchMessages(activeBatch);
+      socket.emit('join_batch', activeBatch);
+    }
   }, [activeBatch]);
 
   useEffect(() => {
@@ -106,13 +119,30 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
     }
   }, [activeBatch, messages]);
 
+  // Socket Event: Listen for incoming batch messages
   useEffect(() => {
-    let interval;
-    if (activeBatch) {
-      interval = setInterval(() => fetchMessages(activeBatch), 3000);
-    }
-    return () => clearInterval(interval);
-  }, [activeBatch]);
+    const handleReceiveBatchMessage = (msg) => {
+      const currentActive = activeBatchRef.current;
+      if (currentActive && String(msg.batch).trim() === String(currentActive).trim()) {
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === msg._id)) return prev;
+          return [...prev, msg];
+        });
+        localStorage.setItem(`chat_last_read_${currentActive}`, Date.now());
+        setTimeout(scrollToBottom, 50);
+      } else {
+        setUnreadCounts((prev) => ({
+          ...prev,
+          [msg.batch]: (prev[msg.batch] || 0) + 1
+        }));
+      }
+    };
+
+    socket.on('receive_batch_message', handleReceiveBatchMessage);
+    return () => {
+      socket.off('receive_batch_message', handleReceiveBatchMessage);
+    };
+  }, []);
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
@@ -142,22 +172,22 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
     e.preventDefault();
     if ((!newMessage.trim() && selectedFiles.length === 0) || !activeBatch) return;
 
+    const payload = {
+      batch: activeBatch.trim(),
+      senderName: userName || "Trainer",
+      senderEmail: userEmail || "trainer@admin.com",
+      senderRole: 'Trainer',
+      senderAvatar: myAvatar,
+      text: newMessage.trim(),
+      attachments: selectedFiles 
+    };
+
+    setNewMessage("");
+    setSelectedFiles([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
     try {
-      const payload = {
-        batch: activeBatch.trim(),
-        senderName: userName || "Trainer",
-        senderEmail: userEmail || "trainer@admin.com",
-        senderRole: 'Trainer',
-        senderAvatar: myAvatar, // 🔥 Sending the dynamically fetched Trainer Photo 🔥
-        text: newMessage.trim(),
-        attachments: selectedFiles 
-      };
-      
-      await axios.post('https://vinsup-4vt5.onrender.com/api/batchchat/send', payload);
-      setNewMessage("");
-      setSelectedFiles([]);
-      if(fileInputRef.current) fileInputRef.current.value = "";
-      fetchMessages(activeBatch); 
+      socket.emit('send_batch_message', payload);
     } catch (err) {
       console.error("Error sending message:", err);
       alert("Failed to send message.");

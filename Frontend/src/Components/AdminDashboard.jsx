@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './AdminDashboard.css';
 import logoImage from '../assets/logo.png'; 
+import API from '../utils/api';
 import Employees from './Employees'; 
 import Courses from './Courses'; 
 import Batches from './Batches'; 
@@ -10,17 +11,15 @@ import Reports from './Reports';
 import TicketNotification from './TicketNotification';
 import AdminTasks from './AdminTasks';
 import AdminLeaveRequests from './AdminLeaveRequests'; 
-import AdminUserChat from './AdminUserChat'; 
 import AdminIDCards from './AdminIDCards';
 import Students from './Students';
 import Settings from './Settings'; 
 
 const AdminDashboard = ({ userName, onLogout }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 992);
   const [activeTab, setActiveTab] = useState('Dashboard');
 
   const [employeesList, setEmployeesList] = useState([]);
-  const [chatUnreadCount, setChatUnreadCount] = useState(0); 
   const [pendingLeaveCount, setPendingLeaveCount] = useState(0); 
 
   // 🔥 ADMIN PROFILE STATE FOR GLOBAL HEADER SYNC 🔥
@@ -38,9 +37,9 @@ const AdminDashboard = ({ userName, onLogout }) => {
   // Fetch Admin Profile Data for Global Header Sync
   const fetchAdminHeaderProfile = async () => {
     try {
-      const res = await fetch('https://vinsup-4vt5.onrender.com/api/admin/profile');
-      const data = await res.json();
-      if (data.success && data.admin) {
+      const res = await API.get('/admin/profile');
+      const data = res.data;
+      if (data?.success && data.admin) {
         setAdminProfile({
           name: data.admin.name,
           profilePhoto: data.admin.profilePhoto
@@ -48,18 +47,6 @@ const AdminDashboard = ({ userName, onLogout }) => {
       }
     } catch (err) {
       console.error("Error fetching admin header profile:", err);
-    }
-  };
-
-  const fetchChatUnreadCount = async () => {
-    try {
-      const response = await fetch('https://vinsup-4vt5.onrender.com/api/privatechat/unread/admin');
-      const data = await response.json();
-      if (data.success) {
-        setChatUnreadCount(data.unreadCount);
-      }
-    } catch (err) {
-      console.error("Error fetching admin unread count:", err);
     }
   };
 
@@ -78,9 +65,8 @@ const AdminDashboard = ({ userName, onLogout }) => {
 
     const interval = setInterval(() => {
       updateLeaveBadge();
-      fetchChatUnreadCount();
       fetchAdminHeaderProfile(); // Sync profile updates in real-time
-    }, 3000);
+    }, 10000);
 
     return () => {
       window.removeEventListener('storage', updateLeaveBadge);
@@ -99,7 +85,6 @@ const AdminDashboard = ({ userName, onLogout }) => {
     { name: 'Leave Requests', icon: 'fas fa-envelope-open-text' }, 
     { name: 'Tasks', icon: 'fas fa-tasks' },
     { name: 'Reports', icon: 'fas fa-chart-line' },
-    { name: 'User Chats', icon: 'far fa-comment-dots' }, 
     { name: 'ID Cards', icon: 'fas fa-id-card' },
     { name: 'Settings', icon: 'fas fa-cog' }
   ];
@@ -119,12 +104,13 @@ const AdminDashboard = ({ userName, onLogout }) => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch('https://vinsup-4vt5.onrender.com/api/dashboard/summary');
-        const data = await response.json();
-        
-        const empResponse = await fetch('https://vinsup-4vt5.onrender.com/api/employees');
-        const empData = await empResponse.json();
-        const employees = Array.isArray(empData) ? empData : (empData.data || []);
+        const [response, empResponse] = await Promise.all([
+          API.get('/dashboard/summary'),
+          API.get('/employees').catch(() => ({ data: [] }))
+        ]);
+        const data = response.data || {};
+        const empData = empResponse.data;
+        const employees = Array.isArray(empData) ? empData : (empData?.data || []);
         setEmployeesList(employees);
 
         setStatsCards([
@@ -207,10 +193,6 @@ const AdminDashboard = ({ userName, onLogout }) => {
                 <i className={item.icon}></i>
                 <span>{item.name}</span>
                 
-                {item.name === 'User Chats' && chatUnreadCount > 0 && (
-                    <span className="chat-badge">{chatUnreadCount}</span>
-                )}
-
                 {item.name === 'Leave Requests' && pendingLeaveCount > 0 && (
                     <span className="chat-badge">{pendingLeaveCount}</span>
                 )}
@@ -371,7 +353,6 @@ const AdminDashboard = ({ userName, onLogout }) => {
         {activeTab === 'Leave Requests' && <AdminLeaveRequests/>} 
         {activeTab === 'Reports' && <Reports/>}
         {activeTab === 'Tasks' && <AdminTasks />}
-        {activeTab === 'User Chats' && <AdminUserChat onRead={() => setChatUnreadCount(0)} />}
         {activeTab === 'Settings' && <Settings />}
 
       </main>

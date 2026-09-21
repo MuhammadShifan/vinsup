@@ -26,7 +26,26 @@ body {
   z-index: 100;
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
-  transition: transform 0.3s ease-in-out; 
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar,
+.sidebar-menu,
+.students-list-sidebar,
+.tr-chat-sidebar,
+.sidebar-list {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+.sidebar::-webkit-scrollbar,
+.sidebar-menu::-webkit-scrollbar,
+.students-list-sidebar::-webkit-scrollbar,
+.tr-chat-sidebar::-webkit-scrollbar,
+.sidebar-list::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .sidebar.closed {
@@ -43,17 +62,27 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(2px);
+  background-color: rgba(15, 23, 42, 0.4);
   z-index: 99;
   display: none;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.3s ease;
 }
 
-.sidebar-backdrop.active {
-  display: block;
-  opacity: 1;
+@media (min-width: 993px) {
+  .sidebar-backdrop {
+    display: none !important;
+    pointer-events: none !important;
+  }
+}
+
+@media (max-width: 992px) {
+  .sidebar-backdrop.active {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .sidebar-logo {
@@ -74,6 +103,14 @@ body {
   margin: 0;
   flex: 1;
   overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.sidebar-menu::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .sidebar-menu li {

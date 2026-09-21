@@ -1,33 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import './Employees.css';
+import API from '../utils/api';
+import { getCache, setCache, clearCache } from '../utils/cache';
 
 const Employees = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editId, setEditId] = useState(null);
-  const [employeeList, setEmployeeList] = useState([]); // DB data store panna
-
+  const [employeeList, setEmployeeList] = useState([]);
+  
   const [searchInput, setSearchInput] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState('All');
+  const [selectedDesignation, setSelectedDesignation] = useState('All');
 
-  // Form State
   const initialFormState = {
-    fullName: '', empId: '', email: '', phone: '', dob: '', gender: '', address: '', profilePhoto: '',
-    designation: '', department: '', experience: '', doj: '', empType: '',
-    courses: [], batches: [],
-    username: '', loginEmail: '', password: '', confirmPassword: '', role: 'Employee',
-    workingDays: [], startTime: '', endTime: '',
-    notes: '', emergencyContact: '', qualification: ''
+    fullName: '', empId: '', email: '', phone: '', dob: '',
+    gender: 'Male', address: '', profilePhoto: null, designation: 'Trainer',
+    department: 'Teaching', experience: '', doj: '', courses: [],
+    batches: [], password: '', confirmPassword: ''
   };
   
   const [formData, setFormData] = useState(initialFormState);
 
-  // 1. FETCH API (GET)
-  const fetchEmployees = async () => {
+  // 1. FETCH API (GET) with cache
+  const fetchEmployees = async (forceRefresh = false) => {
     try {
-      const response = await fetch('https://vinsup-4vt5.onrender.com/api/employees');
-      const result = await response.json();
-      if (result.success) {
-        setEmployeeList(result.data);
+      if (!forceRefresh) {
+        const cached = getCache('employees');
+        if (cached && Array.isArray(cached)) {
+          setEmployeeList(cached);
+          return;
+        }
       }
+      const response = await API.get('/employees');
+      const data = response.data?.data || (Array.isArray(response.data) ? response.data : []);
+      setEmployeeList(data);
+      setCache('employees', data);
     } catch (error) {
       console.error("Error fetching employees:", error);
     }
@@ -66,12 +73,10 @@ const Employees = () => {
     e.stopPropagation(); 
     if (window.confirm(`Are you sure you want to delete ${empToDelete.fullName}?`)) {
       try {
-        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/employees/delete/${empToDelete._id}`, {
-          method: 'DELETE'
-        });
-        const result = await response.json();
-        
-        if (result.success) {
+        const response = await API.delete(`/employees/delete/${empToDelete._id}`);
+        if (response.data?.success || response.status === 200) {
+          clearCache('employees');
+          clearCache('trainers');
           setEmployeeList(prevList => prevList.filter(emp => emp._id !== empToDelete._id));
           alert("Employee Deleted Successfully! 🗑️");
         }
@@ -119,28 +124,26 @@ const Employees = () => {
 
     try {
       if (editId) {
-        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/employees/update/${editId}`, {
-          method: 'PUT',
-          body: submitData 
+        const response = await API.put(`/employees/update/${editId}`, submitData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
-        const result = await response.json();
-        
-        if (result.success) {
+        if (response.data?.success || response.status === 200) {
+          clearCache('employees');
+          clearCache('trainers');
           alert("Employee Updated Successfully! ✏️");
-          fetchEmployees(); 
+          fetchEmployees(true); 
         }
       } else {
-        const response = await fetch('https://vinsup-4vt5.onrender.com/api/employees/add', {
-          method: 'POST',
-          body: submitData 
+        const response = await API.post('/employees/add', submitData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
-        const result = await response.json();
-        
-        if (result.success) {
+        if (response.data?.success || response.status === 201 || response.status === 200) {
+          clearCache('employees');
+          clearCache('trainers');
           alert("New Employee Added with Profile Photo! 🚀");
-          fetchEmployees(); 
+          fetchEmployees(true); 
         } else {
-          alert("Error: " + result.message); 
+          alert("Error: " + (response.data?.message || "Failed to add employee")); 
         }
       }
       
@@ -149,7 +152,8 @@ const Employees = () => {
       setFormData(initialFormState); 
     } catch (error) {
       console.error("Error saving employee:", error);
-      alert("Something went wrong!");
+      const msg = error.response?.data?.message || "Something went wrong saving employee!";
+      alert("Error: " + msg);
     }
   };
 

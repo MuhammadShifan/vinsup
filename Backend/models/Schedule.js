@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const scheduleSchema = new mongoose.Schema({
-  empEmail: { type: String, required: true },
+  empEmail: { type: String, required: true, index: true },
   title: { type: String, required: true },
   category: { type: String, required: true }, 
   type: { type: String, required: true },

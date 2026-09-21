@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
+import { getCache, setCache } from '../utils/cache';
 
 const UserCourses = ({ userName, userEmail }) => {
   const [groupedCourses, setGroupedCourses] = useState({});
@@ -20,9 +21,15 @@ const UserCourses = ({ userName, userEmail }) => {
 
   const fetchSyllabus = async () => {
     try {
-      const response = await axios.get('https://vinsup-4vt5.onrender.com/api/syllabus');
+      const cached = getCache('syllabus');
+      if (cached && Array.isArray(cached)) {
+        setAllSyllabus(cached);
+        return;
+      }
+      const response = await API.get('/syllabus');
       const data = Array.isArray(response.data) ? response.data : (response.data.data || []);
       setAllSyllabus(data);
+      setCache('syllabus', data);
     } catch (err) {
       console.error("Error fetching syllabus:", err);
     }
@@ -30,8 +37,12 @@ const UserCourses = ({ userName, userEmail }) => {
 
   const fetchBatches = async () => {
     try {
-      const response = await axios.get('https://vinsup-4vt5.onrender.com/api/batches');
-      const allBatches = Array.isArray(response.data) ? response.data : (response.data.data || []);
+      let allBatches = getCache('batches');
+      if (!allBatches || !Array.isArray(allBatches)) {
+        const response = await API.get('/batches');
+        allBatches = Array.isArray(response.data) ? response.data : (response.data.data || []);
+        setCache('batches', allBatches);
+      }
       
       const incomingEmail = (userEmail || localStorage.getItem('loggedInEmail') || "").toLowerCase().trim();
       const exactName = (userName || "Employee").toLowerCase().trim();

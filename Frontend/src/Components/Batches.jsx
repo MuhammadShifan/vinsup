@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Employees.css';
+import API from '../utils/api';
+import { getCache, setCache, clearCache } from '../utils/cache';
 
 const Batches = () => {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -23,33 +25,55 @@ const Batches = () => {
   
   const [formData, setFormData] = useState(initialFormState);
 
-  const fetchBatches = async () => {
+  const fetchBatches = async (forceRefresh = false) => {
     try {
-      const response = await fetch('https://vinsup-4vt5.onrender.com/api/batches');
-      const result = await response.json();
-      if (result.success) { setBatchList(result.data); }
-    } catch (error) { console.error("Error fetching batches:", error); }
+      if (!forceRefresh) {
+        const cached = getCache('batches');
+        if (cached && Array.isArray(cached)) {
+          setBatchList(cached);
+          return;
+        }
+      }
+      const response = await API.get('/batches');
+      const data = response.data?.data || (Array.isArray(response.data) ? response.data : []);
+      setBatchList(data);
+      setCache('batches', data);
+    } catch (error) { 
+      console.error("Error fetching batches:", error); 
+    }
   };
 
   const fetchTrainers = async () => {
     try {
-      const response = await fetch('https://vinsup-4vt5.onrender.com/api/employees');
-      const result = await response.json();
-      if (result.success) { 
-        const trainers = result.data.filter(emp => emp.designation === 'Trainer');
-        setTrainersList(trainers); 
+      const cached = getCache('trainers');
+      if (cached && Array.isArray(cached)) {
+        setTrainersList(cached);
+        return;
       }
-    } catch (error) { console.error("Error fetching trainers:", error); }
+      const response = await API.get('/employees');
+      const data = response.data?.data || (Array.isArray(response.data) ? response.data : []);
+      const trainers = data.filter(emp => emp.designation === 'Trainer');
+      setTrainersList(trainers); 
+      setCache('trainers', trainers);
+    } catch (error) { 
+      console.error("Error fetching trainers:", error); 
+    }
   };
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('https://vinsup-4vt5.onrender.com/api/courses');
-      const result = await response.json();
-      if (result.success) { 
-        setCoursesList(result.data); 
+      const cached = getCache('courses');
+      if (cached && Array.isArray(cached)) {
+        setCoursesList(cached);
+        return;
       }
-    } catch (error) { console.error("Error fetching courses:", error); }
+      const response = await API.get('/courses');
+      const data = response.data?.data || (Array.isArray(response.data) ? response.data : []);
+      setCoursesList(data); 
+      setCache('courses', data);
+    } catch (error) { 
+      console.error("Error fetching courses:", error); 
+    }
   };
 
   useEffect(() => { 
@@ -67,13 +91,16 @@ const Batches = () => {
     e.preventDefault();
     if (window.confirm(`Are you sure you want to delete ${batchToDelete.batchName}?`)) {
       try {
-        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/batches/delete/${batchToDelete._id}`, { method: 'DELETE' });
-        const result = await response.json();
-        if (result.success) {
+        const response = await API.delete(`/batches/delete/${batchToDelete._id}`);
+        if (response.data?.success || response.status === 200) {
+          clearCache('batches');
           setBatchList(prevList => prevList.filter(b => b._id !== batchToDelete._id));
           alert("Batch Deleted Successfully! 🗑️");
         }
-      } catch (error) { alert("Failed to delete batch!"); }
+      } catch (error) { 
+        console.error("Delete batch error:", error);
+        alert("Failed to delete batch!"); 
+      }
     }
   };
 
@@ -99,27 +126,23 @@ const Batches = () => {
       let isEdit = !!editId;
 
       if (isEdit) {
-        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/batches/update/${editId}`, {
-          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData)
-        });
-        if ((await response.json()).success) { 
+        const response = await API.put(`/batches/update/${editId}`, formData);
+        if (response.data?.success || response.status === 200) { 
           alert("Batch Updated Successfully! ✏️"); 
           isSuccess = true; 
         }
       } else {
-        const response = await fetch('https://vinsup-4vt5.onrender.com/api/batches/add', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...formData, progress: 0, status: 'Ongoing' }) 
-        });
-        if ((await response.json()).success) { 
+        const response = await API.post('/batches/add', { ...formData, progress: 0, status: 'Ongoing' });
+        if (response.data?.success || response.status === 201 || response.status === 200) { 
           alert("New Batch Added! 🚀"); 
           isSuccess = true; 
         }
       }
 
       if (isSuccess) {
-        fetchBatches();
+        clearCache('batches');
+        fetchBatches(true);
 
-        // 🔥 PUDHU FIX: Only send notification from Frontend if it's an EDIT. Backend handles NEW batch notification automatically. 🔥
         if (isEdit && formData.trainerName) {
           const assignedTrainer = trainersList.find(t => t.fullName === formData.trainerName);
           if (assignedTrainer && assignedTrainer.email) {
@@ -130,17 +153,18 @@ const Batches = () => {
               recipientEmail: assignedTrainer.email.toLowerCase().trim()
             };
 
-            await fetch('https://vinsup-4vt5.onrender.com/api/notifications/add', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(notifPayload)
-            }).catch(err => console.log("Notification send error:", err));
+            await API.post('/notifications/add', notifPayload)
+              .catch(err => console.log("Notification send error:", err));
           }
         }
       }
-
-      setShowAddForm(false); setEditId(null); setFormData(initialFormState); 
-    } catch (error) { alert("Something went wrong!"); }
+      setShowAddForm(false);
+      setEditId(null);
+    } catch (error) {
+      console.error("Save batch error:", error);
+      const msg = error.response?.data?.message || "Failed to save batch!";
+      alert("Error: " + msg);
+    }
   };
 
   const filteredByTab = batchList.filter(batch => {

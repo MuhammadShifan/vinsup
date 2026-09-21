@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const assignmentSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  batchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Batch', required: true },
+  batchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Batch', required: true, index: true },
   moduleOrTopic: { type: String, required: true },
   assignmentType: { type: String, required: true },
   dueDate: { type: String, required: true },
@@ -12,7 +12,7 @@ const assignmentSchema = new mongoose.Schema({
   attachment: { type: String }, 
   instructions: { type: String },
   status: { type: String, enum: ['Draft', 'Published'], default: 'Published' },
-  createdBy: { type: String, required: true } 
+  createdBy: { type: String, required: true, index: true } 
 }, { timestamps: true });
 
 module.exports = mongoose.model('Assignment', assignmentSchema);

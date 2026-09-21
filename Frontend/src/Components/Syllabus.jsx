@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Employees.css';
+import API from '../utils/api';
+import { getCache, setCache, clearCache } from '../utils/cache';
 
 const Syllabus = () => {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -20,27 +22,37 @@ const Syllabus = () => {
   // Dynamic Modules State
   const [modules, setModules] = useState([{ title: '', topics: [''] }]);
 
-  // 1. FETCH SYLLABUS API (GET)
-  const fetchSyllabus = async () => {
+  // 1. FETCH SYLLABUS API (GET) with cache
+  const fetchSyllabus = async (forceRefresh = false) => {
     try {
-      const response = await fetch('https://vinsup-4vt5.onrender.com/api/syllabus');
-      const result = await response.json();
-      if (result.success) {
-        setSyllabusList(result.data);
+      if (!forceRefresh) {
+        const cached = getCache('syllabus');
+        if (cached && Array.isArray(cached)) {
+          setSyllabusList(cached);
+          return;
+        }
       }
+      const response = await API.get('/syllabus');
+      const data = response.data?.data || (Array.isArray(response.data) ? response.data : []);
+      setSyllabusList(data);
+      setCache('syllabus', data);
     } catch (error) {
       console.error("Error fetching syllabus:", error);
     }
   };
 
-  // 2. FETCH COURSES API (GET)
+  // 2. FETCH COURSES API (GET) with cache
   const fetchCourses = async () => {
     try {
-      const response = await fetch('https://vinsup-4vt5.onrender.com/api/courses');
-      const result = await response.json();
-      if (result.success) {
-        setCoursesList(result.data);
+      const cached = getCache('courses');
+      if (cached && Array.isArray(cached)) {
+        setCoursesList(cached);
+        return;
       }
+      const response = await API.get('/courses');
+      const data = response.data?.data || (Array.isArray(response.data) ? response.data : []);
+      setCoursesList(data);
+      setCache('courses', data);
     } catch (error) {
       console.error("Error fetching courses:", error);
     }
@@ -112,13 +124,16 @@ const Syllabus = () => {
     e.preventDefault();
     if (window.confirm(`Are you sure you want to delete ${syllabusToDelete.courseName} syllabus?`)) {
       try {
-        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/syllabus/delete/${syllabusToDelete._id}`, { method: 'DELETE' });
-        const result = await response.json();
-        if (result.success) {
+        const response = await API.delete(`/syllabus/delete/${syllabusToDelete._id}`);
+        if (response.data?.success || response.status === 200) {
+          clearCache('syllabus');
           setSyllabusList(prev => prev.filter(s => s._id !== syllabusToDelete._id));
           alert("Syllabus Deleted Successfully! 🗑️");
         }
-      } catch (error) { alert("Failed to delete syllabus!"); }
+      } catch (error) { 
+        console.error("Delete syllabus error:", error);
+        alert("Failed to delete syllabus!"); 
+      }
     }
   };
 
@@ -142,19 +157,28 @@ const Syllabus = () => {
 
     try {
       if (editId) {
-        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/syllabus/update/${editId}`, {
-          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(submitData)
-        });
-        if ((await response.json()).success) { alert("Syllabus Updated Successfully! ✏️"); fetchSyllabus(); }
+        const response = await API.put(`/syllabus/update/${editId}`, submitData);
+        if (response.data?.success || response.status === 200) { 
+          clearCache('syllabus');
+          alert("Syllabus Updated Successfully! ✏️"); 
+          fetchSyllabus(true); 
+        }
       } else {
-        const response = await fetch('https://vinsup-4vt5.onrender.com/api/syllabus/add', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(submitData)
-        });
-        if ((await response.json()).success) { alert("New Syllabus Added! 🚀"); fetchSyllabus(); }
+        const response = await API.post('/syllabus/add', submitData);
+        if (response.data?.success || response.status === 201 || response.status === 200) { 
+          clearCache('syllabus');
+          alert("New Syllabus Added! 🚀"); 
+          fetchSyllabus(true); 
+        }
       }
-      setShowAddForm(false); setEditId(null); 
-      setFormData(initialFormState); setModules([{ title: '', topics: [''] }]);
-    } catch (error) { alert("Something went wrong!"); }
+      setShowAddForm(false); 
+      setEditId(null); 
+      setFormData(initialFormState); 
+      setModules([{ title: '', topics: [''] }]);
+    } catch (error) { 
+      console.error("Save syllabus error:", error);
+      alert("Something went wrong saving syllabus!"); 
+    }
   };
 
   // Live Filter

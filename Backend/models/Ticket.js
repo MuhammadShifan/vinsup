@@ -6,8 +6,8 @@ const TicketSchema = new mongoose.Schema({
   priority: String,
   description: String,
   date: String,
-  status: { type: String, default: 'In Progress' },
-  employeeId: { type: String, required: true } 
+  status: { type: String, default: 'In Progress', index: true },
+  employeeId: { type: String, required: true, index: true } 
 });
 
 module.exports = mongoose.model('Ticket', TicketSchema);

@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const quizResultSchema = new mongoose.Schema({
-  quizId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz', required: true },
-  studentEmail: { type: String, required: true },
+  quizId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz', required: true, index: true },
+  studentEmail: { type: String, required: true, index: true },
   score: { type: Number, required: true },
   totalMarks: { type: Number, required: true },
   answers: { type: Object }, // Store what student selected

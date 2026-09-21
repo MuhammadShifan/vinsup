@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import API, { getBaseUrl } from '../../utils/api';
+import socket from '../../utils/socket';
 
 const StudentBatchChat = ({ userName, userEmail }) => {
   const [messages, setMessages] = useState([]);
@@ -11,6 +12,11 @@ const StudentBatchChat = ({ userName, userEmail }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
   const chatEndRef = useRef(null);
+  const studentBatchRef = useRef(studentBatch);
+
+  useEffect(() => {
+    studentBatchRef.current = studentBatch;
+  }, [studentBatch]);
 
   const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
 
@@ -19,14 +25,14 @@ const StudentBatchChat = ({ userName, userEmail }) => {
     if (rawPath.startsWith('http') || rawPath.startsWith('data:image')) return rawPath;
     let cleanPath = rawPath.replace(/\\/g, '/').replace(/^\/+/, '');
     if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-    return `https://vinsup-4vt5.onrender.com/${cleanPath}`;
+    return `${getBaseUrl()}/${cleanPath}`;
   };
 
   useEffect(() => {
     const initChat = async () => {
       try {
         const activeEmail = (userEmail || "").toLowerCase().trim();
-        const stuRes = await axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(() => null);
+        const stuRes = await API.get('/students').catch(() => null);
         const allStudents = stuRes?.data?.data || stuRes?.data || [];
         const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
         
@@ -37,7 +43,10 @@ const StudentBatchChat = ({ userName, userEmail }) => {
         const rawPhoto = currentStudent?.profilePhoto || currentStudent?.photo || currentStudent?.image || currentStudent?.avatar || '';
         setMyAvatar(getPhotoUrl(rawPhoto, userName || "Student"));
 
-        if (myBatch) fetchMessages(myBatch);
+        if (myBatch) {
+          fetchMessages(myBatch);
+          socket.emit('join_batch', myBatch);
+        }
         setLoading(false);
       } catch (error) {
         console.error("Error initializing chat:", error);
@@ -49,9 +58,11 @@ const StudentBatchChat = ({ userName, userEmail }) => {
 
   const fetchMessages = async (batch) => {
     try {
-      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/batchchat/${encodeURIComponent(batch)}`);
-      setMessages(res.data);
-      setTimeout(scrollToBottom, 100);
+      const res = await API.get(`/batchchat/${encodeURIComponent(batch)}`);
+      if (studentBatchRef.current === batch) {
+        setMessages(Array.isArray(res.data) ? res.data : []);
+        setTimeout(scrollToBottom, 100);
+      }
     } catch (err) {
       console.error("Error fetching messages:", err);
     }
@@ -63,13 +74,25 @@ const StudentBatchChat = ({ userName, userEmail }) => {
     }
   }, [messages, studentBatch]);
 
+  // Socket Event: Listen for incoming batch messages
   useEffect(() => {
-    let interval;
-    if (studentBatch) {
-      interval = setInterval(() => fetchMessages(studentBatch), 3000);
-    }
-    return () => clearInterval(interval);
-  }, [studentBatch]);
+    const handleReceiveBatchMessage = (msg) => {
+      const currentBatch = studentBatchRef.current;
+      if (currentBatch && String(msg.batch).trim() === String(currentBatch).trim()) {
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === msg._id)) return prev;
+          return [...prev, msg];
+        });
+        localStorage.setItem(`chat_last_read_${currentBatch}`, Date.now());
+        setTimeout(scrollToBottom, 50);
+      }
+    };
+
+    socket.on('receive_batch_message', handleReceiveBatchMessage);
+    return () => {
+      socket.off('receive_batch_message', handleReceiveBatchMessage);
+    };
+  }, []);
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
@@ -99,24 +122,25 @@ const StudentBatchChat = ({ userName, userEmail }) => {
     e.preventDefault();
     if ((!newMessage.trim() && selectedFiles.length === 0) || !studentBatch) return;
 
+    const payload = {
+      batch: studentBatch,
+      senderName: userName || "Student",
+      senderEmail: userEmail,
+      senderRole: 'Student',
+      senderAvatar: myAvatar,
+      text: newMessage.trim(),
+      attachments: selectedFiles
+    };
+
+    setNewMessage("");
+    setSelectedFiles([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
     try {
-      const payload = {
-        batch: studentBatch,
-        senderName: userName || "Student",
-        senderEmail: userEmail,
-        senderRole: 'Student',
-        senderAvatar: myAvatar, // 🔥 Dynamically fetched student avatar 🔥
-        text: newMessage.trim(),
-        attachments: selectedFiles
-      };
-      await axios.post('https://vinsup-4vt5.onrender.com/api/batchchat/send', payload);
-      setNewMessage("");
-      setSelectedFiles([]);
-      if(fileInputRef.current) fileInputRef.current.value = "";
-      fetchMessages(studentBatch);
+      socket.emit('send_batch_message', payload);
     } catch (err) {
       console.error("Error sending message:", err);
-      alert("Failed to send message. File might be too large.");
+      alert("Failed to send message.");
     }
   };
 

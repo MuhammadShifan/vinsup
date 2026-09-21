@@ -8,7 +8,8 @@ const moduleSchema = new mongoose.Schema({
 const syllabusSchema = new mongoose.Schema({
   courseName: { 
     type: String, 
-    required: true 
+    required: true,
+    index: true
   },
   duration: { 
     type: String, 

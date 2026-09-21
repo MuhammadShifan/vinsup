@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const reportSchema = new mongoose.Schema({
   reportName: { type: String, required: true },
   reportType: { type: String, required: true },
-  empId: { type: String, required: true },
+  empId: { type: String, required: true, index: true },
   empName: { type: String },
   empEmail: { type: String },
   summary: { type: String, required: true }

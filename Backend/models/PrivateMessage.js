@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const PrivateMessageSchema = new mongoose.Schema({
-    senderEmail: { type: String, required: true },
-    receiverEmail: { type: String, required: true },
+    senderEmail: { type: String, required: true, index: true },
+    receiverEmail: { type: String, required: true, index: true },
     senderName: { type: String, required: true },
     message: { type: String, default: "" }, 
     file: { 
@@ -11,7 +11,7 @@ const PrivateMessageSchema = new mongoose.Schema({
         fileData: { type: String } 
     },
     timestamp: { type: Date, default: Date.now },
-    isRead: { type: Boolean, default: false }
+    isRead: { type: Boolean, default: false, index: true }
 });
 
 module.exports = mongoose.model('PrivateMessage', PrivateMessageSchema);

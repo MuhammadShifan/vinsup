@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
 
 const UserAttendance = ({ userName, userEmail }) => {
   const [attendanceState, setAttendanceState] = useState('idle'); 
@@ -55,7 +55,10 @@ const UserAttendance = ({ userName, userEmail }) => {
 
   const fetchUserData = async () => {
     try {
-      const response = await axios.get('https://vinsup-4vt5.onrender.com/api/employees');
+      const token = localStorage.getItem('token');
+      const response = await API.get('/employees', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
       const empData = Array.isArray(response.data) ? response.data : (response.data.data || []);
       
       const storedEmail = localStorage.getItem('loggedInEmail');
@@ -166,14 +169,14 @@ const UserAttendance = ({ userName, userEmail }) => {
         setCheckInTime(timeString);
         setStatusToday(newStatus);
         
-        await axios.put(`https://vinsup-4vt5.onrender.com/api/employees/${currentUserData._id || currentUserData.empId}`, {
+        await API.put(`/employees/${currentUserData._id || currentUserData.empId}`, {
           todayCheckIn: timeString,
           todayStatus: newStatus,
           lastAttendanceDate: todayDateStr, 
           todayCheckOut: "-" 
         });
 
-        await axios.post('https://vinsup-4vt5.onrender.com/api/notifications/add', {
+        await API.post('/notifications/add', {
           type: 'Attendance',
           title: 'Employee Checked In',
           message: `${empName} has checked in at ${timeString}. Status: ${newStatus}`
@@ -201,11 +204,11 @@ const UserAttendance = ({ userName, userEmail }) => {
           setCheckOutTime(timeString);
           setTotalHours(calculateTotalHours(checkInTime, timeString));
 
-          await axios.put(`https://vinsup-4vt5.onrender.com/api/employees/${currentUserData._id || currentUserData.empId}`, {
+          await API.put(`/employees/${currentUserData._id || currentUserData.empId}`, {
             todayCheckOut: timeString
           });
 
-          await axios.post('https://vinsup-4vt5.onrender.com/api/notifications/add', {
+          await API.post('/notifications/add', {
             type: 'Attendance',
             title: 'Employee Checked Out',
             message: `${empName} has checked out at ${timeString}.`

@@ -2,13 +2,13 @@ const mongoose = require('mongoose');
 
 const quizSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  batch: { type: String, required: true },
+  batch: { type: String, required: true, index: true },
   module: { type: String, default: 'General' },
   moduleName: { type: String, default: 'General' }, 
   totalQuestions: { type: Number, required: true },
   totalMarks: { type: Number, required: true },
   description: { type: String },
-  trainerEmail: { type: String },
+  trainerEmail: { type: String, index: true },
   questions: [{
     question: String,
     marks: Number,

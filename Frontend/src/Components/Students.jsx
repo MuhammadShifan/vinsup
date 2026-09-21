@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
+import { getCache, setCache, clearCache } from '../utils/cache';
 
 const Students = () => {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -31,40 +32,68 @@ const Students = () => {
     return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
   };
 
-  const fetchData = async () => {
+  const fetchData = async (forceRefresh = false) => {
     try {
-      const stuRes = await axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(() => null);
+      if (!forceRefresh) {
+        const cachedStudents = getCache('students');
+        if (cachedStudents && Array.isArray(cachedStudents)) {
+          setStudentsList(cachedStudents);
+          if (cachedStudents.length > 0 && !activeStudentId) {
+            setActiveStudentId(cachedStudents[0].studentId);
+          }
+        }
+        const cachedCourses = getCache('courses');
+        if (cachedCourses) setCoursesList(cachedCourses);
+        const cachedBatches = getCache('batches');
+        if (cachedBatches) setBatchesList(cachedBatches);
+        const cachedSyllabus = getCache('syllabus');
+        if (cachedSyllabus) setSyllabusList(cachedSyllabus);
+      }
+
+      const [stuRes, crsRes, bthRes, empRes, sylRes] = await Promise.all([
+        API.get('/students').catch(() => null),
+        API.get('/courses').catch(() => null),
+        API.get('/batches').catch(() => null),
+        API.get('/employees').catch(() => null),
+        API.get('/syllabus').catch(() => null)
+      ]);
+
       const stuData = stuRes?.data?.data || stuRes?.data || [];
       const validStudents = Array.isArray(stuData) ? stuData : [];
       setStudentsList(validStudents);
+      setCache('students', validStudents);
       
       if (validStudents.length > 0 && !activeStudentId) {
         setActiveStudentId(validStudents[0].studentId);
       }
 
-      const crsRes = await axios.get('https://vinsup-4vt5.onrender.com/api/courses').catch(() => null);
       const crsData = crsRes?.data?.data || crsRes?.data || [];
-      setCoursesList(Array.isArray(crsData) ? crsData : []);
+      if (Array.isArray(crsData)) {
+        setCoursesList(crsData);
+        setCache('courses', crsData);
+      }
 
-      const bthRes = await axios.get('https://vinsup-4vt5.onrender.com/api/batches').catch(() => null);
       const bthData = bthRes?.data?.data || bthRes?.data || [];
-      setBatchesList(Array.isArray(bthData) ? bthData : []);
+      if (Array.isArray(bthData)) {
+        setBatchesList(bthData);
+        setCache('batches', bthData);
+      }
 
-      const empRes = await axios.get('https://vinsup-4vt5.onrender.com/api/employees').catch(() => null);
       const empData = empRes?.data?.data || empRes?.data || [];
       const allEmp = Array.isArray(empData) ? empData : [];
-      
       setTrainersList(allEmp.filter(e => {
         const role = (e.designation || e.role || '').toLowerCase();
         return role.includes('trainer') || role.includes('faculty');
       }));
 
-      const sylRes = await axios.get('https://vinsup-4vt5.onrender.com/api/syllabus').catch(() => null);
       const sylData = sylRes?.data?.data || sylRes?.data || [];
-      setSyllabusList(Array.isArray(sylData) ? sylData : []);
+      if (Array.isArray(sylData)) {
+        setSyllabusList(sylData);
+        setCache('syllabus', sylData);
+      }
 
     } catch (error) {
-      console.error("Error fetching dependencies:", error);
+      console.error("Error fetching dependencies in Students:", error);
     }
   };
 
@@ -132,22 +161,23 @@ const Students = () => {
     try {
       let response;
       if (isEditing) {
-        response = await axios.put(`https://vinsup-4vt5.onrender.com/api/students/update/${editDbId}`, submitData, {
+        response = await API.put(`/students/update/${editDbId}`, submitData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       } else {
-        response = await axios.post('https://vinsup-4vt5.onrender.com/api/students/add', submitData, {
+        response = await API.post('/students/add', submitData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
       
-      if (response.data.success) {
+      if (response.data?.success) {
+        clearCache('students');
         alert(`Student ${isEditing ? 'Updated' : 'Added'} Successfully! 🎉`);
         setShowAddForm(false);
         setIsEditing(false);
         setEditDbId(null);
         setFormData(initialFormState);
-        fetchData(); 
+        fetchData(true); 
       }
     } catch (error) {
       alert(error.response?.data?.message || `Server Error: Failed to ${isEditing ? 'update' : 'add'} student!`);
@@ -157,11 +187,12 @@ const Students = () => {
   const handleDeleteStudent = async (dbId, stuName) => {
     if (window.confirm(`Are you sure you want to delete ${stuName}?`)) {
       try {
-        const response = await axios.delete(`https://vinsup-4vt5.onrender.com/api/students/delete/${dbId}`);
-        if (response.data.success) {
+        const response = await API.delete(`/students/delete/${dbId}`);
+        if (response.data?.success) {
+          clearCache('students');
           alert("Student Deleted! 🗑️");
           setActiveStudentId(null);
-          fetchData();
+          fetchData(true);
         }
       } catch (error) {
         console.error("Error deleting student:", error);

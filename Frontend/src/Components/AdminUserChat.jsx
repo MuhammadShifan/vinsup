@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
+import socket from '../utils/socket';
 
 const AdminUserChat = ({ onRead }) => {
   const [employees, setEmployees] = useState([]);
@@ -17,23 +18,101 @@ const AdminUserChat = ({ onRead }) => {
 
   const adminEmail = "admin@vinsup.com";
   const adminName = "Admin";
+  const selectedUserRef = useRef(selectedUser);
+  const [loadingChat, setLoadingChat] = useState(false);
 
   useEffect(() => {
+    selectedUserRef.current = selectedUser;
+  }, [selectedUser]);
+
+  useEffect(() => {
+    // Join Admin room in Socket.io
+    socket.emit('join_user', adminEmail);
+
     const fetchEmployees = async () => {
       try {
-        const res = await axios.get('https://vinsup-4vt5.onrender.com/api/employees');
+        const res = await API.get('/employees');
         const empData = Array.isArray(res.data) ? res.data : (res.data.data || []);
         setEmployees(empData);
       } catch (err) {
         console.error("Error fetching employees:", err);
       }
     };
+
     fetchEmployees();
+    fetchUnreadCounts();
+
+    // Socket Event: Real-time incoming private message
+    const handleReceiveMessage = (msg) => {
+      const currentSelected = selectedUserRef.current;
+      const sEmail = (msg.senderEmail || '').toLowerCase().trim();
+      const rEmail = (msg.receiverEmail || '').toLowerCase().trim();
+      const myAdminEmail = adminEmail.toLowerCase().trim();
+
+      if (currentSelected && currentSelected.email) {
+        const activeTarget = currentSelected.email.toLowerCase().trim();
+        const isForActiveChat =
+          (sEmail === activeTarget && rEmail === myAdminEmail) ||
+          (sEmail === myAdminEmail && rEmail === activeTarget);
+
+        if (isForActiveChat) {
+          setChatMessages((prev) => {
+            if (prev.some((m) => m._id && msg._id && m._id === msg._id)) return prev;
+            return [...prev, msg];
+          });
+
+          if (sEmail === activeTarget) {
+            socket.emit('mark_private_read', {
+              receiverEmail: adminEmail,
+              senderEmail: activeTarget
+            });
+          }
+          return;
+        }
+      }
+
+      // If message is from someone else, increment unread count for that sender
+      if (sEmail && sEmail !== myAdminEmail) {
+        setUnreadCounts((prev) => ({
+          ...prev,
+          [sEmail]: (prev[sEmail] || 0) + 1
+        }));
+      }
+    };
+
+    // Socket Event: Message edited
+    const handleMessageEdited = (updatedMsg) => {
+      setChatMessages((prev) =>
+        prev.map((m) => (m._id === updatedMsg._id ? updatedMsg : m))
+      );
+    };
+
+    // Socket Event: Message deleted
+    const handleMessageDeleted = ({ id }) => {
+      setChatMessages((prev) => prev.filter((m) => m._id !== id));
+    };
+
+    // Socket Event: Unread counts update
+    const handleUnreadUpdate = () => {
+      fetchUnreadCounts();
+    };
+
+    socket.on('receive_private_message', handleReceiveMessage);
+    socket.on('private_message_edited', handleMessageEdited);
+    socket.on('private_message_deleted', handleMessageDeleted);
+    socket.on('unread_count_update', handleUnreadUpdate);
+
+    return () => {
+      socket.off('receive_private_message', handleReceiveMessage);
+      socket.off('private_message_edited', handleMessageEdited);
+      socket.off('private_message_deleted', handleMessageDeleted);
+      socket.off('unread_count_update', handleUnreadUpdate);
+    };
   }, []);
 
   const fetchUnreadCounts = async () => {
     try {
-      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/privatechat/unread-senders/admin`);
+      const res = await API.get('/privatechat/unread-senders/admin');
       if (res.data && res.data.success) {
         setUnreadCounts(res.data.counts || {});
       }
@@ -42,52 +121,64 @@ const AdminUserChat = ({ onRead }) => {
     }
   };
 
-  const fetchChatMessages = async () => {
-    if (selectedUser && selectedUser.email) {
-      try {
-        const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/privatechat/${selectedUser.email}`);
-        setChatMessages(res.data);
-      } catch (err) {
-        console.error("Error fetching private chat:", err);
-      }
-    }
-  };
-
-  const markMessagesAsRead = async () => {
-    if (selectedUser && selectedUser.email) {
-      try {
-        await axios.put('https://vinsup-4vt5.onrender.com/api/privatechat/mark-read', {
-            receiverEmail: adminEmail,
-            senderEmail: selectedUser.email
-        });
-        fetchUnreadCounts(); 
-        if (onRead) onRead(); 
-      } catch (err) {
-        console.error("Error marking chat as read:", err);
-      }
-    }
-  };
-
+  // Immediate state reset and race-condition free fetch
   useEffect(() => {
-    if (selectedUser) {
-        markMessagesAsRead();
+    if (!selectedUser || !selectedUser.email) {
+      setChatMessages([]);
+      return;
     }
-    
-    let interval;
-    if (selectedUser && !editingMsgId) { 
-      fetchChatMessages();
-      interval = setInterval(() => {
-          fetchChatMessages();
-          fetchUnreadCounts();
-      }, 3000); 
-    } else {
-        fetchUnreadCounts();
-        interval = setInterval(fetchUnreadCounts, 3000);
-    }
-    return () => clearInterval(interval);
-  }, [selectedUser, editingMsgId]);
 
-  // 🔥 FIX 1: Auto-scroll on new messages ONLY 🔥
+    const targetEmail = selectedUser.email.toLowerCase().trim();
+    let isCurrent = true;
+
+    // Immediately clear chat to prevent previous user's messages from lingering
+    setChatMessages([]);
+    setLoadingChat(true);
+
+    const loadChat = async () => {
+      try {
+        const res = await API.get(`/privatechat/${targetEmail}`);
+        if (isCurrent) {
+          setChatMessages(Array.isArray(res.data) ? res.data : []);
+        }
+      } catch (err) {
+        if (isCurrent) {
+          console.error("Error fetching private chat:", err);
+          setChatMessages([]);
+        }
+      } finally {
+        if (isCurrent) {
+          setLoadingChat(false);
+        }
+      }
+    };
+
+    loadChat();
+
+    // Mark as read
+    socket.emit('mark_private_read', {
+      receiverEmail: adminEmail,
+      senderEmail: targetEmail
+    });
+    API.put('/privatechat/mark-read', {
+      receiverEmail: adminEmail,
+      senderEmail: targetEmail
+    }).catch(() => {});
+
+    setUnreadCounts((prev) => {
+      const next = { ...prev };
+      delete next[targetEmail];
+      return next;
+    });
+
+    if (onRead) onRead();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [selectedUser?.email]);
+
+  // Auto-scroll on new messages
   useEffect(() => {
     if (messagesEndRef.current && !editingMsgId) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -131,56 +222,75 @@ const AdminUserChat = ({ onRead }) => {
     e.preventDefault();
     if ((!newMsg.trim() && selectedFiles.length === 0) || !selectedUser) return;
 
+    const filesToSend = [...selectedFiles];
+    const textToSend = newMsg;
+
+    setNewMsg("");
+    setSelectedFiles([]);
+
     try {
-      if (selectedFiles.length > 0) {
-        for (let i = 0; i < selectedFiles.length; i++) {
+      if (filesToSend.length > 0) {
+        for (let i = 0; i < filesToSend.length; i++) {
           const filePayload = {
-            fileName: selectedFiles[i].name,
-            fileType: selectedFiles[i].type,
-            fileData: selectedFiles[i].data
+            fileName: filesToSend[i].name,
+            fileType: filesToSend[i].type,
+            fileData: filesToSend[i].data
           };
 
-          await axios.post('https://vinsup-4vt5.onrender.com/api/privatechat/send', { 
-            senderName: adminName, 
-            senderEmail: adminEmail, 
-            receiverEmail: selectedUser.email, 
-            message: i === 0 ? newMsg : "", 
+          const payload = {
+            senderName: adminName,
+            senderEmail: adminEmail,
+            receiverEmail: selectedUser.email,
+            message: i === 0 ? textToSend : "",
             file: filePayload
-          });
+          };
+
+          socket.emit('send_private_message', payload);
         }
       } else {
-        await axios.post('https://vinsup-4vt5.onrender.com/api/privatechat/send', { 
-          senderName: adminName, 
-          senderEmail: adminEmail, 
-          receiverEmail: selectedUser.email, 
-          message: newMsg,
+        const payload = {
+          senderName: adminName,
+          senderEmail: adminEmail,
+          receiverEmail: selectedUser.email,
+          message: textToSend,
           file: null
-        });
-      }
+        };
 
-      setNewMsg("");
-      setSelectedFiles([]);
-      fetchChatMessages(); 
+        socket.emit('send_private_message', payload);
+      }
     } catch (err) { 
       console.error("Error sending message:", err); 
     }
   };
 
   const handleDeleteMessage = async (id) => {
-    if(!window.confirm("Delete this message?")) return;
+    if (!window.confirm("Delete this message?")) return;
     try {
-      await axios.delete(`https://vinsup-4vt5.onrender.com/api/privatechat/delete/${id}`);
-      fetchChatMessages();
+      socket.emit('delete_private_message', {
+        id,
+        senderEmail: adminEmail,
+        receiverEmail: selectedUser?.email
+      });
+      await API.delete(`/privatechat/delete/${id}`);
+      setChatMessages((prev) => prev.filter((m) => m._id !== id));
     } catch(err) { console.error("Error deleting message:", err); }
   };
 
   const handleUpdateMessage = async (id) => {
-    if(!editingMsgText.trim()) return;
+    if (!editingMsgText.trim()) return;
     try {
-      await axios.put(`https://vinsup-4vt5.onrender.com/api/privatechat/edit/${id}`, { message: editingMsgText });
+      socket.emit('edit_private_message', {
+        id,
+        message: editingMsgText,
+        senderEmail: adminEmail,
+        receiverEmail: selectedUser?.email
+      });
+      await API.put(`/privatechat/edit/${id}`, { message: editingMsgText });
+      setChatMessages((prev) =>
+        prev.map((m) => (m._id === id ? { ...m, message: editingMsgText } : m))
+      );
       setEditingMsgId(null);
       setEditingMsgText("");
-      fetchChatMessages();
     } catch(err) { console.error("Error updating message:", err); }
   };
 
@@ -319,60 +429,69 @@ const AdminUserChat = ({ onRead }) => {
               </div>
 
               <div className="scroll-bar" style={{ flex: 1, padding: 'clamp(12px, 2vw, 20px)', overflowY: 'auto', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                {chatMessages.length > 0 ? chatMessages.map((msg, idx) => {
-                  const isMe = msg.senderEmail === adminEmail;
-                  const msgTime = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                  
-                  return (
-                    <div key={msg._id || idx} className="msg-container" style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
-                      {!isMe && <span style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px', marginLeft: '5px', fontWeight: '600' }}>{msg.senderName}</span>}
-                      
-                      {editingMsgId === msg._id ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#fff', padding: '12px', borderRadius: '12px', border: '1px solid #2563eb', width: '280px', maxWidth: '100%' }}>
-                          <input type="text" value={editingMsgText} onChange={(e) => setEditingMsgText(e.target.value)} autoFocus style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
-                          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                            <button onClick={() => { setEditingMsgId(null); setEditingMsgText(""); }} style={{ padding: '4px 10px', fontSize: '11px', cursor: 'pointer', background: '#f1f5f9', border: 'none', borderRadius: '4px', fontWeight: '600' }}>Cancel</button>
-                            <button onClick={() => handleUpdateMessage(msg._id)} style={{ padding: '4px 10px', fontSize: '11px', cursor: 'pointer', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: '600' }}>Save</button>
+                {loadingChat ? (
+                  <div style={{ textAlign: 'center', padding: '50px 20px', color: '#94a3b8' }}>
+                    <i className="fas fa-circle-notch fa-spin" style={{ fontSize: '28px', color: '#2563eb', marginBottom: '12px' }}></i>
+                    <p style={{ margin: 0, fontSize: '13px', fontWeight: '500' }}>Loading conversation...</p>
+                  </div>
+                ) : chatMessages.length > 0 ? (
+                  chatMessages.map((msg, idx) => {
+                    const isMe = msg.senderEmail === adminEmail;
+                    const msgTime = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    
+                    return (
+                      <div key={msg._id || idx} className="msg-container" style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
+                        {!isMe && <span style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px', marginLeft: '5px', fontWeight: '600' }}>{msg.senderName}</span>}
+                        
+                        {editingMsgId === msg._id ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#fff', padding: '12px', borderRadius: '12px', border: '1px solid #2563eb', width: '280px', maxWidth: '100%' }}>
+                            <input type="text" value={editingMsgText} onChange={(e) => setEditingMsgText(e.target.value)} autoFocus style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                              <button onClick={() => { setEditingMsgId(null); setEditingMsgText(""); }} style={{ padding: '4px 10px', fontSize: '11px', cursor: 'pointer', background: '#f1f5f9', border: 'none', borderRadius: '4px', fontWeight: '600' }}>Cancel</button>
+                              <button onClick={() => handleUpdateMessage(msg._id)} style={{ padding: '4px 10px', fontSize: '11px', cursor: 'pointer', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: '600' }}>Save</button>
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexDirection: isMe ? 'row-reverse' : 'row' }}>
-                          <div style={{ background: isMe ? '#2563eb' : '#fff', color: isMe ? '#fff' : '#1e293b', padding: '10px 16px', borderRadius: isMe ? '16px 16px 0 16px' : '16px 16px 16px 0', maxWidth: 'min(450px, 85vw)', fontSize: '14px', lineHeight: '1.5', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: isMe ? 'none' : '1px solid #e2e8f0', wordWrap: 'break-word', overflow: 'hidden' }}>
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexDirection: isMe ? 'row-reverse' : 'row' }}>
+                            <div style={{ background: isMe ? '#2563eb' : '#fff', color: isMe ? '#fff' : '#1e293b', padding: '10px 16px', borderRadius: isMe ? '16px 16px 0 16px' : '16px 16px 16px 0', maxWidth: 'min(450px, 85vw)', fontSize: '14px', lineHeight: '1.5', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: isMe ? 'none' : '1px solid #e2e8f0', wordWrap: 'break-word', overflow: 'hidden' }}>
+                              
+                              {msg.file && (
+                                <div style={{ marginBottom: msg.message ? '8px' : '0' }}>
+                                  {msg.file.fileType?.startsWith('image/') ? (
+                                    <img src={msg.file.fileData} alt="attachment" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '6px', display: 'block', cursor: 'pointer' }} onClick={() => window.open(msg.file.fileData)} />
+                                  ) : msg.file.fileType?.startsWith('video/') ? (
+                                    <video controls style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '6px', display: 'block' }}>
+                                      <source src={msg.file.fileData} type={msg.file.fileType} />
+                                    </video>
+                                  ) : (
+                                    <a href={msg.file.fileData} download={msg.file.fileName} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: isMe ? '#fff' : '#2563eb', textDecoration: 'none', background: isMe ? 'rgba(255,255,255,0.15)' : '#f1f5f9', padding: '8px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600' }}>
+                                      <i className="fas fa-file-alt" style={{ fontSize: '16px', flexShrink: 0 }}></i>
+                                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{msg.file.fileName}</span>
+                                    </a>
+                                  )}
+                                </div>
+                              )}
+
+                              {msg.message && <div>{msg.message}</div>}
+                            </div>
                             
-                            {msg.file && (
-                              <div style={{ marginBottom: msg.message ? '8px' : '0' }}>
-                                {msg.file.fileType?.startsWith('image/') ? (
-                                  <img src={msg.file.fileData} alt="attachment" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '6px', display: 'block', cursor: 'pointer' }} onClick={() => window.open(msg.file.fileData)} />
-                                ) : msg.file.fileType?.startsWith('video/') ? (
-                                  <video controls style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '6px', display: 'block' }}>
-                                    <source src={msg.file.fileData} type={msg.file.fileType} />
-                                  </video>
-                                ) : (
-                                  <a href={msg.file.fileData} download={msg.file.fileName} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: isMe ? '#fff' : '#2563eb', textDecoration: 'none', background: isMe ? 'rgba(255,255,255,0.15)' : '#f1f5f9', padding: '8px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600' }}>
-                                    <i className="fas fa-file-alt" style={{ fontSize: '16px', flexShrink: 0 }}></i>
-                                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{msg.file.fileName}</span>
-                                  </a>
-                                )}
+                            {isMe && (
+                              <div className="msg-actions" style={{ display: 'flex', gap: '10px' }}>
+                                <i className="fas fa-pen" onClick={() => { setEditingMsgId(msg._id); setEditingMsgText(msg.message); }} style={{ fontSize: '12px', color: '#94a3b8', cursor: 'pointer', transition: '0.2s' }} title="Edit"></i>
+                                <i className="fas fa-trash" onClick={() => handleDeleteMessage(msg._id)} style={{ fontSize: '12px', color: '#ef4444', cursor: 'pointer', opacity: 0.8, transition: '0.2s' }} title="Delete"></i>
                               </div>
                             )}
-
-                            {msg.message && <div>{msg.message}</div>}
                           </div>
-                          
-                          {isMe && (
-                            <div className="msg-actions" style={{ display: 'flex', gap: '10px' }}>
-                              <i className="fas fa-pen" onClick={() => { setEditingMsgId(msg._id); setEditingMsgText(msg.message); }} style={{ fontSize: '12px', color: '#94a3b8', cursor: 'pointer', transition: '0.2s' }} title="Edit"></i>
-                              <i className="fas fa-trash" onClick={() => handleDeleteMessage(msg._id)} style={{ fontSize: '12px', color: '#ef4444', cursor: 'pointer', opacity: 0.8, transition: '0.2s' }} title="Delete"></i>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      <span style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px', marginRight: isMe ? '5px' : '0', marginLeft: !isMe ? '5px' : '0' }}>{msgTime}</span>
-                    </div>
-                  );
-                }) : (
-                  <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', marginTop: '80px' }}>
-                    <p>No messages yet. Send a message to start.</p>
+                        )}
+                        <span style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px', marginRight: isMe ? '5px' : '0', marginLeft: !isMe ? '5px' : '0' }}>{msgTime}</span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '60px 20px', color: '#94a3b8' }}>
+                    <i className="far fa-comments" style={{ fontSize: '42px', marginBottom: '12px', color: '#cbd5e1' }}></i>
+                    <p style={{ margin: 0, fontSize: '14px', fontWeight: '500' }}>No messages yet with {selectedUser.fullName || selectedUser.name}.</p>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#94a3b8' }}>Send a message to start the conversation! 👋</p>
                   </div>
                 )}
                 <div ref={messagesEndRef} />

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import API from '../utils/api';
+import { getCache } from '../utils/cache';
 
 const MyProfile = ({ trainerData }) => {
   const [allocatedCoursesCount, setAllocatedCoursesCount] = useState(0);
@@ -9,22 +11,22 @@ const MyProfile = ({ trainerData }) => {
         const trainerName = trainerData?.profileDetails?.fullName;
         if (!trainerName) return;
 
-        // Fetching batches or courses from backend to calculate the exact real count
-        const response = await fetch('https://vinsup-4vt5.onrender.com/api/batches');
-        if (response.ok) {
-          const result = await response.json();
-          const batches = Array.isArray(result) ? result : (result.data || []);
-          
-          // Filter batches assigned to this trainer
-          const trainerBatches = batches.filter(b => 
-            (b.trainerName && b.trainerName.toLowerCase() === trainerName.toLowerCase()) || 
-            (b.trainer && b.trainer.toLowerCase() === trainerName.toLowerCase())
-          );
-
-          // Get unique courses count from trainer batches
-          const uniqueCourses = [...new Set(trainerBatches.map(b => b.courseName || b.course))];
-          setAllocatedCoursesCount(uniqueCourses.length > 0 ? uniqueCourses.length : trainerBatches.length);
+        let batches = getCache('batches');
+        if (!batches || !Array.isArray(batches)) {
+          const response = await API.get('/batches');
+          const result = response.data;
+          batches = Array.isArray(result) ? result : (result?.data || []);
         }
+        
+        // Filter batches assigned to this trainer
+        const trainerBatches = (batches || []).filter(b => 
+          (b.trainerName && b.trainerName.toLowerCase() === trainerName.toLowerCase()) || 
+          (b.trainer && b.trainer.toLowerCase() === trainerName.toLowerCase())
+        );
+
+        // Get unique courses count from trainer batches
+        const uniqueCourses = [...new Set(trainerBatches.map(b => b.courseName || b.course))];
+        setAllocatedCoursesCount(uniqueCourses.length > 0 ? uniqueCourses.length : trainerBatches.length);
       } catch (error) {
         console.error("Error fetching allocated courses:", error);
       }

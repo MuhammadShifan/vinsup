@@ -16,7 +16,6 @@ router.get('/all', async (req, res) => {
 
 router.get('/:id/results', async (req, res) => {
   try {
-    const QuizResult = require('../models/QuizResult');
     const results = await QuizResult.find({ quizId: req.params.id });
     res.status(200).json(results);
   } catch (error) {
@@ -39,24 +38,29 @@ router.post('/submit', async (req, res) => {
   try {
     const { quizId, studentEmail, answers } = req.body;
     const quiz = await Quiz.findById(quizId);
-    let score = 0;
-    quiz.questions.forEach((q, idx) => {
+    if (!quiz) {
+      return res.status(404).json({ success: false, message: 'Quiz not found' });
+    }
 
-      if (answers[idx] === q.correct) {
-        score += (q.marks || 1);
-      }
-    });
+    let score = 0;
+    if (quiz.questions && Array.isArray(quiz.questions)) {
+      quiz.questions.forEach((q, idx) => {
+        if (answers && answers[idx] === q.correct) {
+          score += (q.marks || 1);
+        }
+      });
+    }
 
     const newResult = new QuizResult({
       quizId,
       studentEmail,
       score,
-      totalMarks: quiz.totalMarks,
-      answers
+      totalMarks: quiz.totalMarks || 0,
+      answers: answers || []
     });
 
     await newResult.save();
-    res.status(201).json({ success: true, score, totalMarks: quiz.totalMarks });
+    res.status(201).json({ success: true, score, totalMarks: quiz.totalMarks || 0 });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

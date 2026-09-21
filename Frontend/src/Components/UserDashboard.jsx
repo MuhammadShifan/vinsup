@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import API from '../utils/api';
 import './AdminDashboard.css';
 import logoImage from '../assets/logo.png';
 import MyProfile from './MyProfile'; 
@@ -9,41 +9,19 @@ import UserSchedule from './UserSchedule';
 import UserTasks from './UserTasks';
 import UserHelpdesk from './UserHelpdesk';
 import UserReports from './UserReports';
-import UserAdminChat from './UserAdminChat';
 import UserCourses from './UserCourses';
 import EmployeeAnnouncements from './EmployeeAnnouncements'; 
 import EmployeeMyClasses from './EmployeeMyClasses';
 import EmployeeQuizzes from './EmployeeQuizzes'; 
-import EmployeeBatchChat from './EmployeeBatchChat';
-
 
 const UserDashboard = ({ userName, userEmail, onLogout }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 992);
   const [activeTab, setActiveTab] = useState('Dashboard'); 
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   const activeEmail = userEmail || JSON.parse(localStorage.getItem('userAuth') || '{}').email || "";
 
   const [notifications, setNotifications] = useState([]);
-  const [chatUnreadCount, setChatUnreadCount] = useState(0); 
-  
-  // 🔥 NEW: Student Chats Unread Count State 🔥
-  const [studentChatsUnreadCount, setStudentChatsUnreadCount] = useState(0);
-
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [newMsg, setNewMsg] = useState("");
-  const messagesEndRef = useRef(null);
-
-  const [editingMsgId, setEditingMsgId] = useState(null);
-  const [editingMsgText, setEditingMsgText] = useState("");
-
-  const [selectedGroupFiles, setSelectedGroupFiles] = useState([]);
-  const [groupUnreadCount, setGroupUnreadCount] = useState(0);
-
-  const [chatPos, setChatPos] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragInfo = useRef({ isDragging: false, startX: 0, startY: 0, initialPos: { x: 0, y: 0 }, hasMoved: false });
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -80,66 +58,13 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
     birthdays: [] 
   });
 
-  const handlePointerDown = (e) => {
-    dragInfo.current = {
-      isDragging: true,
-      startX: e.clientX,
-      startY: e.clientY,
-      initialPos: { ...chatPos },
-      hasMoved: false
-    };
-    document.addEventListener('pointermove', handlePointerMove);
-    document.addEventListener('pointerup', handlePointerUp);
-  };
-
-  const handlePointerMove = (e) => {
-    if (!dragInfo.current.isDragging) return;
-    
-    const dx = e.clientX - dragInfo.current.startX;
-    const dy = e.clientY - dragInfo.current.startY;
-    
-    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-       dragInfo.current.hasMoved = true;
-       setIsDragging(true);
-    }
-
-    let newX = dragInfo.current.initialPos.x + dx;
-    let newY = dragInfo.current.initialPos.y + dy;
-
-    const maxX = 40; 
-    const maxY = 40;
-    const minX = -(window.innerWidth - 100);
-    const minY = -(window.innerHeight - 100);
-
-    if (newX > maxX) newX = maxX;
-    if (newY > maxY) newY = maxY;
-    if (newX < minX) newX = minX;
-    if (newY < minY) newY = minY;
-
-    setChatPos({ x: newX, y: newY });
-  };
-
-  const handlePointerUp = (e) => {
-    dragInfo.current.isDragging = false;
-    setTimeout(() => setIsDragging(false), 50); 
-    document.removeEventListener('pointermove', handlePointerMove);
-    document.removeEventListener('pointerup', handlePointerUp);
-  };
-
-  useEffect(() => {
-    return () => {
-      document.removeEventListener('pointermove', handlePointerMove);
-      document.removeEventListener('pointerup', handlePointerUp);
-    };
-  }, []);
-
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const incomingEmail = activeEmail.toLowerCase().trim();
         let exactDBName = userName || "Employee";
 
-        const empResponse = await axios.get('https://vinsup-4vt5.onrender.com/api/employees');
+        const empResponse = await API.get('/employees');
         const empData = Array.isArray(empResponse.data) ? empResponse.data : (empResponse.data.data || []);
         
         const currentUser = empData.find(emp => (emp.email || '').toLowerCase().trim() === incomingEmail);
@@ -155,7 +80,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
             } else {
               let cleanPath = rawImage.replace(/\\/g, '/').replace(/^\/+/, '');
               if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-              finalImage = `https://vinsup-4vt5.onrender.com/${cleanPath}`;
+              finalImage = `${getBaseUrl()}/${cleanPath}`;
             }
           }
 
@@ -186,7 +111,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
           }));
         }
 
-        const taskResponse = await axios.get('https://vinsup-4vt5.onrender.com/api/tasks');
+        const taskResponse = await API.get('/tasks');
         const tasks = Array.isArray(taskResponse.data) ? taskResponse.data : (taskResponse.data.data || []);
         const myTasks = tasks.filter(t => {
           const assigned = (t.assignedTo || '').toLowerCase().trim();
@@ -195,7 +120,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         const activeTasks = myTasks.filter(t => t.status !== 'Completed');
         setTrainerData(prev => ({ ...prev, tasksData: activeTasks }));
 
-        const batchResponse = await axios.get('https://vinsup-4vt5.onrender.com/api/batches');
+        const batchResponse = await API.get('/batches');
         const allBatches = Array.isArray(batchResponse.data) ? batchResponse.data : (batchResponse.data.data || []);
         const myBatches = allBatches.filter(b => {
           const trainer = (b.trainer || b.trainerName || b.assignedTo || b.faculty || '').toLowerCase().trim();
@@ -222,7 +147,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
 
         const activeAllocatedBatches = allocatedBatches.filter(batch => batch.status !== 'Completed' && batch.status !== 'completed');
 
-        const leavesResponse = await axios.get('https://vinsup-4vt5.onrender.com/api/leaves');
+        const leavesResponse = await API.get('/leaves');
         const allLeaves = Array.isArray(leavesResponse.data) ? leavesResponse.data : (leavesResponse.data.data || []);
         const myLeaves = allLeaves.filter(l => (l.empEmail || '').toLowerCase().trim() === incomingEmail || (l.empName || '').toLowerCase().trim() === exactDBName.toLowerCase().trim());
         
@@ -243,10 +168,10 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         try {
           let allEvents = [];
           try {
-            const schedRes = await axios.get(`https://vinsup-4vt5.onrender.com/api/schedule/${incomingEmail}`);
+            const schedRes = await API.get(`/schedule/${incomingEmail}`);
             allEvents = Array.isArray(schedRes.data) ? schedRes.data : (schedRes.data.data || []);
           } catch(err1) {
-            const schedRes = await axios.get(`https://vinsup-4vt5.onrender.com/api/schedule`);
+            const schedRes = await API.get(`/schedule`);
             const allSched = Array.isArray(schedRes.data) ? schedRes.data : (schedRes.data.data || []);
             allEvents = allSched.filter(ev => (ev.email === incomingEmail) || (ev.empEmail === incomingEmail) || (ev.assignedTo === exactDBName));
           }
@@ -312,12 +237,12 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
   const fetchNotifications = async () => {
     if (!activeEmail) return;
     try {
-      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/notifications/user/${activeEmail}`);
+      const res = await API.get(`/notifications/user/${activeEmail}`);
       const notifData = Array.isArray(res.data) ? res.data : (res.data.notifications || res.data.data || []);
       setNotifications(notifData);
     } catch (err) {
       try {
-        const resAlt = await axios.get(`https://vinsup-4vt5.onrender.com/api/notifications?email=${activeEmail}`);
+        const resAlt = await API.get(`/notifications?email=${activeEmail}`);
         const notifDataAlt = Array.isArray(resAlt.data) ? resAlt.data : (resAlt.data.notifications || resAlt.data.data || []);
         setNotifications(notifDataAlt);
       } catch (err2) {
@@ -327,74 +252,9 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
     }
   };
 
-  const fetchChatUnreadCount = async () => {
-    if (!activeEmail) return;
-    try {
-      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/privatechat/unread/${activeEmail}`);
-      if (res.data.success) {
-        setChatUnreadCount(res.data.unreadCount);
-      }
-    } catch (err) {
-      console.error("Error fetching unread count:", err);
-    }
-  };
-
-  // 🔥 Polling logic to get total unread Student/Batch chats for the badge 🔥
-  useEffect(() => {
-    let interval;
-    const checkStudentChatsUnread = async () => {
-      if (!trainerData.myBatchesData || trainerData.myBatchesData.length === 0) return;
-      
-      try {
-        let totalUnread = 0;
-        
-        // Extract unique batch names from the trainer's batches state
-        const batchNames = [...new Set(trainerData.myBatchesData.map(b => b.batchName))];
-
-        await Promise.all(batchNames.map(async (batch) => {
-          if(!batch) return;
-          const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/batchchat/${encodeURIComponent(batch)}`).catch(() => null);
-          if (res && res.data) {
-            const msgs = res.data;
-            const lastRead = localStorage.getItem(`chat_last_read_${batch}`) || 0;
-            
-            const unread = msgs.filter(m => 
-              new Date(m.timestamp).getTime() > parseInt(lastRead) && 
-              (m.senderEmail || "").toLowerCase() !== activeEmail
-            ).length;
-            
-            totalUnread += unread;
-          }
-        }));
-        
-        setStudentChatsUnreadCount(totalUnread);
-      } catch (err) {
-        // Silently catch to prevent console spam
-      }
-    };
-
-    if (trainerData.myBatchesData.length > 0) {
-      checkStudentChatsUnread();
-      interval = setInterval(checkStudentChatsUnread, 4000); // Check every 4s
-    }
-    
-    return () => clearInterval(interval);
-  }, [trainerData.myBatchesData, activeEmail]);
-
-
-  useEffect(() => {
-    fetchNotifications();
-    fetchChatUnreadCount();
-    const interval = setInterval(() => {
-        fetchNotifications();
-        fetchChatUnreadCount();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [activeEmail]);
-
   const handleMarkNotificationRead = async (id) => {
     try {
-      await axios.put(`https://vinsup-4vt5.onrender.com/api/notifications/mark-read/${id}`);
+      await API.put(`/notifications/mark-read/${id}`);
       fetchNotifications();
     } catch(err) {
       console.error("Error marking read:", err);
@@ -403,160 +263,32 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
 
   const handleDeleteNotification = async (id) => {
     try {
-      await axios.delete(`https://vinsup-4vt5.onrender.com/api/notifications/${id}`);
+      await API.delete(`/notifications/${id}`);
       fetchNotifications();
     } catch(err) {
       console.error("Error deleting notification:", err);
     }
   };
 
-  const handleTabClick = async (tabName) => {
-    setActiveTab(tabName);
-    
-    if (tabName === 'Admin Chat') {
-        try {
-            await axios.put('https://vinsup-4vt5.onrender.com/api/privatechat/mark-read', {
-                receiverEmail: activeEmail,
-                senderEmail: 'admin@vinsup.com'
-            });
-            setChatUnreadCount(0);
-        } catch (err) {
-            console.error("Error marking chat as read:", err);
-        }
+  useEffect(() => {
+    if (activeEmail) {
+      fetchNotifications();
+
+      const interval = setInterval(() => {
+        fetchNotifications();
+      }, 15000);
+
+      return () => {
+        clearInterval(interval);
+      };
     }
+  }, [activeEmail]);
+
+  const handleTabClick = (tabName) => {
+    setActiveTab(tabName);
   };
 
   const unreadCount = Array.isArray(notifications) ? notifications.filter(n => !n.isRead).length : 0;
-
-  const fetchChatMessages = async () => {
-    try {
-      const res = await axios.get('https://vinsup-4vt5.onrender.com/api/groupchat');
-      const messages = res.data;
-      setChatMessages(messages);
-
-      if (isChatOpen) {
-        localStorage.setItem('groupChatSeenCount', messages.length.toString());
-        setGroupUnreadCount(0);
-      } else {
-        const seenCount = parseInt(localStorage.getItem('groupChatSeenCount') || '0', 10);
-        if (messages.length > seenCount) {
-          setGroupUnreadCount(messages.length - seenCount);
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching chat:", err);
-    }
-  };
-
-  useEffect(() => {
-    let interval;
-    if (!editingMsgId) { 
-      fetchChatMessages();
-      interval = setInterval(fetchChatMessages, 3000); 
-    }
-    return () => clearInterval(interval);
-  }, [isChatOpen, editingMsgId]);
-
-  useEffect(() => {
-    if (messagesEndRef.current && !editingMsgId) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [chatMessages.length, isChatOpen]);
-
-  const toggleGroupChat = () => {
-    if (!isDragging) {
-      const nextState = !isChatOpen;
-      setIsChatOpen(nextState);
-      if (nextState) {
-        localStorage.setItem('groupChatSeenCount', chatMessages.length.toString());
-        setGroupUnreadCount(0);
-      }
-    }
-  };
-
-  const handleGroupFileChange = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-
-    const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024);
-    if (validFiles.length < files.length) {
-      alert("Some files were larger than 5MB and were skipped.");
-    }
-
-    const filePromises = validFiles.map(file => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          resolve({ name: file.name, type: file.type, size: file.size, data: reader.result });
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-
-    const newFilesArray = await Promise.all(filePromises);
-    setSelectedGroupFiles(prev => [...prev, ...newFilesArray]);
-    e.target.value = null; 
-  };
-
-  const removeGroupFile = (indexToRemove) => {
-    setSelectedGroupFiles(prev => prev.filter((_, index) => index !== indexToRemove));
-  };
-
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!newMsg.trim() && selectedGroupFiles.length === 0) return;
-
-    const senderName = trainerData.profile.name !== "Loading..." ? trainerData.profile.name : (userName || "Employee");
-    const senderEmail = trainerData.profileDetails.email !== "Loading..." ? trainerData.profileDetails.email : (userEmail || "test@vinsup.com");
-
-    try {
-      if (selectedGroupFiles.length > 0) {
-        for (let i = 0; i < selectedGroupFiles.length; i++) {
-          const filePayload = {
-            fileName: selectedGroupFiles[i].name,
-            fileType: selectedGroupFiles[i].type,
-            fileData: selectedGroupFiles[i].data
-          };
-
-          await axios.post('https://vinsup-4vt5.onrender.com/api/groupchat/send', { 
-            senderName, 
-            senderEmail, 
-            message: i === 0 ? newMsg : "", 
-            file: filePayload 
-          });
-        }
-      } else {
-        await axios.post('https://vinsup-4vt5.onrender.com/api/groupchat/send', { 
-          senderName, 
-          senderEmail, 
-          message: newMsg,
-          file: null 
-        });
-      }
-      
-      setNewMsg("");
-      setSelectedGroupFiles([]);
-      fetchChatMessages(); 
-    } catch (err) { console.error("Error sending message:", err); }
-  };
-
-  const handleDeleteMessage = async (id) => {
-    if(!window.confirm("Are you sure you want to delete this message?")) return;
-    try {
-      await axios.delete(`https://vinsup-4vt5.onrender.com/api/groupchat/delete/${id}`);
-      fetchChatMessages();
-    } catch(err) { console.error("Error deleting message:", err); }
-  };
-
-  const handleUpdateMessage = async (id) => {
-    if(!editingMsgText.trim()) return;
-    try {
-      await axios.put(`https://vinsup-4vt5.onrender.com/api/groupchat/edit/${id}`, { message: editingMsgText });
-      setEditingMsgId(null);
-      setEditingMsgText("");
-      fetchChatMessages();
-    } catch(err) { console.error("Error updating message:", err); }
-  };
 
   const sidebarMenu = [
     { name: 'Dashboard', icon: 'fas fa-th-large' }, 
@@ -570,9 +302,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
     { name: 'Tasks', icon: 'fas fa-tasks' },
     { name: 'Reports', icon: 'fas fa-chart-bar' }, 
     { name: 'Announcements', icon: 'fas fa-bullhorn' },  
-    { name: 'Helpdesk', icon: 'far fa-life-ring' }, 
-    { name: 'Admin Chat', icon: 'far fa-comment-dots' },
-    { name: 'Student Chats', icon: 'fas fa-comments' }
+    { name: 'Helpdesk', icon: 'far fa-life-ring' }
   ];
 
   const currentUserEmail = trainerData.profileDetails.email !== "Loading..." ? trainerData.profileDetails.email : (userEmail || "test@vinsup.com");
@@ -586,12 +316,6 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
           .batch-scroll-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
           .batch-scroll-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
           .batch-scroll-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-          .chat-scroll::-webkit-scrollbar { width: 4px; }
-          .chat-scroll::-webkit-scrollbar-track { background: transparent; }
-          .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-          .msg-actions { opacity: 0; transition: opacity 0.2s; }
-          .msg-container:hover .msg-actions { opacity: 1; }
-          .chat-badge { background: #ef4444; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px; margin-left: auto; font-weight: bold; min-width: 20px; text-align: center;}
         `}
       </style>
 
@@ -618,13 +342,6 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
               >
                   <i className={item.icon}></i>
                   <span>{item.name}</span>
-                  {item.name === 'Admin Chat' && chatUnreadCount > 0 && (
-                      <span className="chat-badge">{chatUnreadCount}</span>
-                  )}
-                  {/* 🔥 NEW: RED BADGE FOR STUDENT CHATS 🔥 */}
-                  {item.name === 'Student Chats' && studentChatsUnreadCount > 0 && (
-                      <span className="chat-badge">{studentChatsUnreadCount > 99 ? '99+' : studentChatsUnreadCount}</span>
-                  )}
               </a>
             </li>
           ))}
@@ -835,13 +552,10 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         {activeTab === 'My Classes' && <EmployeeMyClasses userName={trainerData.profile.name} userEmail={trainerData.profileDetails.email} />}
         {activeTab === 'Reports' && <UserReports userName={trainerData.profile.name} userEmail={trainerData.profileDetails.email} />}
         {activeTab === 'Announcements' && <EmployeeAnnouncements trainerData={trainerData} />}
-        {activeTab === 'Admin Chat' && <UserAdminChat userName={trainerData.profile.name} userEmail={trainerData.profileDetails.email} />}
         {activeTab === 'Quizzes' && (<EmployeeQuizzes userName={userName} userEmail={userEmail} />)}
-        {activeTab === 'Student Chats' && (<EmployeeBatchChat userName={userName} userEmail={userEmail} />)}
 
       </main>
 
-      {/* 🔥 FLOATING CHAT COMPONENT (WITH BADGE AND ATTACHMENTS) 🔥 */}
       <div 
         style={{
           position: 'fixed',

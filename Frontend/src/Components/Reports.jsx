@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Employees.css';
+import API from '../utils/api';
+import { getCache, setCache } from '../utils/cache';
 
 const Reports = () => {
   const [fromDate, setFromDate] = useState('2026-07-01');
@@ -35,23 +37,25 @@ const Reports = () => {
 
   const fetchEmployeesForDropdown = async () => {
     try {
-      const empResponse = await fetch('https://vinsup-4vt5.onrender.com/api/employees');
-      if (empResponse.ok) {
-        const dbEmployees = await empResponse.json();
-        setAllEmployees(Array.isArray(dbEmployees) ? dbEmployees : dbEmployees.data || []);
+      const cached = getCache('employees');
+      if (cached && Array.isArray(cached)) {
+        setAllEmployees(cached);
+        return;
       }
+      const empResponse = await API.get('/employees');
+      const dbEmployees = empResponse.data?.data || (Array.isArray(empResponse.data) ? empResponse.data : []);
+      setAllEmployees(dbEmployees);
+      setCache('employees', dbEmployees);
     } catch (error) {
-      console.error("Error fetching employees:", error);
+      console.error("Error fetching employees in Reports:", error);
     }
   };
 
   const fetchGeneratedReportsHistory = async () => {
     try {
-      const res = await fetch('https://vinsup-4vt5.onrender.com/api/reports');
-      if (res.ok) {
-        const dbReports = await res.json();
-        setGeneratedReportsHistory(Array.isArray(dbReports.data) ? dbReports.data : []);
-      }
+      const res = await API.get('/reports');
+      const dbReports = res.data?.data || (Array.isArray(res.data) ? res.data : []);
+      setGeneratedReportsHistory(dbReports);
     } catch (error) {
       console.error("Error fetching reports history:", error);
     }
@@ -88,27 +92,19 @@ const Reports = () => {
     }
 
     try {
-      const res = await fetch('https://vinsup-4vt5.onrender.com/api/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
+      const res = await API.post('/reports', formData);
       
-      if (res.ok) {
+      if (res.status === 200 || res.status === 201) {
         const targetEmp = allEmployees.find(emp => emp._id === formData.empId || emp.empId === formData.empId);
         const resolvedEmail = (formData.empEmail || targetEmp?.email || targetEmp?.empEmail || '').toLowerCase().trim();
 
         if (resolvedEmail) {
           try {
-            await fetch('https://vinsup-4vt5.onrender.com/api/notifications/add', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                type: 'message',
-                title: 'New Report Received',
-                message: `You have received a new report from Admin.`,
-                recipientEmail: resolvedEmail
-              })
+            await API.post('/notifications/add', {
+              type: 'message',
+              title: 'New Report Received',
+              message: `You have received a new report from Admin.`,
+              recipientEmail: resolvedEmail
             });
           } catch (notifErr) {
             console.error("Error sending report notification:", notifErr);
@@ -133,11 +129,8 @@ const Reports = () => {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`https://vinsup-4vt5.onrender.com/api/reports/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (res.ok) {
+      const res = await API.delete(`/reports/${id}`);
+      if (res.status === 200) {
         alert("Report deleted successfully! 🗑️");
         fetchGeneratedReportsHistory(); 
       } else {
@@ -158,21 +151,16 @@ const Reports = () => {
         
         if (reportType === 'workload') setActiveWorkloadTab('Active'); 
 
-        const empResponse = await fetch('https://vinsup-4vt5.onrender.com/api/employees');
-        const batchResponse = await fetch('https://vinsup-4vt5.onrender.com/api/batches'); 
+        const [empResponse, batchResponse] = await Promise.all([
+          API.get('/employees').catch(() => ({ data: [] })),
+          API.get('/batches').catch(() => ({ data: [] }))
+        ]);
         
-        if (empResponse.ok) {
-          const dbEmployees = await empResponse.json();
-          const employees = Array.isArray(dbEmployees) ? dbEmployees : dbEmployees.data || [];
-          
-          let batches = [];
-          if (batchResponse.ok) {
-            const dbBatches = await batchResponse.json();
-            batches = Array.isArray(dbBatches) ? dbBatches : dbBatches.data || [];
-          }
+        const employees = empResponse.data?.data || (Array.isArray(empResponse.data) ? empResponse.data : []);
+        const batches = batchResponse.data?.data || (Array.isArray(batchResponse.data) ? batchResponse.data : []);
 
-          if (reportType === 'attendance') {
-            const formattedAttendance = employees.map(emp => ({
+        if (reportType === 'attendance') {
+          const formattedAttendance = employees.map(emp => ({
               id: emp.empId || emp._id,
               name: emp.fullName || emp.name || "Unknown",
               daysPresent: emp.daysPresent || 0, 
@@ -240,28 +228,21 @@ const Reports = () => {
             });
             setWorkloadData(formattedWorkload);
           }
-        }
-      } 
-      else if (reportType === 'course') {
+        } else if (reportType === 'course') {
         setActiveCourseTab('Ongoing'); 
-        const batchResponse = await fetch('https://vinsup-4vt5.onrender.com/api/batches');
-        if (batchResponse.ok) {
-          const dbBatches = await batchResponse.json();
-          const batches = Array.isArray(dbBatches) ? dbBatches : dbBatches.data || [];
+        const batchResponse = await API.get('/batches').catch(() => ({ data: [] }));
+        const batches = batchResponse.data?.data || (Array.isArray(batchResponse.data) ? batchResponse.data : []);
 
-          if (batches.length > 0) {
-            const formattedCourses = batches.map(batch => ({
-              batchId: batch.batchId || batch._id,
-              course: batch.courseName || "Unknown Course",
-              trainer: batch.trainerName || batch.trainer || "Unassigned",
-              startDate: batch.startDate || "-",
-              progress: batch.progress || 0, 
-              status: batch.status || "Ongoing"
-            }));
-            setCourseData(formattedCourses);
-          } else {
-             setCourseData([]);
-          }
+        if (batches.length > 0) {
+          const formattedCourses = batches.map(batch => ({
+            batchId: batch.batchId || batch._id,
+            course: batch.courseName || "Unknown Course",
+            trainer: batch.trainerName || batch.trainer || "Unassigned",
+            startDate: batch.startDate || "-",
+            progress: batch.progress || 0, 
+            status: batch.status || "Ongoing"
+          }));
+          setCourseData(formattedCourses);
         } else {
           setCourseData([]);
         }

@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const studentSchema = new mongoose.Schema({
-  studentId: { type: String, required: true, unique: true },
+  studentId: { type: String, required: true, unique: true, index: true },
   fullName: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true, index: true },
   phone: { type: String, required: true },
   dob: { type: Date, required: true },
   gender: { type: String, required: true },
@@ -11,11 +11,11 @@ const studentSchema = new mongoose.Schema({
   emergencyName: { type: String },
   emergencyPhone: { type: String },
   profilePhoto: { type: String }, // Upload aagura image path
-  course: { type: String, required: true },
-  batch: { type: String, required: true },
-  trainer: { type: String },
+  course: { type: String, required: true, index: true },
+  batch: { type: String, required: true, index: true },
+  trainer: { type: String, index: true },
   doj: { type: Date, required: true },
-  status: { type: String, default: 'Active' },
+  status: { type: String, default: 'Active', index: true },
   previousEdu: { type: String },
   skills: { type: String },
   remarks: { type: String },

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const batchMessageSchema = new mongoose.Schema({
-  batch: { type: String, required: true }, 
+  batch: { type: String, required: true, index: true }, 
   senderName: { type: String, required: true },
   senderEmail: { type: String, required: true },
   senderRole: { type: String, enum: ['Trainer', 'Student', 'Admin'], required: true },

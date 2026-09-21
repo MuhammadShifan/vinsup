@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './Employees.css'; 
+import API from '../utils/api';
+import { getCache, setCache, clearCache } from '../utils/cache';
 
 const Courses = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editId, setEditId] = useState(null);
   const [courseList, setCourseList] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [searchInput, setSearchInput] = useState('');
 
@@ -19,16 +22,30 @@ const Courses = () => {
   
   const [formData, setFormData] = useState(initialFormState);
 
-  // 1. FETCH API (GET)
-  const fetchCourses = async () => {
+  // 1. FETCH API (GET) with Caching
+  const fetchCourses = async (forceRefresh = false) => {
     try {
-      const response = await fetch('https://vinsup-4vt5.onrender.com/api/courses');
-      const result = await response.json();
-      if (result.success) {
-        setCourseList(result.data);
+      if (!forceRefresh) {
+        const cachedCourses = getCache('courses');
+        if (cachedCourses && Array.isArray(cachedCourses)) {
+          setCourseList(cachedCourses);
+          return;
+        }
       }
+
+      setLoading(true);
+      const response = await API.get('/courses');
+      const courses = response.data?.data || (Array.isArray(response.data) ? response.data : []);
+      setCourseList(courses);
+      setCache('courses', courses);
     } catch (error) {
       console.error("Error fetching courses:", error);
+      const errorMsg = error.response?.data?.message || error.message || "Failed to fetch courses!";
+      if (error.response?.status === 401) {
+        alert("Session expired or unauthorized! Please log in again.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,18 +64,16 @@ const Courses = () => {
     e.stopPropagation(); 
     if (window.confirm(`Are you sure you want to delete ${courseToDelete.courseName}?`)) {
       try {
-        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/courses/delete/${courseToDelete._id}`, {
-          method: 'DELETE'
-        });
-        const result = await response.json();
-        
-        if (result.success) {
+        const response = await API.delete(`/courses/delete/${courseToDelete._id}`);
+        if (response.data?.success || response.status === 200) {
+          clearCache('courses');
           setCourseList(prevList => prevList.filter(c => c._id !== courseToDelete._id));
           alert("Course Deleted Successfully! 🗑️");
         }
       } catch (error) {
         console.error("Error deleting course:", error);
-        alert("Failed to delete course!");
+        const msg = error.response?.data?.message || "Failed to delete course!";
+        alert(msg);
       }
     }
   };
@@ -84,30 +99,22 @@ const Courses = () => {
 
     try {
       if (editId) {
-        const response = await fetch(`https://vinsup-4vt5.onrender.com/api/courses/update/${editId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-        const result = await response.json();
-        
-        if (result.success) {
+        const response = await API.put(`/courses/update/${editId}`, formData);
+        if (response.data?.success || response.status === 200) {
+          clearCache('courses');
           alert("Course Updated Successfully! ✏️");
-          fetchCourses(); 
+          fetchCourses(true); 
+        } else {
+          alert("Error: " + (response.data?.message || "Could not update course"));
         }
       } else {
-        const response = await fetch('https://vinsup-4vt5.onrender.com/api/courses/add', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-        const result = await response.json();
-        
-        if (result.success) {
+        const response = await API.post('/courses/add', formData);
+        if (response.data?.success || response.status === 201 || response.status === 200) {
+          clearCache('courses');
           alert("New Course Added! 🚀");
-          fetchCourses(); 
+          fetchCourses(true); 
         } else {
-          alert("Error: " + result.message); 
+          alert("Error: " + (response.data?.message || "Could not add course")); 
         }
       }
       
@@ -116,7 +123,8 @@ const Courses = () => {
       setFormData(initialFormState); 
     } catch (error) {
       console.error("Error saving course:", error);
-      alert("Something went wrong!");
+      const msg = error.response?.data?.message || "Something went wrong saving the course!";
+      alert("Error: " + msg);
     }
   };
 

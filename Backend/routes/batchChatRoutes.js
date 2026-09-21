@@ -21,7 +21,7 @@ router.post('/send', async (req, res) => {
     }
 
     const newMessage = new BatchMessage({
-      batch, 
+      batch: String(batch).trim(), 
       senderName, 
       senderEmail, 
       senderRole, 
@@ -31,6 +31,12 @@ router.post('/send', async (req, res) => {
     });
 
     await newMessage.save();
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`batch_${String(batch).trim()}`).emit('receive_batch_message', newMessage);
+    }
+
     res.status(201).json({ success: true, data: newMessage });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
+import socket from '../utils/socket';
 
 const UserAdminChat = ({ userName, userEmail }) => {
   const [chatMessages, setChatMessages] = useState([]);
@@ -11,28 +12,96 @@ const UserAdminChat = ({ userName, userEmail }) => {
 
   const [selectedFiles, setSelectedFiles] = useState([]);
 
-  const activeEmail = userEmail || localStorage.getItem('loggedInEmail') || "test@vinsup.com";
+  const activeEmail = (userEmail || localStorage.getItem('loggedInEmail') || "test@vinsup.com").toLowerCase().trim();
   const activeName = userName || "Employee";
-
-  const fetchChatMessages = async () => {
-    try {
-      if (activeEmail) {
-        const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/privatechat/${activeEmail}`);
-        setChatMessages(res.data);
-      }
-    } catch (err) {
-      console.error("Error fetching private chat:", err);
-    }
-  };
+  const [loadingChat, setLoadingChat] = useState(false);
+  const activeEmailRef = useRef(activeEmail);
 
   useEffect(() => {
-    let interval;
-    if (!editingMsgId) { 
-      fetchChatMessages();
-      interval = setInterval(fetchChatMessages, 3000); 
-    }
-    return () => clearInterval(interval);
-  }, [activeEmail, editingMsgId]);
+    activeEmailRef.current = activeEmail;
+  }, [activeEmail]);
+
+  useEffect(() => {
+    if (!activeEmail) return;
+
+    let isCurrent = true;
+    setChatMessages([]);
+    setLoadingChat(true);
+
+    // Join personal user room in Socket.io
+    socket.emit('join_user', activeEmail);
+
+    const loadChat = async () => {
+      try {
+        const res = await API.get(`/privatechat/${activeEmail}`);
+        if (isCurrent) {
+          setChatMessages(Array.isArray(res.data) ? res.data : []);
+        }
+      } catch (err) {
+        if (isCurrent) {
+          console.error("Error fetching private chat:", err);
+          setChatMessages([]);
+        }
+      } finally {
+        if (isCurrent) {
+          setLoadingChat(false);
+        }
+      }
+    };
+
+    loadChat();
+
+    // Mark messages from admin as read on load
+    socket.emit('mark_private_read', {
+      receiverEmail: activeEmail,
+      senderEmail: 'admin@vinsup.com'
+    });
+
+    const handleReceiveMessage = (msg) => {
+      const sEmail = (msg.senderEmail || '').toLowerCase().trim();
+      const rEmail = (msg.receiverEmail || '').toLowerCase().trim();
+      const myEmail = activeEmailRef.current;
+
+      const isForThisChat =
+        (sEmail === myEmail && rEmail === 'admin@vinsup.com') ||
+        (sEmail === 'admin@vinsup.com' && rEmail === myEmail);
+
+      if (isForThisChat) {
+        setChatMessages((prev) => {
+          if (prev.some((m) => m._id && msg._id && m._id === msg._id)) return prev;
+          return [...prev, msg];
+        });
+
+        if (sEmail === 'admin@vinsup.com') {
+          socket.emit('mark_private_read', {
+            receiverEmail: myEmail,
+            senderEmail: 'admin@vinsup.com'
+          });
+        }
+      }
+    };
+
+    const handleMessageEdited = (updatedMsg) => {
+      setChatMessages((prev) =>
+        prev.map((m) => (m._id === updatedMsg._id ? updatedMsg : m))
+      );
+    };
+
+    const handleMessageDeleted = ({ id }) => {
+      setChatMessages((prev) => prev.filter((m) => m._id !== id));
+    };
+
+    socket.on('receive_private_message', handleReceiveMessage);
+    socket.on('private_message_edited', handleMessageEdited);
+    socket.on('private_message_deleted', handleMessageDeleted);
+
+    return () => {
+      isCurrent = false;
+      socket.off('receive_private_message', handleReceiveMessage);
+      socket.off('private_message_edited', handleMessageEdited);
+      socket.off('private_message_deleted', handleMessageDeleted);
+    };
+  }, [activeEmail]);
 
   useEffect(() => {
     if (messagesEndRef.current && !editingMsgId) {
@@ -78,41 +147,50 @@ const UserAdminChat = ({ userName, userEmail }) => {
     e.preventDefault();
     if (!newMsg.trim() && selectedFiles.length === 0) return;
 
+    const filesToSend = [...selectedFiles];
+    const textToSend = newMsg;
+
+    setNewMsg("");
+    setSelectedFiles([]);
+
     try {
-      if (selectedFiles.length > 0) {
-        for (let i = 0; i < selectedFiles.length; i++) {
+      if (filesToSend.length > 0) {
+        for (let i = 0; i < filesToSend.length; i++) {
           const filePayload = {
-            fileName: selectedFiles[i].name,
-            fileType: selectedFiles[i].type,
-            fileData: selectedFiles[i].data
+            fileName: filesToSend[i].name,
+            fileType: filesToSend[i].type,
+            fileData: filesToSend[i].data
           };
 
-          await axios.post('https://vinsup-4vt5.onrender.com/api/privatechat/send', { 
-            senderName: activeName, 
-            senderEmail: activeEmail, 
-            message: i === 0 ? newMsg : "", 
+          const payload = {
+            senderName: activeName,
+            senderEmail: activeEmail,
+            receiverEmail: 'admin@vinsup.com',
+            message: i === 0 ? textToSend : "",
             file: filePayload
-          });
+          };
+
+          socket.emit('send_private_message', payload);
         }
       } else {
-        await axios.post('https://vinsup-4vt5.onrender.com/api/privatechat/send', { 
-          senderName: activeName, 
-          senderEmail: activeEmail, 
-          message: newMsg,
+        const payload = {
+          senderName: activeName,
+          senderEmail: activeEmail,
+          receiverEmail: 'admin@vinsup.com',
+          message: textToSend,
           file: null
-        });
+        };
+
+        socket.emit('send_private_message', payload);
       }
 
-      const shortMsg = newMsg.length > 30 ? newMsg.substring(0, 30) + '...' : (newMsg || `Sent ${selectedFiles.length} attachment(s)`);
-      await axios.post('https://vinsup-4vt5.onrender.com/api/notifications/add', {
+      const shortMsg = textToSend.length > 30 ? textToSend.substring(0, 30) + '...' : (textToSend || `Sent ${filesToSend.length} attachment(s)`);
+      API.post('/notifications/add', {
         type: 'Message',
         title: `New Message from ${activeName}`,
         message: shortMsg
       }).catch(err => console.log("Notification error:", err));
 
-      setNewMsg("");
-      setSelectedFiles([]);
-      fetchChatMessages(); 
     } catch (err) { 
       console.error("Error sending message:", err); 
       alert("Failed to send message.");
@@ -120,20 +198,33 @@ const UserAdminChat = ({ userName, userEmail }) => {
   };
 
   const handleDeleteMessage = async (id) => {
-    if(!window.confirm("Are you sure you want to delete this message?")) return;
+    if (!window.confirm("Are you sure you want to delete this message?")) return;
     try {
-      await axios.delete(`https://vinsup-4vt5.onrender.com/api/privatechat/delete/${id}`);
-      fetchChatMessages();
+      socket.emit('delete_private_message', {
+        id,
+        senderEmail: activeEmail,
+        receiverEmail: 'admin@vinsup.com'
+      });
+      await API.delete(`/privatechat/delete/${id}`);
+      setChatMessages((prev) => prev.filter((m) => m._id !== id));
     } catch(err) { console.error("Error deleting message:", err); }
   };
 
   const handleUpdateMessage = async (id) => {
-    if(!editingMsgText.trim()) return;
+    if (!editingMsgText.trim()) return;
     try {
-      await axios.put(`https://vinsup-4vt5.onrender.com/api/privatechat/edit/${id}`, { message: editingMsgText });
+      socket.emit('edit_private_message', {
+        id,
+        message: editingMsgText,
+        senderEmail: activeEmail,
+        receiverEmail: 'admin@vinsup.com'
+      });
+      await API.put(`/privatechat/edit/${id}`, { message: editingMsgText });
+      setChatMessages((prev) =>
+        prev.map((m) => (m._id === id ? { ...m, message: editingMsgText } : m))
+      );
       setEditingMsgId(null);
       setEditingMsgText("");
-      fetchChatMessages();
     } catch(err) { console.error("Error updating message:", err); }
   };
 
@@ -224,9 +315,14 @@ const UserAdminChat = ({ userName, userEmail }) => {
                   </span>
                 </div>
               );
-            }) : (
-              <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '14px', marginTop: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ width: '70px', height: '70px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '15px' }}>
+            }) : loadingChat ? (
+              <div style={{ textAlign: 'center', margin: 'auto', color: '#94a3b8', padding: '40px 0' }}>
+                <i className="fas fa-circle-notch fa-spin" style={{ fontSize: '28px', color: '#2563eb', marginBottom: '12px' }}></i>
+                <p style={{ margin: 0, fontSize: '13px', fontWeight: '500' }}>Loading chat...</p>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', margin: 'auto', color: '#94a3b8', padding: '40px 0' }}>
+                <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px auto' }}>
                   <i className="far fa-comment-dots" style={{ fontSize: '28px', color: '#cbd5e1' }}></i>
                 </div>
                 <h3 style={{ margin: '0 0 5px 0', color: '#475569', fontSize: '16px' }}>No messages yet</h3>

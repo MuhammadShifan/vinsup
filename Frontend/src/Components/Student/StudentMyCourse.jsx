@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
+import { getCache, setCache } from '../../utils/cache';
 
 const StudentMyCourse = ({ userEmail, userName }) => {
-  // 🔥 Initial state-la dummy data thookiyachu. Original data load aagum. 🔥
+  // Initial state
   const [courseData, setCourseData] = useState({
     courseName: 'Loading...',
     description: 'Loading course details...',
@@ -19,7 +20,7 @@ const StudentMyCourse = ({ userEmail, userName }) => {
 
   const [modules, setModules] = useState([]);
   
-  // 🔥 Accordion State 🔥
+  // Accordion State
   const [expandedMod, setExpandedMod] = useState(null);
 
   const toggleMod = (id) => {
@@ -28,24 +29,47 @@ const StudentMyCourse = ({ userEmail, userName }) => {
   };
 
   useEffect(() => {
-    // API Fetch logic for REAL DATA
+    // API Fetch logic for REAL DATA with Cache
     const fetchData = async () => {
       try {
         const activeEmail = (userEmail || "").toLowerCase().trim();
         if (!activeEmail) return;
 
-        // Fetch multiple APIs at once
-        const [stuRes, empRes, sylRes, batchRes] = await Promise.all([
-            axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(() => null),
-            axios.get('https://vinsup-4vt5.onrender.com/api/employees').catch(() => null),
-            axios.get('https://vinsup-4vt5.onrender.com/api/syllabus').catch(() => null),
-            axios.get('https://vinsup-4vt5.onrender.com/api/batches').catch(() => null)
-        ]);
+        let allStudents = getCache('students');
+        let allEmp = getCache('employees');
+        let allSyllabus = getCache('syllabus');
+        let allBatches = getCache('batches');
 
-        const allStudents = stuRes?.data?.data || stuRes?.data || [];
-        const allEmp = empRes?.data?.data || empRes?.data || [];
-        const allSyllabus = sylRes?.data?.data || sylRes?.data || [];
-        const allBatches = batchRes?.data?.data || batchRes?.data || [];
+        if (!allStudents || !allEmp || !allSyllabus || !allBatches) {
+          const [stuRes, empRes, sylRes, batchRes] = await Promise.all([
+            !allStudents ? API.get('/students').catch(() => null) : Promise.resolve(null),
+            !allEmp ? API.get('/employees').catch(() => null) : Promise.resolve(null),
+            !allSyllabus ? API.get('/syllabus').catch(() => null) : Promise.resolve(null),
+            !allBatches ? API.get('/batches').catch(() => null) : Promise.resolve(null)
+          ]);
+
+          if (stuRes) {
+            allStudents = stuRes.data?.data || stuRes.data || [];
+            setCache('students', allStudents);
+          }
+          if (empRes) {
+            allEmp = empRes.data?.data || empRes.data || [];
+            setCache('employees', allEmp);
+          }
+          if (sylRes) {
+            allSyllabus = sylRes.data?.data || sylRes.data || [];
+            setCache('syllabus', allSyllabus);
+          }
+          if (batchRes) {
+            allBatches = batchRes.data?.data || batchRes.data || [];
+            setCache('batches', allBatches);
+          }
+        }
+
+        allStudents = allStudents || [];
+        allEmp = allEmp || [];
+        allSyllabus = allSyllabus || [];
+        allBatches = allBatches || [];
 
         const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
 

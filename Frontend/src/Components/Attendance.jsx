@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Employees.css';
+import API, { getBaseUrl } from '../utils/api';
 
 const Attendance = () => {
   const [searchInput, setSearchInput] = useState('');
@@ -11,17 +12,22 @@ const Attendance = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const getPhotoUrl = (rawPhoto) => {
+    if (!rawPhoto || typeof rawPhoto !== 'string') return "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+    if (rawPhoto.startsWith('http') || rawPhoto.startsWith('data:image')) return rawPhoto;
+    let cleanPath = rawPhoto.replace(/\\/g, '/').replace(/^\/+/, '');
+    if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
+    return `${getBaseUrl()}/${cleanPath}`;
+  };
+
   const fetchMongoDBEmployees = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://vinsup-4vt5.onrender.com/api/employees');
-      
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.message || `API Connection Failed (Status: ${response.status})`);
-      }
-
-      const dbData = await response.json();
+      const token = localStorage.getItem('token');
+      const response = await API.get('/employees', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      const dbData = response.data;
       console.log("Backend Response:", dbData); 
 
       let employeeArray = [];
@@ -45,7 +51,7 @@ const Attendance = () => {
         checkOut: emp.todayCheckOut || "-",
         status: emp.todayStatus || "Not Marked",
         rate: emp.attendancePercentage || 0,
-        photo: emp.profilePhoto || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+        photo: getPhotoUrl(emp.profilePhoto),
         reason: emp.leaveReason || "", 
         leaveDate: emp.leaveDate || ""
       }));
@@ -54,7 +60,7 @@ const Attendance = () => {
       setError(null);
     } catch (err) {
       console.error("MongoDB Fetch Error:", err);
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -157,7 +163,7 @@ const Attendance = () => {
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <img 
-                          src={emp.photo.startsWith('http') || emp.photo.startsWith('data:image') ? emp.photo : `https://vinsup-4vt5.onrender.com/${emp.photo.replace(/\\/g, '/').replace(/^\/+/, '').startsWith('uploads/') ? '' : 'uploads/'}${emp.photo.replace(/\\/g, '/').replace(/^\/+/, '')}`} 
+                          src={emp.photo} 
                           alt={emp.name} 
                           style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} 
                           onError={(e) => { e.target.src = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; }}

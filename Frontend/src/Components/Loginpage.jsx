@@ -2,6 +2,7 @@ import { useState } from 'react';
 import "../App.css"; 
 import logoImage from "../assets/logo.png";
 import backgroundImage from "../assets/loginbg.png";
+import { getBaseUrl } from "../utils/api";
 
 const TrainingManagementSystem = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
@@ -23,7 +24,7 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
     }
 
     try {
-      const response = await fetch('https://vinsup-4vt5.onrender.com/api/auth/login', {
+      const response = await fetch(`${getBaseUrl()}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

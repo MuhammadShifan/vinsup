@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const attendanceSchema = new mongoose.Schema({
   studentId: { 
     type: String, 
-    required: true 
+    required: true,
+    index: true
   },
   studentName: { 
     type: String, 
@@ -11,12 +12,14 @@ const attendanceSchema = new mongoose.Schema({
   },
   date: { 
     type: String, 
-    required: true 
+    required: true,
+    index: true
   },
   status: { 
     type: String, 
     enum: ['present', 'absent', 'leave'], 
-    required: true 
+    required: true,
+    index: true
   },
   markedBy: { 
     type: String, 
