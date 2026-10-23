@@ -1,8 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
 
 const UserLeaveRequest = ({ userName, userEmail }) => {
-  const activeEmail = userEmail || localStorage.getItem('loggedInEmail');
+  const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+  const activeEmail = (userEmail || auth.email || localStorage.getItem('loggedInEmail') || "").toLowerCase().trim();
+  const [empId, setEmpId] = useState("EMP");
+
+  useEffect(() => {
+    const fetchEmpProfile = async () => {
+      if (!activeEmail) return;
+      try {
+        const empRes = await API.get('/employees');
+        const empList = Array.isArray(empRes.data) ? empRes.data : (empRes.data?.data || []);
+        const found = empList.find(e => (e.email || '').toLowerCase().trim() === activeEmail);
+        if (found) {
+          setEmpId(found.empId || found.employeeId || found._id || "EMP");
+        }
+      } catch (e) {
+        // Fallback
+      }
+    };
+    fetchEmpProfile();
+  }, [activeEmail]);
 
   // 🔥 FIX: session removed from state 🔥
   const [leaveData, setLeaveData] = useState({
@@ -49,7 +68,7 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
   const fetchLeaveHistory = async () => {
     if (!activeEmail) return;
     try {
-      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/leaves/user/${activeEmail}`);
+      const res = await API.get(`/leaves/user/${activeEmail}`);
       if (res.data.success) {
         setHistory(res.data.data);
         calculateUsedBalances(res.data.data);
@@ -115,7 +134,7 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
 
     // 🔥 FIX: session removed from payload 🔥
     const payload = {
-        empId: "EMP-001",
+        empId: empId || "EMP",
         empName: appliedBy,
         empEmail: activeEmail,
         leaveType: leaveData.leaveType,
@@ -127,7 +146,7 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
     };
 
     try {
-        const res = await axios.post('https://vinsup-4vt5.onrender.com/api/leaves/apply', payload);
+        const res = await API.post('/leaves/apply', payload);
         if (res.data.success) {
             alert("Leave request submitted successfully!");
             // 🔥 FIX: session removed from reset state 🔥

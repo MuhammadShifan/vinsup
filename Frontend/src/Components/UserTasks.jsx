@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
 
-const UserTasks = ({ userName }) => {
+const UserTasks = ({ userName, userEmail }) => {
   const [activeTab, setActiveTab] = useState('All Tasks');
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -9,13 +9,21 @@ const UserTasks = ({ userName }) => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get('https://vinsup-4vt5.onrender.com/api/tasks');
+        const response = await API.get('/tasks');
         const taskData = Array.isArray(response.data) ? response.data : (response.data.data || []);
         
-        const currentUserName = (userName || "").toLowerCase();
-        const myTasks = taskData.filter(task => 
-          task.assignedTo && task.assignedTo.toLowerCase() === currentUserName
-        );
+        const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+        const currentUserName = (userName || auth.name || "").toLowerCase().trim();
+        const currentUserEmail = (userEmail || auth.email || "").toLowerCase().trim();
+
+        const myTasks = taskData.filter(task => {
+          if (!task.assignedTo) return false;
+          const assigned = task.assignedTo.toLowerCase().trim();
+          return (
+            (currentUserName && assigned === currentUserName) ||
+            (currentUserEmail && (assigned === currentUserEmail || assigned === currentUserEmail.split('@')[0]))
+          );
+        });
 
         setTasks(myTasks);
         if (myTasks.length > 0) {
@@ -28,11 +36,11 @@ const UserTasks = ({ userName }) => {
       }
     };
     fetchTasks();
-  }, [userName]);
+  }, [userName, userEmail]);
 
   const handleStatusUpdate = async (taskId, newStatus) => {
     try {
-      await axios.put(`https://vinsup-4vt5.onrender.com/api/tasks/${taskId}`, { status: newStatus });
+      await API.put(`/tasks/${taskId}`, { status: newStatus });
       
       const updatedTasks = tasks.map(t => t._id === taskId ? { ...t, status: newStatus } : t);
       setTasks(updatedTasks);
@@ -45,7 +53,7 @@ const UserTasks = ({ userName }) => {
         const currentTask = tasks.find(t => t._id === taskId);
         const taskTitle = currentTask ? currentTask.title : 'a task';
 
-        await axios.post('https://vinsup-4vt5.onrender.com/api/notifications/add', {
+        await API.post('/notifications/add', {
           type: 'Task',
           title: 'Task Completed',
           message: `${userName || 'Employee'} has completed the task: ${taskTitle}.`,

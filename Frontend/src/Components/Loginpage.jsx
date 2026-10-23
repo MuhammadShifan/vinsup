@@ -2,7 +2,7 @@ import { useState } from 'react';
 import "../App.css"; 
 import logoImage from "../assets/logo.png";
 import backgroundImage from "../assets/loginbg.png";
-import { getBaseUrl } from "../utils/api";
+import API from "../utils/api";
 
 const TrainingManagementSystem = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
@@ -24,15 +24,8 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
     }
 
     try {
-      const response = await fetch(`${getBaseUrl()}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      const result = await response.json();
+      const response = await API.post('/auth/login', { email, password });
+      const result = response.data;
 
       if (result.success) {
         alert(`Login successful! Welcome ${result.user.name}.`);
@@ -45,7 +38,7 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
         };
 
         // 🔥 JWT TOKEN & USER DATA STORAGE 🔥
-        localStorage.setItem('token', result.token); // JWT Token store panrom
+        localStorage.setItem('token', result.token); 
         localStorage.setItem('userAuth', JSON.stringify(userData));
         
         onLoginSuccess(userData); 
@@ -54,7 +47,8 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
       }
     } catch (error) {
       console.error("Login Error:", error);
-      alert("Server error! Backend run aagudha nu check pannunga bawa.");
+      const serverMsg = error.response?.data?.message || "Server error! Please check if backend is running.";
+      alert(serverMsg);
     }
   };
 

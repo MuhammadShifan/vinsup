@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import API from '../utils/api';
+import API, { getImageUrl } from '../utils/api';
 import { getCache, setCache, clearCache } from '../utils/cache';
 
 const Students = () => {
@@ -211,8 +211,7 @@ const Students = () => {
     if (!rawPath) return null;
     if (rawPath.startsWith('http') || rawPath.startsWith('data:image')) return rawPath;
     let cleanPath = rawPath.replace(/\\/g, '/').replace(/^\/+/, '');
-    if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-    return `https://vinsup-4vt5.onrender.com/${cleanPath}`;
+    return getImageUrl(cleanPath);
   };
 
   const filteredStudents = studentsList.filter(stu => 

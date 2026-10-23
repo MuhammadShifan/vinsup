@@ -17,12 +17,18 @@ const Admin = require('./models/Admin');
 const PrivateMessage = require('./models/PrivateMessage');
 const BatchMessage = require('./models/BatchMessage');
 
+const fs = require('fs');
+const multer = require('multer');
+
 const app = express();
 const server = http.createServer(app);
 
+// Dynamic Socket.io CORS origin resolution to support credentials
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: (origin, callback) => {
+      callback(null, true);
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   },
@@ -31,10 +37,36 @@ const io = new Server(server, {
 
 app.set('io', io);
 
-app.use(cors());
+// Configure allowed frontend origins from .env and defaults
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://vinsup-lms-by-mds.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5001'
+].filter(Boolean);
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
+    return callback(null, true); // Allow all valid web clients
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadDir));
 
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI;
@@ -83,6 +115,22 @@ app.use('/api/assessments', protect, assessmentRoutes);
 app.use('/api/quizzes', protect, quizRoutes);
 app.use('/api/announcements', protect, announcementRoutes);
 app.use('/api/batchchat', protect, batchChatRoutes);
+
+// Generic file upload route
+const generalUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadDir),
+    filename: (req, file, cb) => cb(null, 'file_' + Date.now() + path.extname(file.originalname))
+  })
+});
+
+app.post('/api/upload', protect, generalUpload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: 'No file uploaded' });
+  }
+  const filePath = `uploads/${req.file.filename}`;
+  res.json({ success: true, filePath });
+});
 
 
 app.get('/api/admin/profile', protect, async (req, res) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Employees.css';
-import API from '../utils/api';
+import API, { getImageUrl } from '../utils/api';
 import { getCache, setCache, clearCache } from '../utils/cache';
 
 const Batches = () => {
@@ -197,13 +197,7 @@ const Batches = () => {
     let imageUrl = defaultAvatar;
     
     if (trainer && trainer.profilePhoto) {
-      if (trainer.profilePhoto.startsWith('http') || trainer.profilePhoto.startsWith('data:')) {
-        imageUrl = trainer.profilePhoto;
-      } else {
-        let cleanPath = trainer.profilePhoto.replace(/\\/g, '/');
-        if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-        imageUrl = `https://vinsup-4vt5.onrender.com/${cleanPath}`;
-      }
+      imageUrl = getImageUrl(trainer.profilePhoto, defaultAvatar);
     }
     return { ...trainer, displayImage: imageUrl };
   };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
 
 const TicketNotification = () => {
   const [notifications, setNotifications] = useState([]);
@@ -8,7 +8,7 @@ const TicketNotification = () => {
   // Fetch only Admin Notifications
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get('https://vinsup-4vt5.onrender.com/api/notifications/user/admin');
+      const res = await API.get('/notifications/user/admin');
       const notifData = Array.isArray(res.data) ? res.data : (res.data.data || []);
       setNotifications(notifData);
     } catch (err) {
@@ -25,7 +25,7 @@ const TicketNotification = () => {
 
   const handleMarkRead = async (id) => {
     try {
-      await axios.put(`https://vinsup-4vt5.onrender.com/api/notifications/mark-read/${id}`);
+      await API.put(`/notifications/mark-read/${id}`);
       fetchNotifications(); // Refresh list after marking as read
     } catch (err) {
       console.error("Error marking notification as read:", err);
@@ -35,7 +35,7 @@ const TicketNotification = () => {
   // 🔥 PUDHUSU: Delete Notification Functionality 🔥
   const handleDeleteNotification = async (id) => {
     try {
-      await axios.delete(`https://vinsup-4vt5.onrender.com/api/notifications/${id}`);
+      await API.delete(`/notifications/${id}`);
       fetchNotifications(); // Refresh list after deleting
     } catch (err) {
       console.error("Error deleting notification:", err);

@@ -16,7 +16,13 @@ router.post('/', async (req, res) => {
 
 router.get('/trainer/:trainerId', async (req, res) => {
   try {
-    const announcements = await Announcement.find({ trainerId: req.params.trainerId }).sort({ createdAt: -1 });
+    const { trainerId } = req.params;
+    const announcements = await Announcement.find({
+      $or: [
+        { trainerId: trainerId },
+        { sentBy: trainerId }
+      ]
+    }).sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: announcements });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

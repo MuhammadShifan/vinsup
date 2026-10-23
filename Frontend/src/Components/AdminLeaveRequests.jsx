@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API, { getImageUrl } from '../utils/api';
 
 const AdminLeaveRequests = () => {
   const [leaves, setLeaves] = useState([]);
@@ -14,7 +14,7 @@ const AdminLeaveRequests = () => {
 
   const fetchAllEmployees = async () => {
     try {
-      const res = await axios.get('https://vinsup-4vt5.onrender.com/api/employees');
+      const res = await API.get('/employees');
       if (res.data) {
         setAllEmployees(Array.isArray(res.data) ? res.data : res.data.data || []);
       }
@@ -26,7 +26,7 @@ const AdminLeaveRequests = () => {
   const fetchAllLeaves = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get('https://vinsup-4vt5.onrender.com/api/leaves'); 
+      const res = await API.get('/leaves'); 
       if (res.data.success) {
         const data = res.data.data;
         setLeaves(data || []); 
@@ -54,7 +54,7 @@ const AdminLeaveRequests = () => {
     if (!confirmAction) return;
 
     try {
-      const res = await axios.put(`https://vinsup-4vt5.onrender.com/api/leaves/${id}/status`, { status: newStatus });
+      const res = await API.put(`/leaves/${id}/status`, { status: newStatus });
       if (res.data.success) {
         fetchAllLeaves(); 
         // 🔥 PUDHU FIX: Frontend-la irundhu pogura duplicate notification line remove panniyachu! Backend automatically anuppidum. 🔥
@@ -139,8 +139,7 @@ const AdminLeaveRequests = () => {
                       finalImage = rawImage; 
                     } else {
                       let cleanPath = rawImage.replace(/\\/g, '/').replace(/^\/+/, '');
-                      if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-                      finalImage = `https://vinsup-4vt5.onrender.com/${cleanPath}`;
+                      finalImage = getImageUrl(cleanPath);
                     }
                   } else if (rawImage) {
                     finalImage = rawImage;

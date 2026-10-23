@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import API from '../utils/api';
+import React, { useState, useEffect, useRef } from 'react';
+import API, { getImageUrl, getBaseUrl } from '../utils/api';
 import './AdminDashboard.css';
 import logoImage from '../assets/logo.png';
 import MyProfile from './MyProfile'; 
@@ -19,9 +19,87 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
   const [activeTab, setActiveTab] = useState('Dashboard'); 
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
-  const activeEmail = userEmail || JSON.parse(localStorage.getItem('userAuth') || '{}').email || "";
+  const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+  const storedEmail = localStorage.getItem('loggedInEmail');
+  const activeEmail = (userEmail || auth.email || storedEmail || "").toLowerCase().trim();
+
+  const handleTabClick = (tabName) => {
+    setActiveTab(tabName);
+    if (window.innerWidth <= 992) {
+      setIsSidebarOpen(false);
+    }
+  };
 
   const [notifications, setNotifications] = useState([]);
+
+  // Floating Group Chat States
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [newMsg, setNewMsg] = useState("");
+  const messagesEndRef = useRef(null);
+
+  const [editingMsgId, setEditingMsgId] = useState(null);
+  const [editingMsgText, setEditingMsgText] = useState("");
+
+  const [selectedGroupFiles, setSelectedGroupFiles] = useState([]);
+  const [groupUnreadCount, setGroupUnreadCount] = useState(0);
+
+  const [chatPos, setChatPos] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragInfo = useRef({ isDragging: false, startX: 0, startY: 0, initialPos: { x: 0, y: 0 }, hasMoved: false });
+
+  const handlePointerDown = (e) => {
+    dragInfo.current = {
+      isDragging: true,
+      startX: e.clientX,
+      startY: e.clientY,
+      initialPos: { ...chatPos },
+      hasMoved: false
+    };
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', handlePointerUp);
+  };
+
+  const handlePointerMove = (e) => {
+    if (!dragInfo.current.isDragging) return;
+    
+    const dx = e.clientX - dragInfo.current.startX;
+    const dy = e.clientY - dragInfo.current.startY;
+    
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+       dragInfo.current.hasMoved = true;
+       setIsDragging(true);
+    }
+
+    let newX = dragInfo.current.initialPos.x + dx;
+    let newY = dragInfo.current.initialPos.y + dy;
+
+    const maxX = 40; 
+    const maxY = 40;
+    const minX = -(window.innerWidth - 100);
+    const minY = -(window.innerHeight - 100);
+
+    if (newX > maxX) newX = maxX;
+    if (newY > maxY) newY = maxY;
+    if (newX < minX) newX = minX;
+    if (newY < minY) newY = minY;
+
+    setChatPos({ x: newX, y: newY });
+  };
+
+  const handlePointerUp = () => {
+    dragInfo.current.isDragging = false;
+    setTimeout(() => setIsDragging(false), 50); 
+    document.removeEventListener('pointermove', handlePointerMove);
+    document.removeEventListener('pointerup', handlePointerUp);
+  };
+
+  useEffect(() => {
+    return () => {
+      document.removeEventListener('pointermove', handlePointerMove);
+      document.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, []);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -61,45 +139,50 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const incomingEmail = activeEmail.toLowerCase().trim();
-        let exactDBName = userName || "Employee";
+        const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+        const incomingEmail = (activeEmail || auth.email || localStorage.getItem('loggedInEmail') || "").toLowerCase().trim();
+        let exactDBName = userName || auth.name || (incomingEmail ? incomingEmail.split('@')[0] : "Trainer");
 
-        const empResponse = await API.get('/employees');
-        const empData = Array.isArray(empResponse.data) ? empResponse.data : (empResponse.data.data || []);
+        let empData = [];
+        try {
+          const empResponse = await API.get('/employees');
+          empData = Array.isArray(empResponse.data) ? empResponse.data : (empResponse.data.data || []);
+        } catch (e) {
+          console.warn("Employees fetch warning:", e.message);
+        }
         
-        const currentUser = empData.find(emp => (emp.email || '').toLowerCase().trim() === incomingEmail);
+        const currentUser = empData.find(emp => 
+          (incomingEmail && (emp.email || '').toLowerCase().trim() === incomingEmail) ||
+          (exactDBName && (emp.fullName || emp.name || '').toLowerCase().trim() === exactDBName.toLowerCase().trim()) ||
+          (exactDBName && (emp.username || '').toLowerCase().trim() === exactDBName.toLowerCase().trim()) ||
+          (incomingEmail && (emp.username || '').toLowerCase().trim() === incomingEmail.split('@')[0])
+        );
 
         if (currentUser) {
-          exactDBName = currentUser.fullName || currentUser.name || "Employee";
+          exactDBName = currentUser.fullName || currentUser.name || exactDBName;
           const rawImage = currentUser.profilePhoto || currentUser.profilePic || currentUser.image || currentUser.avatar || currentUser.photo || currentUser.pic || currentUser.profileImage || currentUser.empImage || currentUser.file;
           
           let finalImage = ""; 
           if (rawImage && !rawImage.includes('randomuser.me')) {
-            if (rawImage.startsWith('http') || rawImage.startsWith('data:image')) {
-              finalImage = rawImage; 
-            } else {
-              let cleanPath = rawImage.replace(/\\/g, '/').replace(/^\/+/, '');
-              if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-              finalImage = `${getBaseUrl()}/${cleanPath}`;
-            }
+            finalImage = getImageUrl(rawImage);
           }
 
           setTrainerData(prev => ({
             ...prev,
-            profile: { ...prev.profile, name: exactDBName, role: currentUser.designation || currentUser.role || "Employee", profilePic: finalImage },
+            profile: { ...prev.profile, name: exactDBName, role: currentUser.designation || currentUser.role || "Trainer", profilePic: finalImage },
             profileDetails: {
               ...prev.profileDetails,
               fullName: exactDBName, 
-              email: currentUser.email || prev.profileDetails.email, 
+              email: currentUser.email || incomingEmail || prev.profileDetails.email, 
               phone: currentUser.phone || prev.profileDetails.phone,
-              role: currentUser.designation || currentUser.role || "Employee", 
+              role: currentUser.designation || currentUser.role || "Trainer", 
               empId: currentUser.empId || currentUser.employeeId || currentUser.id || "N/A",
               dob: currentUser.dob || currentUser.dateOfBirth || "N/A", 
               gender: currentUser.gender || "N/A", 
               joinedOn: currentUser.doj || currentUser.joinedOn || currentUser.joinDate || "N/A",
               location: currentUser.location || currentUser.city || currentUser.address || "N/A", 
               address: { current: currentUser.address || "N/A", permanent: currentUser.address || "N/A" },
-              account: { username: currentUser.username || (currentUser.email ? currentUser.email.split('@')[0] : "Employee"), lastLogin: "Today" },
+              account: { username: currentUser.username || (currentUser.email ? currentUser.email.split('@')[0] : "Trainer"), lastLogin: "Today" },
               summary: { ...prev.profileDetails.summary, experience: currentUser.experience ? `${currentUser.experience} Years` : "0 Years" }
             },
             attendanceToday: { 
@@ -111,21 +194,43 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
           }));
         }
 
-        const taskResponse = await API.get('/tasks');
-        const tasks = Array.isArray(taskResponse.data) ? taskResponse.data : (taskResponse.data.data || []);
-        const myTasks = tasks.filter(t => {
-          const assigned = (t.assignedTo || '').toLowerCase().trim();
-          return assigned === exactDBName.toLowerCase().trim() || assigned === (currentUser?.username || '').toLowerCase().trim();
-        });
+        // Fetch Tasks
+        let myTasks = [];
+        try {
+          const taskResponse = await API.get('/tasks');
+          const tasks = Array.isArray(taskResponse.data) ? taskResponse.data : (taskResponse.data.data || []);
+          myTasks = tasks.filter(t => {
+            const assigned = (t.assignedTo || '').toLowerCase().trim();
+            return assigned === exactDBName.toLowerCase().trim() || 
+                   assigned === (currentUser?.fullName || '').toLowerCase().trim() ||
+                   assigned === (currentUser?.name || '').toLowerCase().trim() ||
+                   assigned === (currentUser?.username || '').toLowerCase().trim() ||
+                   assigned === incomingEmail ||
+                   (incomingEmail && assigned === incomingEmail.split('@')[0]);
+          });
+        } catch (e) {
+          console.warn("Tasks fetch warning:", e.message);
+        }
         const activeTasks = myTasks.filter(t => t.status !== 'Completed');
         setTrainerData(prev => ({ ...prev, tasksData: activeTasks }));
 
-        const batchResponse = await API.get('/batches');
-        const allBatches = Array.isArray(batchResponse.data) ? batchResponse.data : (batchResponse.data.data || []);
-        const myBatches = allBatches.filter(b => {
-          const trainer = (b.trainer || b.trainerName || b.assignedTo || b.faculty || '').toLowerCase().trim();
-          return trainer === exactDBName.toLowerCase().trim() || trainer === (currentUser?.username || '').toLowerCase().trim() || trainer === 'admin';
-        });
+        // Fetch Batches
+        let myBatches = [];
+        try {
+          const batchResponse = await API.get('/batches');
+          const allBatches = Array.isArray(batchResponse.data) ? batchResponse.data : (batchResponse.data.data || []);
+          myBatches = allBatches.filter(b => {
+            const trainer = (b.trainerName || b.trainer || b.assignedTo || b.faculty || '').toLowerCase().trim();
+            return trainer === exactDBName.toLowerCase().trim() || 
+                   trainer === (currentUser?.fullName || '').toLowerCase().trim() ||
+                   trainer === (currentUser?.name || '').toLowerCase().trim() ||
+                   trainer === (currentUser?.username || '').toLowerCase().trim() ||
+                   trainer === incomingEmail ||
+                   (incomingEmail && trainer === incomingEmail.split('@')[0]);
+          });
+        } catch (e) {
+          console.warn("Batches fetch warning:", e.message);
+        }
 
         const allocatedBatches = myBatches.map((b, idx) => {
           let tTime = "09:00 AM"; let eTime = "10:30 AM";
@@ -136,31 +241,48 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
             if(Array.isArray(b.schedule[0].days)) bDays = b.schedule[0].days.join(', ');
             else if(b.schedule[0].days) bDays = b.schedule[0].days;
           }
-          let studentsCount = Array.isArray(b.students) ? b.students.length : (Array.isArray(b.enrolledStudents) ? b.enrolledStudents.length : Number(b.studentsCount || 20));
+          let studentsCount = Array.isArray(b.students) ? b.students.length : (Array.isArray(b.enrolledStudents) ? b.enrolledStudents.length : Number(b.studentsCount || 0));
 
           return {
-            id: b._id || idx, course: b.courseName || b.course || "Training Class", batchName: String(b.batchName || b.batchId || `Batch-${idx+1}`).trim(),
-            students: studentsCount, days: bDays, time: `${tTime} - ${eTime}`, room: b.room || "Lab 1", status: b.status || "Ongoing",
-            color: idx % 2 === 0 ? "#3b82f6" : "#a855f7", bgColor: idx % 2 === 0 ? "#eff6ff" : "#f3e8ff", initial: `B${idx+1}`
-          }
+            id: b._id || idx, 
+            course: b.courseName || b.course || "Training Class", 
+            batchName: String(b.batchName || b.batchId || `Batch-${idx+1}`).trim(),
+            students: studentsCount, 
+            days: bDays, 
+            time: `${tTime} - ${eTime}`, 
+            room: b.room || "Lab 1", 
+            status: b.status || "Ongoing",
+            color: idx % 2 === 0 ? "#3b82f6" : "#a855f7", 
+            bgColor: idx % 2 === 0 ? "#eff6ff" : "#f3e8ff", 
+            initial: `B${idx+1}`
+          };
         });
 
         const activeAllocatedBatches = allocatedBatches.filter(batch => batch.status !== 'Completed' && batch.status !== 'completed');
 
-        const leavesResponse = await API.get('/leaves');
-        const allLeaves = Array.isArray(leavesResponse.data) ? leavesResponse.data : (leavesResponse.data.data || []);
-        const myLeaves = allLeaves.filter(l => (l.empEmail || '').toLowerCase().trim() === incomingEmail || (l.empName || '').toLowerCase().trim() === exactDBName.toLowerCase().trim());
-        
+        // Fetch Leaves
         let usedCasual = 0, usedSick = 0, usedPrivilege = 0, usedCompOff = 0;
-        myLeaves.forEach(l => {
-          if (l.status === 'Approved') {
-            const lType = (l.leaveType || '').toLowerCase();
-            if (lType.includes('sick')) usedSick += Number(l.totalDays || 0);
-            else if (lType.includes('privilege')) usedPrivilege += Number(l.totalDays || 0);
-            else if (lType.includes('comp')) usedCompOff += Number(l.totalDays || 0);
-            else usedCasual += Number(l.totalDays || 0);
-          }
-        });
+        try {
+          const leavesResponse = await API.get('/leaves');
+          const allLeaves = Array.isArray(leavesResponse.data) ? leavesResponse.data : (leavesResponse.data.data || []);
+          const myLeaves = allLeaves.filter(l => 
+            (l.empEmail || '').toLowerCase().trim() === incomingEmail || 
+            (l.empName || '').toLowerCase().trim() === exactDBName.toLowerCase().trim() ||
+            (l.empName || '').toLowerCase().trim() === (currentUser?.fullName || '').toLowerCase().trim()
+          );
+          
+          myLeaves.forEach(l => {
+            if (l.status === 'Approved') {
+              const lType = (l.leaveType || '').toLowerCase();
+              if (lType.includes('sick')) usedSick += Number(l.totalDays || 0);
+              else if (lType.includes('privilege')) usedPrivilege += Number(l.totalDays || 0);
+              else if (lType.includes('comp')) usedCompOff += Number(l.totalDays || 0);
+              else usedCasual += Number(l.totalDays || 0);
+            }
+          });
+        } catch (e) {
+          console.warn("Leaves fetch warning:", e.message);
+        }
 
         const today = new Date(); today.setHours(0, 0, 0, 0);
         
@@ -171,9 +293,13 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
             const schedRes = await API.get(`/schedule/${incomingEmail}`);
             allEvents = Array.isArray(schedRes.data) ? schedRes.data : (schedRes.data.data || []);
           } catch(err1) {
-            const schedRes = await API.get(`/schedule`);
+            const schedRes = await API.get(`/schedule`).catch(() => ({ data: [] }));
             const allSched = Array.isArray(schedRes.data) ? schedRes.data : (schedRes.data.data || []);
-            allEvents = allSched.filter(ev => (ev.email === incomingEmail) || (ev.empEmail === incomingEmail) || (ev.assignedTo === exactDBName));
+            allEvents = allSched.filter(ev => 
+              (ev.email && ev.email.toLowerCase() === incomingEmail) || 
+              (ev.empEmail && ev.empEmail.toLowerCase() === incomingEmail) || 
+              (ev.assignedTo && ev.assignedTo.toLowerCase() === exactDBName.toLowerCase())
+            );
           }
 
           const y = today.getFullYear();
@@ -222,8 +348,8 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
             totalDays: 8, 
             breakdown: [ 
               { type: "Casual Leave", used: usedCasual, total: 2, color: "#10b981" }, 
-              { type: "Sick Leave", used: usedSick, total: 2, color: "#3b82f6" },
-              { type: "Privilege Leave", used: usedPrivilege, total: 1, color: "#a855f7" },
+              { type: "Sick Leave", used: usedSick, total: 2, color: "#3b82f6" }, 
+              { type: "Privilege Leave", used: usedPrivilege, total: 1, color: "#a855f7" }, 
               { type: "Comp Off", used: usedCompOff, total: 3, color: "#f59e0b" } 
             ] 
           }
@@ -232,7 +358,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
     };
 
     fetchUserData();
-  }, [userName, userEmail, activeEmail]);
+  }, [userName, userEmail, activeEmail, activeTab]);
 
   const fetchNotifications = async () => {
     if (!activeEmail) return;
@@ -284,8 +410,134 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
     }
   }, [activeEmail]);
 
-  const handleTabClick = (tabName) => {
-    setActiveTab(tabName);
+  const fetchChatMessages = async () => {
+    try {
+      const res = await API.get('/groupchat');
+      const messages = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+      setChatMessages(messages);
+
+      if (isChatOpen) {
+        localStorage.setItem('groupChatSeenCount', messages.length.toString());
+        setGroupUnreadCount(0);
+      } else {
+        const seenCount = parseInt(localStorage.getItem('groupChatSeenCount') || '0', 10);
+        if (messages.length > seenCount) {
+          setGroupUnreadCount(messages.length - seenCount);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching chat:", err);
+    }
+  };
+
+  useEffect(() => {
+    let interval;
+    if (!editingMsgId) { 
+      fetchChatMessages();
+      interval = setInterval(fetchChatMessages, 3000); 
+    }
+    return () => clearInterval(interval);
+  }, [isChatOpen, editingMsgId]);
+
+  useEffect(() => {
+    if (messagesEndRef.current && !editingMsgId) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages.length, isChatOpen]);
+
+  const toggleGroupChat = () => {
+    if (!isDragging) {
+      const nextState = !isChatOpen;
+      setIsChatOpen(nextState);
+      if (nextState) {
+        localStorage.setItem('groupChatSeenCount', chatMessages.length.toString());
+        setGroupUnreadCount(0);
+      }
+    }
+  };
+
+  const handleGroupFileChange = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024);
+    if (validFiles.length < files.length) {
+      alert("Some files were larger than 5MB and were skipped.");
+    }
+
+    const filePromises = validFiles.map(file => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve({ name: file.name, type: file.type, size: file.size, data: reader.result });
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    const newFilesArray = await Promise.all(filePromises);
+    setSelectedGroupFiles(prev => [...prev, ...newFilesArray]);
+    e.target.value = null; 
+  };
+
+  const removeGroupFile = (indexToRemove) => {
+    setSelectedGroupFiles(prev => prev.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMsg.trim() && selectedGroupFiles.length === 0) return;
+
+    const senderName = trainerData.profile.name !== "Loading..." ? trainerData.profile.name : (userName || "Employee");
+    const senderEmail = trainerData.profileDetails.email !== "Loading..." ? trainerData.profileDetails.email : (userEmail || "test@vinsup.com");
+
+    try {
+      if (selectedGroupFiles.length > 0) {
+        for (let i = 0; i < selectedGroupFiles.length; i++) {
+          const filePayload = {
+            fileName: selectedGroupFiles[i].name,
+            fileType: selectedGroupFiles[i].type,
+            fileData: selectedGroupFiles[i].data
+          };
+
+          await API.post('/groupchat/send', { 
+            senderName, 
+            senderEmail, 
+            message: i === 0 ? newMsg : "", 
+            file: filePayload 
+          });
+        }
+      } else {
+        await API.post('/groupchat/send', { 
+          senderName, 
+          senderEmail, 
+          message: newMsg,
+          file: null 
+        });
+      }
+      
+      setNewMsg("");
+      setSelectedGroupFiles([]);
+      fetchChatMessages(); 
+    } catch (err) { console.error("Error sending message:", err); }
+  };
+
+  const handleDeleteMessage = async (id) => {
+    if(!window.confirm("Are you sure you want to delete this message?")) return;
+    try {
+      await API.delete(`/groupchat/delete/${id}`);
+      fetchChatMessages();
+    } catch(err) { console.error("Error deleting message:", err); }
+  };
+
+  const handleUpdateMessage = async (id) => {
+    if(!editingMsgText.trim()) return;
+    try {
+      await API.put(`/groupchat/edit/${id}`, { message: editingMsgText });
+      setEditingMsgId(null);
+      setEditingMsgText("");
+      fetchChatMessages();
+    } catch(err) { console.error("Error updating message:", err); }
   };
 
   const unreadCount = Array.isArray(notifications) ? notifications.filter(n => !n.isRead).length : 0;
@@ -305,7 +557,13 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
     { name: 'Helpdesk', icon: 'far fa-life-ring' }
   ];
 
-  const currentUserEmail = trainerData.profileDetails.email !== "Loading..." ? trainerData.profileDetails.email : (userEmail || "test@vinsup.com");
+  const displayName = (trainerData.profile.name && trainerData.profile.name !== "Loading...") 
+    ? trainerData.profile.name 
+    : (userName || auth.name || (activeEmail ? activeEmail.split('@')[0] : "Trainer"));
+  const firstName = displayName.split(' ')[0] || "Trainer";
+  const currentUserEmail = (trainerData.profileDetails.email && trainerData.profileDetails.email !== "Loading..." && trainerData.profileDetails.email !== "N/A")
+    ? trainerData.profileDetails.email
+    : (activeEmail || "trainer@vinsup.com");
 
   return (
     <div className="admin-layout">
@@ -336,12 +594,16 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
                 onClick={(e) => { 
                   e.preventDefault(); 
                   handleTabClick(item.name); 
-                  if (window.innerWidth <= 992) setIsSidebarOpen(false);
                 }} 
-                style={{ display: 'flex', alignItems: 'center' }}
+                style={{ display: 'flex', alignItems: 'center', width: '100%' }}
               >
                   <i className={item.icon}></i>
                   <span>{item.name}</span>
+                  {item.name === 'Tasks' && trainerData.tasksData.length > 0 && (
+                    <span style={{ marginLeft: 'auto', background: '#ea580c', color: '#fff', fontSize: '11px', padding: '2px 7px', borderRadius: '10px', fontWeight: 'bold' }}>
+                      {trainerData.tasksData.length}
+                    </span>
+                  )}
               </a>
             </li>
           ))}
@@ -356,7 +618,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         <header className="top-header">
           <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <i className="fas fa-bars menu-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}></i>
-            <span style={{ fontSize: '14px', color: '#4b5563', fontWeight: '500' }}>{getGreeting()}, <strong style={{ color: '#111827' }}>{trainerData.profile.name.split(' ')[0]}</strong></span>
+            <span style={{ fontSize: '14px', color: '#4b5563', fontWeight: '500' }}>{getGreeting()}, <strong style={{ color: '#111827' }}>{firstName}</strong></span>
           </div>
 
           <div className="header-right">
@@ -419,12 +681,12 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
                 {trainerData.profile.profilePic ? (
                   <img src={trainerData.profile.profilePic} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} onError={(e) => { e.target.style.display = 'none'; }} />
                 ) : (
-                  <span>{trainerData.profile.name.charAt(0).toUpperCase()}</span>
+                  <span>{firstName.charAt(0).toUpperCase()}</span>
                 )}
               </div>
               <div className="user-info" style={{ textAlign: 'left' }}>
-                <strong>{trainerData.profile.name}</strong>
-                <span>{trainerData.profile.role} <i className="fas fa-chevron-down" style={{ fontSize: '10px', marginLeft: '3px' }}></i></span>
+                <strong>{displayName}</strong>
+                <span>{trainerData.profile.role !== "Loading..." ? trainerData.profile.role : "Trainer"} <i className="fas fa-chevron-down" style={{ fontSize: '10px', marginLeft: '3px' }}></i></span>
               </div>
             </div>
 
@@ -434,7 +696,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         {activeTab === 'Dashboard' && (
           <div className="dashboard-container">
             <div className="page-header">
-              <h1 style={{ color: '#0f172a', fontWeight: 'bold' }}>Welcome back, {trainerData.profile.name.split(' ')[0]}!</h1>
+              <h1 style={{ color: '#0f172a', fontWeight: 'bold' }}>Welcome back, {firstName}!</h1>
               <p>Here is what is happening with your work today.</p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '25px' }}>
@@ -444,7 +706,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
                 <div style={{ width: '100%' }}>
                   <p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#64748b', fontWeight: '500' }}>Batches Allocated</p>
                   <h3 style={{ margin: '0 0 12px 0', fontSize: '20px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData.myBatchesData.length} Batches</h3>
-                  <span style={{ fontSize: '12px', color: '#4f46e5', fontWeight: '600', cursor: 'pointer' }} onClick={() => handleTabClick('Courses')}>View Batches &rarr;</span>
+                  <span style={{ fontSize: '12px', color: '#4f46e5', fontWeight: '600', cursor: 'pointer' }} onClick={() => handleTabClick('My Classes')}>View Batches &rarr;</span>
                 </div>
               </div>
               <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #f1f5f9', display: 'flex', gap: '15px', alignItems: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}><div style={{ background: '#fff7ed', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c', fontSize: '24px' }}><i className="far fa-clipboard"></i></div><div style={{ width: '100%' }}><p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#64748b', fontWeight: '500' }}>Pending Tasks</p><h3 style={{ margin: '0 0 12px 0', fontSize: '20px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData.tasksData.length} Tasks</h3><span style={{ fontSize: '12px', color: '#ea580c', fontWeight: '600', cursor: 'pointer' }} onClick={() => handleTabClick('Tasks')}>View Tasks &rarr;</span></div></div>
@@ -470,7 +732,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
               <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                   <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>My Batches (Allocated)</h3>
-                  <a href="#" onClick={(e) => { e.preventDefault(); handleTabClick('Courses'); }} style={{ color: '#2563eb', fontSize: '12px', fontWeight: '600', textDecoration: 'none' }}>View All Batches</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); handleTabClick('My Classes'); }} style={{ color: '#2563eb', fontSize: '12px', fontWeight: '600', textDecoration: 'none' }}>View All Batches</a>
                 </div>
                 <div className="batch-scroll-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0', maxHeight: '315px', overflowY: 'auto', paddingRight: '10px' }}>
                   {trainerData.myBatchesData.length > 0 ? trainerData.myBatchesData.map((batch, idx) => (
@@ -543,16 +805,16 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
 
         {/* Other Tabs */}
         {activeTab === 'My Profile' && <MyProfile trainerData={trainerData} />}
-        {activeTab === 'Attendance' && <UserAttendance userName={trainerData.profileDetails.fullName} userEmail={trainerData.profileDetails.email} />}
-        {activeTab === 'Leave Request' && <UserLeaveRequest userName={trainerData.profileDetails.fullName} userEmail={trainerData.profileDetails.email} />}
-        {activeTab === 'My Schedule' && <UserSchedule userName={trainerData.profile.name} userEmail={trainerData.profileDetails.email} />}
-        {activeTab === 'Tasks' && <UserTasks userName={trainerData.profile.name} />}
-        {activeTab === 'Helpdesk' && <UserHelpdesk />}
-        {activeTab === 'Courses' && <UserCourses userName={trainerData.profile.name} userEmail={trainerData.profileDetails.email} />}
-        {activeTab === 'My Classes' && <EmployeeMyClasses userName={trainerData.profile.name} userEmail={trainerData.profileDetails.email} />}
-        {activeTab === 'Reports' && <UserReports userName={trainerData.profile.name} userEmail={trainerData.profileDetails.email} />}
+        {activeTab === 'Attendance' && <UserAttendance userName={displayName} userEmail={currentUserEmail} />}
+        {activeTab === 'Leave Request' && <UserLeaveRequest userName={displayName} userEmail={currentUserEmail} />}
+        {activeTab === 'My Schedule' && <UserSchedule userName={displayName} userEmail={currentUserEmail} />}
+        {activeTab === 'Tasks' && <UserTasks userName={displayName} userEmail={currentUserEmail} />}
+        {activeTab === 'Helpdesk' && <UserHelpdesk userName={displayName} userEmail={currentUserEmail} />}
+        {activeTab === 'Courses' && <UserCourses userName={displayName} userEmail={currentUserEmail} />}
+        {activeTab === 'My Classes' && <EmployeeMyClasses userName={displayName} userEmail={currentUserEmail} />}
+        {activeTab === 'Reports' && <UserReports userName={displayName} userEmail={currentUserEmail} />}
         {activeTab === 'Announcements' && <EmployeeAnnouncements trainerData={trainerData} />}
-        {activeTab === 'Quizzes' && (<EmployeeQuizzes userName={userName} userEmail={userEmail} />)}
+        {activeTab === 'Quizzes' && (<EmployeeQuizzes userName={displayName} userEmail={currentUserEmail} />)}
 
       </main>
 

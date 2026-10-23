@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken'); // 🔥 JWT Import pannirukku 🔥
+const generateToken = require('../config/generateToken');
 const Employee = require('../models/Employee');
 const Student = require('../models/Student');
 const Admin = require('../models/Admin');
@@ -20,7 +21,7 @@ router.post('/login', async (req, res) => {
     const admin = await Admin.findOne({ email: cleanEmail });
     if (admin) {
       if (admin.password === cleanPassword) {
-        const token = jwt.sign({ id: admin._id, role: 'Admin' }, process.env.JWT_SECRET, { expiresIn: '30d' });
+        const token = generateToken(admin._id, 'Admin');
 
         return res.status(200).json({
           success: true,
@@ -42,7 +43,7 @@ router.post('/login', async (req, res) => {
     if (employee) {
       const empDobFormatted = employee.dob ? new Date(employee.dob).toISOString().split('T')[0].replace(/-/g, '') : '';
       if (employee.password === cleanPassword || empDobFormatted === cleanPassword) {
-        const token = jwt.sign({ id: employee._id, role: employee.role || 'Employee' }, process.env.JWT_SECRET, { expiresIn: '30d' });
+        const token = generateToken(employee._id, employee.role || 'Employee');
 
         return res.status(200).json({
           success: true,
@@ -77,7 +78,7 @@ router.post('/login', async (req, res) => {
       }
 
       if (studentDobMatch || student.password === cleanPassword) {
-        const token = jwt.sign({ id: student._id, role: 'Student' }, process.env.JWT_SECRET, { expiresIn: '30d' });
+        const token = generateToken(student._id, 'Student');
 
         return res.status(200).json({
           success: true,

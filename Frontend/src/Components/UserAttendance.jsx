@@ -61,12 +61,17 @@ const UserAttendance = ({ userName, userEmail }) => {
       });
       const empData = Array.isArray(response.data) ? response.data : (response.data.data || []);
       
+      const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
       const storedEmail = localStorage.getItem('loggedInEmail');
-      const incomingEmail = (userEmail || storedEmail || "").toLowerCase().trim();
+      const incomingEmail = (userEmail || auth.email || storedEmail || "").toLowerCase().trim();
+      const incomingName = (userName || auth.name || "").toLowerCase().trim();
 
       let matchedUser = null;
-      if (incomingEmail) {
-        matchedUser = empData.find(emp => (emp.email || '').toLowerCase().trim() === incomingEmail);
+      if (incomingEmail || incomingName) {
+        matchedUser = empData.find(emp => 
+          (incomingEmail && (emp.email || '').toLowerCase().trim() === incomingEmail) ||
+          (incomingName && (emp.fullName || emp.name || '').toLowerCase().trim() === incomingName)
+        );
       }
 
       if (matchedUser) {

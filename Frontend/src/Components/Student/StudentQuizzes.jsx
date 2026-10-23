@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
 
 const StudentQuizzes = ({ userEmail }) => {
   const [quizzes, setQuizzes] = useState([]);
@@ -14,17 +14,18 @@ const StudentQuizzes = ({ userEmail }) => {
 
   const fetchQuizzes = async () => {
     try {
-      const activeEmail = (userEmail || "").toLowerCase().trim();
+      const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+      const activeEmail = (userEmail || auth.email || "").toLowerCase().trim();
       if (!activeEmail) return;
 
-      const stuRes = await axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(() => null);
+      const stuRes = await API.get('/students').catch(() => null);
       const allStudents = stuRes?.data?.data || stuRes?.data || [];
       const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
       const studentBatch = currentStudent ? (currentStudent.batch || '').toLowerCase().trim() : '';
 
       const [quizRes, resultRes] = await Promise.all([
-        axios.get('https://vinsup-4vt5.onrender.com/api/quizzes/all').catch(() => null),
-        axios.get(`https://vinsup-4vt5.onrender.com/api/quizzes/results/${activeEmail}`).catch(() => null)
+        API.get('/quizzes/all').catch(() => null),
+        API.get(`/quizzes/results/${activeEmail}`).catch(() => null)
       ]);
 
       const allQuizzes = Array.isArray(quizRes?.data) ? quizRes.data : [];
@@ -114,9 +115,11 @@ const StudentQuizzes = ({ userEmail }) => {
   const submitQuiz = async () => {
     if(!window.confirm("Are you sure you want to submit the quiz?")) return;
     try {
-      const res = await axios.post('https://vinsup-4vt5.onrender.com/api/quizzes/submit', {
+      const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+      const activeEmail = (userEmail || auth.email || "").toLowerCase().trim();
+      const res = await API.post('/quizzes/submit', {
         quizId: activeQuiz._id,
-        studentEmail: userEmail,
+        studentEmail: activeEmail,
         answers: answers
       });
 

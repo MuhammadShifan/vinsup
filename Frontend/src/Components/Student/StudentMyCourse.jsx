@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import API from '../../utils/api';
+import API, { getImageUrl } from '../../utils/api';
 import { getCache, setCache } from '../../utils/cache';
 
 const StudentMyCourse = ({ userEmail, userName }) => {
@@ -32,7 +32,8 @@ const StudentMyCourse = ({ userEmail, userName }) => {
     // API Fetch logic for REAL DATA with Cache
     const fetchData = async () => {
       try {
-        const activeEmail = (userEmail || "").toLowerCase().trim();
+        const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+        const activeEmail = (userEmail || auth.email || "").toLowerCase().trim();
         if (!activeEmail) return;
 
         let allStudents = getCache('students');
@@ -74,19 +75,16 @@ const StudentMyCourse = ({ userEmail, userName }) => {
         const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
 
         if (currentStudent) {
-          const trainerInfo = allEmp.find(e => (e.fullName || e.name || '') === currentStudent.trainer);
+          const trainerQuery = (currentStudent.trainer || '').trim().toLowerCase();
+          const trainerInfo = allEmp.find(e => (e.fullName || e.name || '').trim().toLowerCase() === trainerQuery || (e.email || '').trim().toLowerCase() === trainerQuery);
           const studentBatch = allBatches.find(b => (b.batchName || b.batchId || b.name || '').toLowerCase() === (currentStudent.batch || '').toLowerCase());
           
           const batchProgress = studentBatch ? (studentBatch.progress || 0) : 0;
-          const mySyllabus = allSyllabus.find(s => (s.courseName || s.course) === currentStudent.course);
+          const mySyllabus = allSyllabus.find(s => (s.courseName || s.course || '').trim().toLowerCase() === (currentStudent.course || '').trim().toLowerCase());
 
           let trainerImg = null;
           if (trainerInfo && trainerInfo.profilePhoto) {
-            let cleanPath = trainerInfo.profilePhoto.replace(/\\/g, '/').replace(/^\/+/, '');
-            if (!cleanPath.startsWith('http')) {
-               cleanPath = cleanPath.startsWith('uploads/') ? cleanPath : `uploads/${cleanPath}`;
-               trainerImg = `https://vinsup-4vt5.onrender.com/${cleanPath}`;
-            } else trainerImg = trainerInfo.profilePhoto;
+            trainerImg = getImageUrl(trainerInfo.profilePhoto);
           }
 
           setCourseData({

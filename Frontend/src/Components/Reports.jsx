@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Employees.css';
-import API from '../utils/api';
+import API, { getImageUrl } from '../utils/api';
 import { getCache, setCache } from '../utils/cache';
 
 const Reports = () => {
@@ -537,8 +537,7 @@ const Reports = () => {
                         finalImage = rawImage; 
                       } else {
                         let cleanPath = rawImage.replace(/\\/g, '/').replace(/^\/+/, '');
-                        if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-                        finalImage = `https://vinsup-4vt5.onrender.com/${cleanPath}`;
+                        finalImage = getImageUrl(cleanPath);
                       }
                     } else if (rawImage) {
                       finalImage = rawImage;

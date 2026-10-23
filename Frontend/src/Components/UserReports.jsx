@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
 import { jsPDF } from 'jspdf'; 
 import html2canvas from 'html2canvas'; // 🔥 Pudhusa add pannirukom for table snapshot
 
@@ -20,21 +20,22 @@ const UserReports = ({ userName, userEmail }) => {
     const fetchAllData = async () => {
       try {
         // Fetch Reports
-        const repRes = await axios.get('https://vinsup-4vt5.onrender.com/api/reports');
+        const repRes = await API.get('/reports');
         const allReports = Array.isArray(repRes.data) ? repRes.data : (repRes.data.data || []);
+        const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+        const currentEmail = (userEmail || auth.email || '').toLowerCase().trim();
         const myReports = allReports.filter(report => {
           const targetEmail = (report.empEmail || '').toLowerCase().trim();
-          const currentEmail = (userEmail || '').toLowerCase().trim();
           return targetEmail === currentEmail || targetEmail === 'all'; 
         });
         setReports(myReports);
 
         // Fetch Batches for Tables
-        const batchRes = await axios.get('https://vinsup-4vt5.onrender.com/api/batches');
+        const batchRes = await API.get('/batches');
         setAllBatches(Array.isArray(batchRes.data) ? batchRes.data : (batchRes.data.data || []));
 
         // Fetch Employees for Attendance/Workload
-        const empRes = await axios.get('https://vinsup-4vt5.onrender.com/api/employees');
+        const empRes = await API.get('/employees');
         setAllEmployees(Array.isArray(empRes.data) ? empRes.data : (empRes.data.data || []));
 
       } catch (error) {

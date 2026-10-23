@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const MySchedule = () => {
   const today = new Date();
-  const [currentMonthDate, setCurrentMonthDate] = useState(new Date(2026, 7, 1)); 
+  const [currentMonthDate, setCurrentMonthDate] = useState(new Date()); 
 
   // Page load aagumpothu LocalStorage-la irundhu data-va eduthu expire aanatha filter pannum
   const [events, setEvents] = useState(() => {

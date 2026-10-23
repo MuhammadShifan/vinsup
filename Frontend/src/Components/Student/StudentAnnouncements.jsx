@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
 
 const StudentAnnouncements = ({ userEmail }) => {
   const [announcements, setAnnouncements] = useState([]);
@@ -9,8 +9,11 @@ const StudentAnnouncements = ({ userEmail }) => {
 
   // 🔥 FIX 1: Bullet-proof target audience extractor 🔥
   const extractTargetAudience = (ann, sBatch) => {
+    if (ann.audienceType === 'All Students') return 'All Students';
+    if (ann.targetBatch) return ann.targetBatch;
+
     // 1. Standard known keys check
-    const keys = ['audience', 'Audience', 'targetAudience', 'batch', 'Batch', 'batchName', 'course', 'Course', 'sendTo', 'target', 'assignedTo'];
+    const keys = ['audienceType', 'targetBatch', 'audience', 'Audience', 'targetAudience', 'batch', 'Batch', 'batchName', 'course', 'Course', 'sendTo', 'target', 'assignedTo'];
     for (let k of keys) {
         if (ann[k] && typeof ann[k] === 'string' && ann[k].trim() !== '') return ann[k];
     }
@@ -26,17 +29,17 @@ const StudentAnnouncements = ({ userEmail }) => {
         }
     }
     
-    // STRICT RULE: Do NOT default to 'All Students' if unknown. Return null to fail the filter.
     return null; 
   };
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const activeEmail = (userEmail || "").toLowerCase().trim();
+        const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+        const activeEmail = (userEmail || auth.email || "").toLowerCase().trim();
         
         // 1. Fetch Student Details (to know their exact batch)
-        const stuRes = await axios.get('https://vinsup-4vt5.onrender.com/api/students').catch(() => null);
+        const stuRes = await API.get('/students').catch(() => null);
         const allStudents = stuRes?.data?.data || stuRes?.data || [];
         const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
         
@@ -45,7 +48,7 @@ const StudentAnnouncements = ({ userEmail }) => {
         const studentBatch = String(studentBatchRaw).toLowerCase().trim();
 
         // 2. Fetch Announcements from Backend
-        const annRes = await axios.get('https://vinsup-4vt5.onrender.com/api/announcements').catch(() => null);
+        const annRes = await API.get('/announcements').catch(() => null);
         const allAnn = Array.isArray(annRes?.data) ? annRes.data : (annRes?.data?.data || []);
 
         let formattedAnns = [];
@@ -91,10 +94,10 @@ const StudentAnnouncements = ({ userEmail }) => {
               ...a,
               _id: a._id || Math.random().toString(),
               title: a.title || a.subject || 'Announcement',
-              description: a.description || a.message || a.content || '',
+              description: a.message || a.description || a.content || '',
               targetAudience: finalAudience,
-              date: a.date || createdDateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-              time: a.time || createdDateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+              date: a.publishDate || a.date || createdDateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+              time: a.publishTime || a.time || createdDateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
               type: a.type || 'info'
             };
           });

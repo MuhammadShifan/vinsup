@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import API, { getImageUrl } from '../utils/api';
 
 const AdminSettings = () => {
   const [adminData, setAdminData] = useState({
@@ -20,7 +20,7 @@ const AdminSettings = () => {
 
   const fetchAdminSettings = async () => {
     try {
-      const res = await axios.get('https://vinsup-4vt5.onrender.com/api/admin/profile');
+      const res = await API.get('/admin/profile');
       if (res.data.success && res.data.admin) {
         setAdminData(res.data.admin);
         setNewName(res.data.admin.name);
@@ -42,7 +42,7 @@ const AdminSettings = () => {
   const handleUpdateName = async () => {
     if (!newName.trim()) return alert("Name cannot be empty!");
     try {
-      const res = await axios.put('https://vinsup-4vt5.onrender.com/api/admin/update', { name: newName });
+      const res = await API.put('/admin/update', { name: newName });
       if (res.data.success) {
         alert("Admin name updated successfully! 🎉");
         fetchAdminSettings();
@@ -64,13 +64,13 @@ const AdminSettings = () => {
 
     try {
       // Direct file upload to server uploads folder
-      const uploadRes = await axios.post('https://vinsup-4vt5.onrender.com/api/upload', formData, {
+      const uploadRes = await API.post('/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       }).catch(() => null);
 
       let photoUrl = '';
       if (uploadRes && uploadRes.data && uploadRes.data.filePath) {
-        photoUrl = `https://vinsup-4vt5.onrender.com/${uploadRes.data.filePath.replace(/\\/g, '/')}`;
+        photoUrl = getImageUrl(uploadRes.data.filePath);
       } else {
         // Fallback to base64 if upload route is missing
         const reader = new FileReader();
@@ -92,7 +92,7 @@ const AdminSettings = () => {
 
   const savePhotoToDb = async (url) => {
     try {
-      const res = await axios.put('https://vinsup-4vt5.onrender.com/api/admin/update', { profilePhoto: url });
+      const res = await API.put('/admin/update', { profilePhoto: url });
       if (res.data.success) {
         alert("Profile photo updated successfully! 📸");
         setSelectedFile(null);
@@ -116,7 +116,7 @@ const AdminSettings = () => {
     }
 
     try {
-      const res = await axios.put('https://vinsup-4vt5.onrender.com/api/admin/change-password', {
+      const res = await API.put('/admin/change-password', {
         currentPassword: passwords.current,
         newPassword: passwords.new
       });
@@ -135,8 +135,7 @@ const AdminSettings = () => {
     if (!rawPath) return "https://randomuser.me/api/portraits/men/1.jpg";
     if (rawPath.startsWith('http') || rawPath.startsWith('data:image')) return rawPath;
     let cleanPath = rawPath.replace(/\\/g, '/').replace(/^\/+/, '');
-    if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-    return `https://vinsup-4vt5.onrender.com/${cleanPath}`;
+    return getImageUrl(cleanPath);
   };
 
   return (

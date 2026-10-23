@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import API, { getBaseUrl } from '../../utils/api';
+import API, { getBaseUrl, getImageUrl } from '../../utils/api';
 import socket from '../../utils/socket';
 
 const StudentBatchChat = ({ userName, userEmail }) => {
@@ -22,16 +22,15 @@ const StudentBatchChat = ({ userName, userEmail }) => {
 
   const getPhotoUrl = (rawPath, fallbackName) => {
     if (!rawPath || typeof rawPath !== 'string') return `https://ui-avatars.com/api/?name=${encodeURIComponent(fallbackName || 'U')}&background=random&color=fff`;
-    if (rawPath.startsWith('http') || rawPath.startsWith('data:image')) return rawPath;
-    let cleanPath = rawPath.replace(/\\/g, '/').replace(/^\/+/, '');
-    if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-    return `${getBaseUrl()}/${cleanPath}`;
+    return getImageUrl(rawPath, `https://ui-avatars.com/api/?name=${encodeURIComponent(fallbackName || 'U')}&background=random&color=fff`);
   };
 
   useEffect(() => {
     const initChat = async () => {
       try {
-        const activeEmail = (userEmail || "").toLowerCase().trim();
+        const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+        const activeEmail = (userEmail || auth.email || "").toLowerCase().trim();
+        const activeName = userName || auth.name || "Student";
         const stuRes = await API.get('/students').catch(() => null);
         const allStudents = stuRes?.data?.data || stuRes?.data || [];
         const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
@@ -41,7 +40,7 @@ const StudentBatchChat = ({ userName, userEmail }) => {
         setStudentBatch(myBatch);
 
         const rawPhoto = currentStudent?.profilePhoto || currentStudent?.photo || currentStudent?.image || currentStudent?.avatar || '';
-        setMyAvatar(getPhotoUrl(rawPhoto, userName || "Student"));
+        setMyAvatar(getPhotoUrl(rawPhoto, activeName));
 
         if (myBatch) {
           fetchMessages(myBatch);

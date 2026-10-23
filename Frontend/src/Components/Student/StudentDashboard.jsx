@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import API, { getBaseUrl } from '../../utils/api';
+import API, { getBaseUrl, getImageUrl } from '../../utils/api';
 import '../AdminDashboard.css'; 
 import logoImage from '../../assets/logo.png'; 
 import StudentMyCourse from './StudentMyCourse'; 
@@ -21,7 +21,10 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
   const [trainerInfo, setTrainerInfo] = useState({ name: 'Assigned Trainer', email: '', photo: '' });
   const [studentPhoto, setStudentPhoto] = useState("");
 
-  const firstName = userName ? userName.split(' ')[0] : 'Student';
+  const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+  const activeEmail = (userEmail || auth.email || "").toLowerCase().trim();
+  const displayName = userName || auth.name || 'Student';
+  const firstName = displayName ? displayName.split(' ')[0] : 'Student';
 
   const sidebarMenu = [
     { name: 'Dashboard', icon: 'fas fa-th-large' },
@@ -39,10 +42,7 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
 
   const getPhotoUrl = (rawPath, fallbackName) => {
     if (!rawPath || typeof rawPath !== 'string') return `https://ui-avatars.com/api/?name=${encodeURIComponent(fallbackName || 'U')}&background=random&color=fff`;
-    if (rawPath.startsWith('http') || rawPath.startsWith('data:image')) return rawPath;
-    let cleanPath = rawPath.replace(/\\/g, '/').replace(/^\/+/, '');
-    if (!cleanPath.startsWith('uploads/')) cleanPath = 'uploads/' + cleanPath;
-    return `${getBaseUrl()}/${cleanPath}`;
+    return getImageUrl(rawPath, `https://ui-avatars.com/api/?name=${encodeURIComponent(fallbackName || 'U')}&background=random&color=fff`);
   };
 
   useEffect(() => {
@@ -114,16 +114,26 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
         if (Array.isArray(annRes?.data)) allAnn = annRes.data;
         else if (Array.isArray(annRes?.data?.data)) allAnn = annRes.data.data;
         else if (Array.isArray(annRes?.data?.announcements)) allAnn = annRes.data.announcements;
-        setAnnouncementsCount(allAnn.length);
+        
+        // Filter announcements specifically for this student and their batch
+        const myAnns = allAnn.filter(a => {
+          const aud = (a.audienceType || a.audience || a.targetAudience || '').toLowerCase().trim();
+          if (aud === 'all students' || aud === 'all' || aud === 'everyone') return true;
+          const tb = (a.targetBatch || a.batch || a.batchName || '').toLowerCase().trim();
+          if (batchName && tb && (tb === batchName.toLowerCase() || tb.includes(batchName.toLowerCase()))) return true;
+          return false;
+        });
+
+        setAnnouncementsCount(myAnns.length);
 
         const annCacheKey = `read_anns_v3_${activeEmail}`;
         const readAnns = JSON.parse(localStorage.getItem(annCacheKey) || '[]');
         if (activeTab === 'Announcements') {
-          const allAIds = allAnn.map(a => String(a._id || a.id));
+          const allAIds = myAnns.map(a => String(a._id || a.id));
           localStorage.setItem(annCacheKey, JSON.stringify(allAIds));
           setUnreadAnnCount(0);
         } else {
-          const unreadA = allAnn.filter(a => !readAnns.includes(String(a._id || a.id))).length;
+          const unreadA = myAnns.filter(a => !readAnns.includes(String(a._id || a.id))).length;
           setUnreadAnnCount(unreadA);
         }
 
@@ -313,9 +323,9 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
              </div>
           )}
 
-          {activeTab === 'My Course' && <StudentMyCourse userName={userName} userEmail={userEmail} />}
-          {activeTab === 'Quizzes' && <StudentQuizzes userEmail={userEmail} />}
-          {activeTab === 'Announcements' && <StudentAnnouncements userEmail={userEmail} />}
+          {activeTab === 'My Course' && <StudentMyCourse userName={displayName} userEmail={activeEmail} />}
+          {activeTab === 'Quizzes' && <StudentQuizzes userEmail={activeEmail} />}
+          {activeTab === 'Announcements' && <StudentAnnouncements userEmail={activeEmail} />}
         </div>
       </main>
       

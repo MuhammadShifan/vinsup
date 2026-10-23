@@ -44,8 +44,9 @@ const UserCourses = ({ userName, userEmail }) => {
         setCache('batches', allBatches);
       }
       
-      const incomingEmail = (userEmail || localStorage.getItem('loggedInEmail') || "").toLowerCase().trim();
-      const exactName = (userName || "Employee").toLowerCase().trim();
+      const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+      const incomingEmail = (userEmail || auth.email || localStorage.getItem('loggedInEmail') || "").toLowerCase().trim();
+      const exactName = (userName || auth.name || "Employee").toLowerCase().trim();
 
       const myBatches = allBatches.filter(b => {
         const trainerStr = (b.trainer || b.trainerName || b.assignedTo || b.faculty || '').toLowerCase().trim();

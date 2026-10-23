@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
 
-const UserHelpdesk = () => {
+const UserHelpdesk = ({ userName, userEmail }) => {
   const [currentView, setCurrentView] = useState('dashboard');
   const [selectedPriority, setSelectedPriority] = useState('Medium');
 
@@ -14,13 +14,14 @@ const UserHelpdesk = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ticketsPerPage = 5;
   
-  // 🔥 Real user email edukkura logic (Dummy ID-kku bathila) 🔥
+  // Dynamic User Email Resolution
   const getStoredEmail = () => {
+    if (userEmail) return userEmail.toLowerCase().trim();
     try {
       const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
-      return auth.email || 'muhammadshifan@gmail.com';
+      return (auth.email || localStorage.getItem('loggedInEmail') || '').toLowerCase().trim();
     } catch (e) {
-      return 'muhammadshifan@gmail.com';
+      return '';
     }
   };
   const employeeId = getStoredEmail();
@@ -33,9 +34,10 @@ const UserHelpdesk = () => {
   });
 
   const fetchTickets = async () => {
+    if (!employeeId) return;
     try {
-      const response = await axios.get(`https://vinsup-4vt5.onrender.com/api/tickets/${employeeId}`);
-      setTickets(response.data);
+      const response = await API.get(`/tickets/${employeeId}`);
+      setTickets(Array.isArray(response.data) ? response.data : (response.data?.data || []));
     } catch (err) {
       console.error("Error fetching tickets:", err);
     }
@@ -45,7 +47,7 @@ const UserHelpdesk = () => {
     if (currentView === 'dashboard') {
       fetchTickets();
     }
-  }, [currentView]);
+  }, [currentView, employeeId]);
 
   // Reset to page 1 when Tab or Search changes
   useEffect(() => {
@@ -57,9 +59,13 @@ const UserHelpdesk = () => {
   };
 
   const handleSubmit = async () => {
+    if (!employeeId) {
+      alert("User email not found. Please re-login.");
+      return;
+    }
     try {
-      const ticketData = { ...formData, priority: selectedPriority, employeeId };
-      const response = await axios.post('https://vinsup-4vt5.onrender.com/api/tickets/add', ticketData);
+      const ticketData = { ...formData, priority: selectedPriority, employeeId, employeeName: userName || 'Employee' };
+      const response = await API.post('/tickets/add', ticketData);
       alert(response.data.message || "Ticket successfully raised!");
       setFormData({ subject: '', category: 'Technical Issue', description: '', date: '' });
       setCurrentView('dashboard');
@@ -73,7 +79,7 @@ const UserHelpdesk = () => {
     if (!window.confirm("Are you sure you want to delete this ticket?")) return;
 
     try {
-      await axios.delete(`https://vinsup-4vt5.onrender.com/api/tickets/${ticketId}`);
+      await API.delete(`/tickets/${ticketId}`);
       fetchTickets();
     } catch (err) {
       console.error("Error deleting ticket:", err);

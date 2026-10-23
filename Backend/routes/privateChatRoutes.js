@@ -3,25 +3,6 @@ const router = express.Router();
 const PrivateMessage = require('../models/PrivateMessage');
 
 
-router.get('/:userEmail', async (req, res) => {
-    try {
-        const userEmail = req.params.userEmail.toLowerCase().trim();
-        const adminEmail = 'admin@vinsup.com'; 
-
-        const messages = await PrivateMessage.find({
-            $or: [
-                { senderEmail: userEmail, receiverEmail: adminEmail },
-                { senderEmail: adminEmail, receiverEmail: userEmail }
-            ]
-        }).sort({ timestamp: 1 });
-
-        res.json(messages);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-
 router.get('/unread/:userEmail', async (req, res) => {
     try {
         let userEmail = req.params.userEmail.toLowerCase().trim();
@@ -55,6 +36,25 @@ router.get('/unread-senders/:receiverEmail', async (req, res) => {
         });
 
         res.json({ success: true, counts: countsMap });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+router.get('/:userEmail', async (req, res) => {
+    try {
+        const userEmail = req.params.userEmail.toLowerCase().trim();
+        const adminEmail = 'admin@vinsup.com'; 
+
+        const messages = await PrivateMessage.find({
+            $or: [
+                { senderEmail: userEmail, receiverEmail: adminEmail },
+                { senderEmail: adminEmail, receiverEmail: userEmail }
+            ]
+        }).sort({ timestamp: 1 });
+
+        res.json(messages);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

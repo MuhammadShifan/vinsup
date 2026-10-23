@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../utils/api';
 
 const EmployeeAnnouncements = ({ trainerData }) => {
   // Navigation State
@@ -20,18 +20,20 @@ const EmployeeAnnouncements = ({ trainerData }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const trainerName = trainerData?.profileDetails?.fullName;
-        const trainerId = trainerData?.profileDetails?.empId || trainerData?._id;
+        const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+        const trainerName = (trainerData?.profileDetails?.fullName && trainerData?.profileDetails?.fullName !== 'Loading...') ? trainerData.profileDetails.fullName : (trainerData?.profile?.name || auth.name || 'Trainer');
+        const trainerId = (trainerData?.profileDetails?.empId && trainerData?.profileDetails?.empId !== 'N/A') ? trainerData.profileDetails.empId : (trainerData?.profileDetails?.email || auth.email || trainerData?._id || 'trainer');
         
-        if (!trainerName || !trainerId) return;
+        if (!trainerName) return;
 
         // 1. Fetch Batches (Filter only for this trainer)
-        const batchRes = await axios.get('https://vinsup-4vt5.onrender.com/api/batches');
+        const batchRes = await API.get('/batches');
         const allBatches = Array.isArray(batchRes.data) ? batchRes.data : (batchRes.data.data || []);
         
         const filteredBatches = allBatches.filter(b => 
           (b.trainerName && b.trainerName.toLowerCase() === trainerName.toLowerCase()) || 
-          (b.trainer && b.trainer.toLowerCase() === trainerName.toLowerCase())
+          (b.trainer && b.trainer.toLowerCase() === trainerName.toLowerCase()) ||
+          (b.trainer && auth.email && b.trainer.toLowerCase() === auth.email.toLowerCase())
         );
         setMyBatches(filteredBatches);
 
@@ -50,7 +52,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
 
   const fetchAnnouncements = async (trainerId) => {
     try {
-      const res = await axios.get(`https://vinsup-4vt5.onrender.com/api/announcements/trainer/${trainerId}`);
+      const res = await API.get(`/announcements/trainer/${trainerId}`);
       setAnnouncements(res.data.data || []);
     } catch (error) {
       console.error("Error fetching announcements:", error);
@@ -67,8 +69,9 @@ const EmployeeAnnouncements = ({ trainerData }) => {
       return;
     }
 
-    const trainerId = trainerData?.profileDetails?.empId || trainerData?._id;
-    const trainerName = trainerData?.profileDetails?.fullName;
+    const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
+    const trainerId = (trainerData?.profileDetails?.empId && trainerData?.profileDetails?.empId !== 'N/A') ? trainerData.profileDetails.empId : (trainerData?.profileDetails?.email || auth.email || trainerData?._id || 'trainer');
+    const trainerName = (trainerData?.profileDetails?.fullName && trainerData?.profileDetails?.fullName !== 'Loading...') ? trainerData.profileDetails.fullName : (trainerData?.profile?.name || auth.name || 'Trainer');
 
     // 🔥 AUTO GENERATE CURRENT LOCAL DATE & TIME 🔥
     const now = new Date();
@@ -94,7 +97,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
     };
 
     try {
-      await axios.post('https://vinsup-4vt5.onrender.com/api/announcements', payload);
+      await API.post('/announcements', payload);
       alert("Announcement Sent Successfully! 🚀");
       
       // Reset Form
@@ -115,7 +118,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
   const handleDelete = async (id) => {
     if(window.confirm("Are you sure you want to delete this announcement?")) {
       try {
-        await axios.delete(`https://vinsup-4vt5.onrender.com/api/announcements/${id}`);
+        await API.delete(`/announcements/${id}`);
         setAnnouncements(announcements.filter(a => a._id !== id));
       } catch (error) {
         console.error("Error deleting:", error);

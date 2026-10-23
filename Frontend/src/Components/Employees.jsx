@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Employees.css';
-import API from '../utils/api';
+import API, { getImageUrl } from '../utils/api';
 import { getCache, setCache, clearCache } from '../utils/cache';
 
 const Employees = () => {
@@ -380,10 +380,7 @@ const Employees = () => {
                       <div className="emp-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                         {emp.profilePhoto ? (
                           <img 
-                            src={emp.profilePhoto.startsWith('http') || emp.profilePhoto.startsWith('data:image') 
-                              ? emp.profilePhoto 
-                              : `https://vinsup-4vt5.onrender.com/${emp.profilePhoto.replace(/\\/g, '/').replace(/^\/+/, '').startsWith('uploads/') ? '' : 'uploads/'}${emp.profilePhoto.replace(/\\/g, '/').replace(/^\/+/, '')}`
-                            } 
+                            src={getImageUrl(emp.profilePhoto)} 
                             alt="Profile" 
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             onError={(e) => { e.target.outerHTML = '<i class="fas fa-user"></i>'; }} 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import API, { getImageUrl } from '../utils/api';
 
 const AdminIDCards = () => {
   const [activeTab, setActiveTab] = useState('employee');
@@ -21,12 +21,12 @@ const AdminIDCards = () => {
       setSelectedPerson(null);
       try {
         if (activeTab === 'employee') {
-          const response = await axios.get('https://vinsup-4vt5.onrender.com/api/employees');
+          const response = await API.get('/employees');
           const data = Array.isArray(response.data) ? response.data : (response.data.data || []);
           setEmployees(data);
           if (data.length > 0) setSelectedPerson(data[0]);
         } else {
-          const response = await axios.get('https://vinsup-4vt5.onrender.com/api/students');
+          const response = await API.get('/students');
           const data = Array.isArray(response.data) ? response.data : (response.data.data || []);
           setStudents(data);
           if (data.length > 0) setSelectedPerson(data[0]);
@@ -250,7 +250,7 @@ const AdminIDCards = () => {
                 }}>
                   {selectedPerson.profilePhoto ? (
                     <img 
-                      src={selectedPerson.profilePhoto.startsWith('http') ? selectedPerson.profilePhoto : `https://vinsup-4vt5.onrender.com/${selectedPerson.profilePhoto.replace(/\\/g, '/').replace(/^\/+/, '')}`} 
+                      src={getImageUrl(selectedPerson.profilePhoto)} 
                       alt="Profile" 
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onError={(e) => { e.target.style.display = 'none'; }}
