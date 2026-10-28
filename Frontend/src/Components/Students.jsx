@@ -6,19 +6,16 @@ const Students = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [activeStudentId, setActiveStudentId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  
-  // 🔥 Edit States 🔥
+
   const [isEditing, setIsEditing] = useState(false);
   const [editDbId, setEditDbId] = useState(null);
 
-  // Dynamic States for API Data
   const [studentsList, setStudentsList] = useState([]);
   const [coursesList, setCoursesList] = useState([]);
   const [batchesList, setBatchesList] = useState([]);
   const [trainersList, setTrainersList] = useState([]);
   const [syllabusList, setSyllabusList] = useState([]);
-  
-  // Initial Form State
+
   const initialFormState = {
     studentId: '', fullName: '', email: '', phone: '', dob: '', gender: '', address: '',
     emergencyName: '', emergencyPhone: '', course: '', batch: '', trainer: '', doj: '',
@@ -62,7 +59,7 @@ const Students = () => {
       const validStudents = Array.isArray(stuData) ? stuData : [];
       setStudentsList(validStudents);
       setCache('students', validStudents);
-      
+
       if (validStudents.length > 0 && !activeStudentId) {
         setActiveStudentId(validStudents[0].studentId);
       }
@@ -143,8 +140,8 @@ const Students = () => {
 
   const handleSaveStudent = async () => {
     if (
-      !formData.studentId || !formData.fullName || !formData.email || !formData.phone || 
-      !formData.dob || !formData.gender || !formData.address || !formData.course || 
+      !formData.studentId || !formData.fullName || !formData.email || !formData.phone ||
+      !formData.dob || !formData.gender || !formData.address || !formData.course ||
       !formData.batch || !formData.doj
     ) {
       alert("Please fill all required (*) fields!");
@@ -169,7 +166,7 @@ const Students = () => {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
-      
+
       if (response.data?.success) {
         clearCache('students');
         alert(`Student ${isEditing ? 'Updated' : 'Added'} Successfully! 🎉`);
@@ -177,7 +174,7 @@ const Students = () => {
         setIsEditing(false);
         setEditDbId(null);
         setFormData(initialFormState);
-        fetchData(true); 
+        fetchData(true);
       }
     } catch (error) {
       alert(error.response?.data?.message || `Server Error: Failed to ${isEditing ? 'update' : 'add'} student!`);
@@ -214,7 +211,7 @@ const Students = () => {
     return getImageUrl(cleanPath);
   };
 
-  const filteredStudents = studentsList.filter(stu => 
+  const filteredStudents = studentsList.filter(stu =>
     stu.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     stu.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (stu.course || '').toLowerCase().includes(searchQuery.toLowerCase())
@@ -224,18 +221,18 @@ const Students = () => {
 
   const displayStudent = activeStudentData ? {
     _id: activeStudentData._id,
-    id: activeStudentData.studentId || '---', 
-    name: activeStudentData.fullName || '---', 
+    id: activeStudentData.studentId || '---',
+    name: activeStudentData.fullName || '---',
     status: activeStudentData.status || 'Active',
-    course: activeStudentData.course || '---', 
+    course: activeStudentData.course || '---',
     batch: activeStudentData.batch || '---',
-    email: activeStudentData.email || '---', 
-    phone: activeStudentData.phone || '---', 
+    email: activeStudentData.email || '---',
+    phone: activeStudentData.phone || '---',
     location: activeStudentData.address || '---',
-    doj: activeStudentData.doj ? new Date(activeStudentData.doj).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '---', 
-    dob: activeStudentData.dob ? new Date(activeStudentData.dob).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '---', 
-    gender: activeStudentData.gender || '---', 
-    trainer: activeStudentData.trainer || 'Not Assigned', 
+    doj: activeStudentData.doj ? new Date(activeStudentData.doj).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '---',
+    dob: activeStudentData.dob ? new Date(activeStudentData.dob).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '---',
+    gender: activeStudentData.gender || '---',
+    trainer: activeStudentData.trainer || 'Not Assigned',
     duration: '6 Months',
     image: getPhotoUrl(activeStudentData.profilePhoto)
   } : {
@@ -245,7 +242,6 @@ const Students = () => {
     image: null
   };
 
-  // Get Progress from the Specific Batch
   const studentBatch = batchesList.find(b => {
     const bName = String(b.batchName || b.batchId || b.name || "").toLowerCase().trim();
     const sBatch = String(displayStudent.batch || "").toLowerCase().trim();
@@ -253,19 +249,18 @@ const Students = () => {
   });
   const batchProgress = studentBatch ? (studentBatch.progress || 0) : 0;
 
-  const currentSyllabus = syllabusList.find(s => 
+  const currentSyllabus = syllabusList.find(s =>
     (s.courseName || s.course) === displayStudent.course
   );
   const dynamicModules = currentSyllabus && currentSyllabus.modules ? currentSyllabus.modules : [];
-  
+
   let totalSyllabusConcepts = 0;
   dynamicModules.forEach(mod => {
     totalSyllabusConcepts += (mod.totalConcepts || mod.topics?.length || 0);
   });
 
-  // Calculate proportional topics completed
   let tempRemaining = Math.round((batchProgress / 100) * totalSyllabusConcepts);
-  
+
   const modulesWithProgress = dynamicModules.map(mod => {
     const total = mod.totalConcepts || mod.topics?.length || 0;
     let comp = 0;
@@ -293,10 +288,9 @@ const Students = () => {
       </div>
 
       <div className="form-container">
-        {/* Left Column: Personal Info */}
         <div className="form-column">
           <div className="section-title"><i className="far fa-user"></i> 1. Personal Information</div>
-          
+
           <div className="form-grid-2">
             <div className="form-group">
               <label>Student ID <span className="text-danger">*</span></label>
@@ -357,10 +351,9 @@ const Students = () => {
           </div>
         </div>
 
-        {/* Right Column: Academic & Additional */}
         <div className="form-column">
           <div className="section-title"><i className="fas fa-graduation-cap"></i> 2. Academic Information</div>
-          
+
           <div className="form-grid-2">
             <div className="form-group">
               <label>Select Course <span className="text-danger">*</span></label>
@@ -409,7 +402,7 @@ const Students = () => {
           </div>
 
           <div className="section-title mt-5"><i className="fas fa-clipboard-list"></i> 3. Additional Information <span className="text-muted fw-normal" style={{fontSize:'13px'}}>(Optional)</span></div>
-          
+
           <div className="form-group">
             <label>Previous Education</label>
             <input type="text" name="previousEdu" value={formData.previousEdu} onChange={handleInputChange} placeholder="Enter previous education" className="form-control" />
@@ -448,8 +441,7 @@ const Students = () => {
       </div>
 
       <div className="main-layout">
-        
-        {/* Left Sidebar List */}
+
         <div className="students-list-sidebar card-shadow">
           <div className="sidebar-header d-flex justify-content-between align-items-center">
             <span>All Students ({filteredStudents.length})</span>
@@ -457,9 +449,9 @@ const Students = () => {
           <div className="sidebar-search">
             <div className="search-box">
               <i className="fas fa-search"></i>
-              <input 
-                type="text" 
-                placeholder="Search student..." 
+              <input
+                type="text"
+                placeholder="Search student..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -470,8 +462,8 @@ const Students = () => {
               filteredStudents.map(stu => {
                 const imgUrl = getPhotoUrl(stu.profilePhoto);
                 return (
-                  <div 
-                    key={stu.studentId} 
+                  <div
+                    key={stu.studentId}
                     className={`student-list-item ${activeStudentId === stu.studentId ? 'active' : ''}`}
                     onClick={() => setActiveStudentId(stu.studentId)}
                   >
@@ -479,7 +471,7 @@ const Students = () => {
                       <img src={imgUrl} alt={stu.fullName} className="list-avatar" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
                     ) : null}
                     <div className="list-avatar align-items-center justify-content-center" style={{background: '#f1f5f9', color: '#94a3b8', display: imgUrl ? 'none' : 'flex'}}><i className="fas fa-user"></i></div>
-                    
+
                     <div className="list-info" style={{ flex: 1 }}>
                       <div className="list-name">{stu.fullName}</div>
                       <div className="list-desc">{stu.studentId}</div>
@@ -507,8 +499,7 @@ const Students = () => {
         </div>
 
         <div className="student-details-panel">
-          
-          {/* Main Profile Card */}
+
           <div className="profile-card card-shadow relative-card">
             {displayStudent.image ? (
               <img src={displayStudent.image} alt="Profile" className="profile-large-avatar" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}/>
@@ -516,7 +507,7 @@ const Students = () => {
             <div className="profile-large-avatar align-items-center justify-content-center" style={{background: '#f1f5f9', display: displayStudent.image ? 'none' : 'flex', fontSize: '45px', color: '#94a3b8'}}>
               <i className="fas fa-user"></i>
             </div>
-            
+
             <div className="profile-info-full">
               <div className="d-flex align-items-center justify-content-between mb-2">
                 <div className="d-flex align-items-center">
@@ -540,7 +531,6 @@ const Students = () => {
             </div>
           </div>
 
-          {/* Quick Info Grid */}
           <div className="quick-info-grid">
             <div className="quick-card card-shadow">
               <div className="icon-box blue-light"><i className="far fa-calendar-alt text-primary"></i></div>
@@ -565,7 +555,6 @@ const Students = () => {
             </div>
           </div>
 
-          {/* 🔥 Progress Grid (Centered Single Card) 🔥 */}
           <div className="progress-grid">
             <div className="progress-card card-shadow">
               <div className="prog-header"><i className="fas fa-book-open text-primary"></i> Syllabus Progress</div>
@@ -579,10 +568,8 @@ const Students = () => {
             </div>
           </div>
 
-          {/* Bottom Grid */}
           <div className="bottom-grid">
-            
-            {/* Enrolled Details */}
+
             <div className="card-panel card-shadow">
               <h3 className="panel-title">Enrolled Details</h3>
               <div className="details-list">
@@ -594,7 +581,6 @@ const Students = () => {
               </div>
             </div>
 
-            {/* Syllabus Progress */}
             <div className="card-panel card-shadow">
               <h3 className="panel-title">Syllabus Progress</h3>
               <div className="custom-scroll" style={{maxHeight: '320px', overflowY: 'auto', paddingRight: '10px'}}>
@@ -647,48 +633,48 @@ const Students = () => {
         .page-title { font-size: 20px; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.5px;}
         .breadcrumb { font-size: 13px; color: #94a3b8; display:flex; align-items:center;}
         .active-bread { color: #0f172a; font-weight: 600; }
-        
+
         .btn-primary { background: #2563eb; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s;}
         .btn-primary:hover { background: #1d4ed8; }
         .btn-outline { background: #fff; color: #2563eb; border: 1px solid #bfdbfe; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s;}
         .btn-outline:hover { background: #eff6ff; }
         .btn-outline-gray { background: #fff; color: #475569; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s;}
         .btn-outline-gray:hover { background: #f8fafc; color: #0f172a;}
-        
+
         .card-shadow { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .relative-card { position: relative; }
-        
+
         /* Main Layout */
         .main-layout { display: flex; gap: 24px; align-items: flex-start; }
-        
+
         /* Left Sidebar List */
         .students-list-sidebar { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; background: #fff; }
         .sidebar-header { padding: 16px 20px; font-weight: 800; color: #0f172a; font-size: 14px; }
         .sidebar-search { padding: 0 16px 16px 16px; border-bottom: 1px solid #f1f5f9; }
-        
+
         /* SEARCH BOX CSS */
         .search-box { position: relative; width: 100%; display: flex; align-items: center; }
         .search-box input { width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px 10px 38px; font-size: 13px; outline: none; box-sizing: border-box; color: #0f172a; }
         .search-box i { position: absolute; left: 14px; color: #94a3b8; font-size: 14px; }
-        
+
         .sidebar-list { overflow-y: auto; max-height: calc(100vh - 270px); }
         .student-list-item { display: flex; gap: 14px; padding: 14px 20px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s; position: relative; }
         .student-list-item:hover { background: #f8fafc; }
         .student-list-item.active { background: #eff6ff; border-left: 3px solid #2563eb; }
         .hover-primary:hover { color: #2563eb; }
         .hover-danger:hover { color: #ef4444; }
-        
+
         .list-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
         .list-name { font-weight: 800; color: #0f172a; font-size: 14px; margin-bottom: 4px; }
         .list-desc { font-size: 12px; color: #64748b; margin-bottom: 2px; }
-        
+
         .pagination { padding: 16px; display: flex; justify-content: center; gap: 12px; border-top: 1px solid #e2e8f0; }
         .page-btn { width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; border-radius: 6px; border: none; background: transparent; color: #475569; font-size: 12px; font-weight: 600; cursor: pointer; }
         .page-btn.active { background: #2563eb; color: #fff; }
-        
+
         /* Details Panel */
         .student-details-panel { flex: 1; display: flex; flex-direction: column; gap: 24px; min-width: 0; }
-        
+
         /* Details Top Profile */
         .profile-card { padding: 24px 32px; display: flex; gap: 24px; align-items: center; }
         .profile-large-avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; background: #f1f5f9; flex-shrink: 0; }
@@ -699,7 +685,7 @@ const Students = () => {
         .dot { margin: 0 8px; color: #cbd5e1; }
         .profile-contact { display: flex; flex-wrap: wrap; gap: 24px; font-size: 13px; color: #475569; font-weight: 500;}
         .profile-contact span { display: flex; align-items: center; gap: 8px; }
-        
+
         /* Quick Info */
         .quick-info-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
         .quick-card { padding: 16px 20px; display: flex; gap: 16px; align-items: center; }
@@ -731,19 +717,19 @@ const Students = () => {
         .bottom-grid { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 24px; align-items: start; }
         .card-panel { padding: 24px; }
         .panel-title { font-size: 14px; font-weight: 800; color: #0f172a; margin: 0 0 20px 0; }
-        
+
         .details-list { display: flex; flex-direction: column; }
         .detail-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #64748b; gap: 10px; }
         .text-end { text-align: right; flex: 1; word-wrap: break-word; color: #0f172a; font-weight: 800; }
         .badge-enrolled { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-        
+
         /* Table Alignments Fixed */
         .table-clean { width: 100%; border-collapse: collapse; }
         .table-clean th { padding: 0 0 12px 0; color: #64748b; font-weight: 700; border-bottom: 1px solid #f1f5f9; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;}
         .text-right { text-align: right !important; }
         .table-clean td { padding: 14px 0; border-bottom: 1px dashed #f1f5f9; font-size: 13px; vertical-align: middle;}
         .table-clean tr:last-child td { border-bottom: none; }
-        
+
         .progress-bar-bg { width: 100px; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; flex-shrink: 0;}
         .progress-bar-fill { height: 100%; border-radius: 3px; transition: 0.3s ease; }
 
@@ -782,11 +768,11 @@ const Students = () => {
         .pb-0 { padding-bottom: 0 !important; }
         .pt-2 { padding-top: 8px !important; }
         .pt-3 { padding-top: 16px !important; }
-        
+
         .upload-box { border: 2px dashed #bfdbfe; background: #f8fafc; border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; transition: 0.2s; }
         .upload-box:hover { border-color: #2563eb; background: #eff6ff; }
         .alert-blue { background: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 8px; }
-        
+
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }

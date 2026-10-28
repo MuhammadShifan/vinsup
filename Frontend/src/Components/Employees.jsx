@@ -7,7 +7,7 @@ const Employees = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editId, setEditId] = useState(null);
   const [employeeList, setEmployeeList] = useState([]);
-  
+
   const [searchInput, setSearchInput] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('All');
   const [selectedDesignation, setSelectedDesignation] = useState('All');
@@ -18,10 +18,9 @@ const Employees = () => {
     department: 'Teaching', experience: '', doj: '', courses: [],
     batches: [], password: '', confirmPassword: ''
   };
-  
+
   const [formData, setFormData] = useState(initialFormState);
 
-  // 1. FETCH API (GET) with cache
   const fetchEmployees = async (forceRefresh = false) => {
     try {
       if (!forceRefresh) {
@@ -67,10 +66,9 @@ const Employees = () => {
     setFormData({ ...formData, [field]: updatedArray });
   };
 
-  // 2. DELETE API
   const handleDelete = async (empToDelete, e) => {
     e.preventDefault();
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (window.confirm(`Are you sure you want to delete ${empToDelete.fullName}?`)) {
       try {
         const response = await API.delete(`/employees/delete/${empToDelete._id}`);
@@ -89,28 +87,28 @@ const Employees = () => {
 
   const handleEdit = (empToEdit, e) => {
     e.preventDefault();
-    e.stopPropagation(); 
+    e.stopPropagation();
     setFormData({
       ...empToEdit,
-      password: empToEdit.password || '', 
+      password: empToEdit.password || '',
       confirmPassword: empToEdit.password || ''
     });
-    setEditId(empToEdit._id); 
+    setEditId(empToEdit._id);
     setShowAddForm(true);
   };
 
   const handleSaveEmployee = async (e) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
       alert("Password and Confirm Password must match!");
-      return; 
+      return;
     }
 
     const generatedUsername = formData.email ? formData.email.split('@')[0] : '';
-    
+
     const submitData = new FormData();
-    
+
     for (const key in formData) {
       if (Array.isArray(formData[key])) {
         submitData.append(key, JSON.stringify(formData[key]));
@@ -118,8 +116,8 @@ const Employees = () => {
         submitData.append(key, formData[key]);
       }
     }
-    
-    submitData.set('username', generatedUsername); 
+
+    submitData.set('username', generatedUsername);
     submitData.set('role', 'Employee');
 
     try {
@@ -131,7 +129,7 @@ const Employees = () => {
           clearCache('employees');
           clearCache('trainers');
           alert("Employee Updated Successfully! ✏️");
-          fetchEmployees(true); 
+          fetchEmployees(true);
         }
       } else {
         const response = await API.post('/employees/add', submitData, {
@@ -141,15 +139,15 @@ const Employees = () => {
           clearCache('employees');
           clearCache('trainers');
           alert("New Employee Added with Profile Photo! 🚀");
-          fetchEmployees(true); 
+          fetchEmployees(true);
         } else {
-          alert("Error: " + (response.data?.message || "Failed to add employee")); 
+          alert("Error: " + (response.data?.message || "Failed to add employee"));
         }
       }
-      
+
       setShowAddForm(false);
       setEditId(null);
-      setFormData(initialFormState); 
+      setFormData(initialFormState);
     } catch (error) {
       console.error("Error saving employee:", error);
       const msg = error.response?.data?.message || "Something went wrong saving employee!";
@@ -157,18 +155,16 @@ const Employees = () => {
     }
   };
 
-  // Live Filter Logic
   const displayedEmployees = employeeList.filter(emp => {
     if (!searchInput) return true;
-    
+
     const query = searchInput.toLowerCase();
     const matchName = emp.fullName?.toLowerCase().includes(query);
     const matchId = emp.empId?.toLowerCase().includes(query);
-    
+
     return matchName || matchId;
   });
-  
-  // Stats Calculation
+
   const totalEmp = employeeList.length;
   const maleEmp = employeeList.filter(e => e.gender === 'Male').length;
   const femaleEmp = employeeList.filter(e => e.gender === 'Female').length;
@@ -187,7 +183,7 @@ const Employees = () => {
         </div>
 
         <form className="add-employee-form" onSubmit={handleSaveEmployee}>
-          
+
           <div className="form-section">
             <h3>👤 Basic Information</h3>
             <div className="form-grid">
@@ -282,7 +278,7 @@ const Employees = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="form-grid">
             <div className="input-group">
               <label>Password *</label>
@@ -346,9 +342,9 @@ const Employees = () => {
       <div className="filters-bar" style={{ display: 'flex', gap: '10px' }}>
         <div className="search-box" style={{ flex: 1 }}>
           <i className="fas fa-search"></i>
-          <input 
-            type="text" 
-            placeholder="Search employees by Name or Employee ID..." 
+          <input
+            type="text"
+            placeholder="Search employees by Name or Employee ID..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
           />
@@ -360,7 +356,6 @@ const Employees = () => {
           <thead>
             <tr>
               <th style={{ textAlign: 'center' }}>#</th>
-              {/* 🔥 Changed to Left Align 🔥 */}
               <th style={{ textAlign: 'left' }}>Employee</th>
               <th style={{ textAlign: 'left' }}>Email</th>
               <th style={{ textAlign: 'center' }}>Phone</th>
@@ -374,16 +369,15 @@ const Employees = () => {
               displayedEmployees.map((emp, index) => (
                 <tr key={emp._id || index}>
                   <td style={{ textAlign: 'center' }}>{index + 1}</td>
-                  {/* 🔥 Left Aligned Column 🔥 */}
                   <td style={{ textAlign: 'left' }}>
                     <div className="emp-name-cell">
                       <div className="emp-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                         {emp.profilePhoto ? (
-                          <img 
-                            src={getImageUrl(emp.profilePhoto)} 
-                            alt="Profile" 
+                          <img
+                            src={getImageUrl(emp.profilePhoto)}
+                            alt="Profile"
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            onError={(e) => { e.target.outerHTML = '<i class="fas fa-user"></i>'; }} 
+                            onError={(e) => { e.target.outerHTML = '<i class="fas fa-user"></i>'; }}
                           />
                         ) : (
                           <i className="fas fa-user"></i>
@@ -395,7 +389,6 @@ const Employees = () => {
                       </div>
                     </div>
                   </td>
-                  {/* 🔥 Left Aligned Column 🔥 */}
                   <td style={{ textAlign: 'left' }}>{emp.email}</td>
                   <td style={{ textAlign: 'center' }}>{emp.phone}</td>
                   <td style={{ textAlign: 'center' }}><span className="badge role-badge">{emp.designation || 'Staff'}</span></td>

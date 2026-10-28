@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 
 const MySchedule = () => {
   const today = new Date();
-  const [currentMonthDate, setCurrentMonthDate] = useState(new Date()); 
+  const [currentMonthDate, setCurrentMonthDate] = useState(new Date());
 
-  // Page load aagumpothu LocalStorage-la irundhu data-va eduthu expire aanatha filter pannum
   const [events, setEvents] = useState(() => {
     const savedEvents = localStorage.getItem('myScheduleEvents');
     if (savedEvents) {
@@ -17,12 +16,10 @@ const MySchedule = () => {
     ];
   });
 
-  // Pudhusa event add aanalum, delete aanaalum LocalStorage-la update pannidum
   useEffect(() => {
     localStorage.setItem('myScheduleEvents', JSON.stringify(events));
   }, [events]);
 
-  // Prathyega oru second-um expire aannatha check panni automatic-ah delete pannum
   useEffect(() => {
     const interval = setInterval(() => {
       setEvents(prevEvents => filterExpiredEvents(prevEvents));
@@ -36,9 +33,9 @@ const MySchedule = () => {
     return eventList.filter(event => {
       const [day, month, year] = event.date.split('-').map(Number);
       const [hours, minutes] = event.time.split(':').map(Number);
-      
+
       const eventDate = new Date(year, month - 1, day, hours, minutes);
-      return eventDate > now; 
+      return eventDate > now;
     });
   }
 
@@ -76,13 +73,12 @@ const MySchedule = () => {
     };
 
     setEvents([...events, eventToAdd]);
-    setShowModal(false); 
-    setNewEvent({ title: '', type: 'Class', date: '', time: '' }); 
+    setShowModal(false);
+    setNewEvent({ title: '', type: 'Class', date: '', time: '' });
   };
 
   const classCount = events.filter(e => e.type === 'Class').length;
   const meetingCount = events.filter(e => e.type === 'Meeting').length;
-  // 🔥 OTHERS COUNT ADD PANNIRUKEN 🔥
   const otherCount = events.filter(e => e.type === 'Other').length;
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -109,7 +105,7 @@ const MySchedule = () => {
           }
         }
       `}</style>
-      
+
       {showModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px' }}>
           <div style={{ background: '#fff', padding: 'clamp(20px, 3vw, 30px)', borderRadius: '12px', width: 'min(400px, 100%)', boxShadow: '0 10px 25px rgba(0,0,0,0.2)', boxSizing: 'border-box' }}>
@@ -117,13 +113,13 @@ const MySchedule = () => {
               <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a' }}>Add New Event</h2>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '18px', color: '#94a3b8', cursor: 'pointer' }}><i className="fas fa-times"></i></button>
             </div>
-            
+
             <form onSubmit={handleAddEventSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', color: '#475569', fontWeight: '500' }}>Event Title</label>
                 <input type="text" placeholder="e.g. React Class" value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none' }} required />
               </div>
-              
+
               <div>
                 <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', color: '#475569', fontWeight: '500' }}>Event Type</label>
                 <select value={newEvent.type} onChange={e => setNewEvent({...newEvent, type: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none' }}>
@@ -132,7 +128,7 @@ const MySchedule = () => {
                   <option value="Other">Other</option>
                 </select>
               </div>
-              
+
               <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                 <div style={{ flex: '1 1 140px' }}>
                   <label style={{ display: 'block', marginBottom: '5px', fontSize: '13px', color: '#475569', fontWeight: '500' }}>Date</label>
@@ -143,7 +139,7 @@ const MySchedule = () => {
                   <input type="time" value={newEvent.time} onChange={e => setNewEvent({...newEvent, time: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none' }} required />
                 </div>
               </div>
-              
+
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
                 <button type="button" onClick={() => setShowModal(false)} style={{ padding: '10px 15px', border: '1px solid #e2e8f0', background: '#fff', color: '#475569', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>Cancel</button>
                 <button type="submit" style={{ padding: '10px 15px', border: 'none', background: '#2563eb', color: '#fff', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>Save Event</button>
@@ -171,7 +167,6 @@ const MySchedule = () => {
 
       <div className="schedule-main-grid">
 
-        {/* ---------------- LEFT: CALENDAR CARD ---------------- */}
         <div className="schedule-calendar-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '10px' }}>
             <h3 style={{ margin: '0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>Schedule Calendar</h3>
@@ -195,7 +190,7 @@ const MySchedule = () => {
             {Array.from({ length: daysInMonth }).map((_, i) => {
               const day = i + 1;
               const dateStr = `${String(day).padStart(2, '0')}-${String(currentMonthIndex + 1).padStart(2, '0')}-${currentYear}`;
-              
+
               const dayEvents = events.filter(e => e.date === dateStr);
               const hasEvent = dayEvents.length > 0;
               const eventType = hasEvent ? dayEvents[0].type : null;
@@ -209,25 +204,25 @@ const MySchedule = () => {
               if (hasEvent) {
                 cellFontWeight = 'bold';
                 if (eventType === 'Class') {
-                  cellBg = '#10b981'; // Green
-                  cellColor = '#ffffff'; 
+                  cellBg = '#10b981';
+                  cellColor = '#ffffff';
                 } else if (eventType === 'Meeting') {
-                  cellBg = '#ef4444'; // Red
-                  cellColor = '#ffffff'; 
+                  cellBg = '#ef4444';
+                  cellColor = '#ffffff';
                 } else {
-                  cellBg = '#3b82f6'; // Blue
-                  cellColor = '#ffffff'; 
+                  cellBg = '#3b82f6';
+                  cellColor = '#ffffff';
                 }
               }
 
               const isToday = today.getDate() === day && today.getMonth() === currentMonthIndex && today.getFullYear() === currentYear;
-              
+
               if (isToday) {
                 cellBorderRadius = '50%';
-                cellBorder = '2px solid #000000'; 
+                cellBorder = '2px solid #000000';
                 if (!hasEvent) {
-                  cellBg = 'transparent'; 
-                  cellColor = '#0f172a'; 
+                  cellBg = 'transparent';
+                  cellColor = '#0f172a';
                   cellFontWeight = 'bold';
                 }
               }
@@ -258,12 +253,10 @@ const MySchedule = () => {
           </div>
         </div>
 
-        {/* ---------------- RIGHT: SUMMARY & EVENTS ---------------- */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-          
+
           <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
             <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>Schedule Summary</h3>
-            {/* 🔥 UPDATED GRID COLUMNS TO 3 FOR CLASSES, MEETINGS, & OTHERS 🔥 */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
               <div style={{ background: '#dcfce7', borderRadius: '10px', padding: '15px 10px', display: 'flex', flexDirection: 'column', gap: '5px', textAlign: 'center' }}>
                 <strong style={{ fontSize: '20px', color: '#16a34a' }}>{String(classCount).padStart(2, '0')}</strong>
@@ -286,10 +279,10 @@ const MySchedule = () => {
               {events.map(event => (
                 <div key={event.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '15px', borderBottom: '1px dashed #e2e8f0' }}>
                   <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <div style={{ 
-                      background: event.type === 'Class' ? '#10b981' : event.type === 'Meeting' ? '#ef4444' : '#3b82f6', 
-                      color: '#ffffff', 
-                      width: '35px', height: '35px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center' 
+                    <div style={{
+                      background: event.type === 'Class' ? '#10b981' : event.type === 'Meeting' ? '#ef4444' : '#3b82f6',
+                      color: '#ffffff',
+                      width: '35px', height: '35px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center'
                     }}>
                       <i className="far fa-calendar-alt"></i>
                     </div>
@@ -311,7 +304,7 @@ const MySchedule = () => {
               )}
             </div>
           </div>
-          
+
         </div>
       </div>
 

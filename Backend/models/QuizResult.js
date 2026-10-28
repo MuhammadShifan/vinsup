@@ -5,7 +5,7 @@ const quizResultSchema = new mongoose.Schema({
   studentEmail: { type: String, required: true, index: true },
   score: { type: Number, required: true },
   totalMarks: { type: Number, required: true },
-  answers: { type: Object }, // Store what student selected
+  answers: { type: Object },
   status: { type: String, default: 'Completed' },
   submittedAt: { type: Date, default: Date.now }
 });

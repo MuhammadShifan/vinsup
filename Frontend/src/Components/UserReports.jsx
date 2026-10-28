@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API from '../utils/api';
-import { jsPDF } from 'jspdf'; 
-import html2canvas from 'html2canvas'; // 🔥 Pudhusa add pannirukom for table snapshot
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const UserReports = ({ userName, userEmail }) => {
   const [reports, setReports] = useState([]);
@@ -9,32 +9,29 @@ const UserReports = ({ userName, userEmail }) => {
   const [allEmployees, setAllEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const [currentPage, setCurrentPage] = useState(1);
-  const reportsPerPage = 8; 
 
-  const [viewReport, setViewReport] = useState(null); 
-  const [activeModalTab, setActiveModalTab] = useState('Ongoing'); // 🔥 Modal Tabs State
+  const [currentPage, setCurrentPage] = useState(1);
+  const reportsPerPage = 8;
+
+  const [viewReport, setViewReport] = useState(null);
+  const [activeModalTab, setActiveModalTab] = useState('Ongoing');
 
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        // Fetch Reports
         const repRes = await API.get('/reports');
         const allReports = Array.isArray(repRes.data) ? repRes.data : (repRes.data.data || []);
         const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
         const currentEmail = (userEmail || auth.email || '').toLowerCase().trim();
         const myReports = allReports.filter(report => {
           const targetEmail = (report.empEmail || '').toLowerCase().trim();
-          return targetEmail === currentEmail || targetEmail === 'all'; 
+          return targetEmail === currentEmail || targetEmail === 'all';
         });
         setReports(myReports);
 
-        // Fetch Batches for Tables
         const batchRes = await API.get('/batches');
         setAllBatches(Array.isArray(batchRes.data) ? batchRes.data : (batchRes.data.data || []));
 
-        // Fetch Employees for Attendance/Workload
         const empRes = await API.get('/employees');
         setAllEmployees(Array.isArray(empRes.data) ? empRes.data : (empRes.data.data || []));
 
@@ -48,7 +45,7 @@ const UserReports = ({ userName, userEmail }) => {
     fetchAllData();
   }, [userEmail]);
 
-  const filteredReports = reports.filter(r => 
+  const filteredReports = reports.filter(r =>
     (r.reportName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (r.reportType || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -72,10 +69,10 @@ const UserReports = ({ userName, userEmail }) => {
 
   const getTypeStyling = (type) => {
     const t = (type || '').toLowerCase();
-    if (t.includes('attendance')) return { icon: 'far fa-calendar-alt', color: '#10b981', bg: '#ecfdf5' }; 
-    if (t.includes('performance') || t.includes('course')) return { icon: 'fas fa-book-open', color: '#3b82f6', bg: '#eff6ff' }; 
-    if (t.includes('task') || t.includes('workload')) return { icon: 'fas fa-briefcase', color: '#8b5cf6', bg: '#f5f3ff' }; 
-    return { icon: 'far fa-file-alt', color: '#64748b', bg: '#f1f5f9' }; 
+    if (t.includes('attendance')) return { icon: 'far fa-calendar-alt', color: '#10b981', bg: '#ecfdf5' };
+    if (t.includes('performance') || t.includes('course')) return { icon: 'fas fa-book-open', color: '#3b82f6', bg: '#eff6ff' };
+    if (t.includes('task') || t.includes('workload')) return { icon: 'fas fa-briefcase', color: '#8b5cf6', bg: '#f5f3ff' };
+    return { icon: 'far fa-file-alt', color: '#64748b', bg: '#f1f5f9' };
   };
 
   const openReportModal = (report) => {
@@ -84,7 +81,6 @@ const UserReports = ({ userName, userEmail }) => {
     else if ((report.reportType || '').toLowerCase().includes('workload')) setActiveModalTab('Active');
   };
 
-  // 🔥 PUDHU LOGIC: HTML2CANVAS vechu exact table-oda PDF capture panradhu
   const handleDownloadPDF = async (report) => {
     const element = document.getElementById('pdf-download-content');
     if (!element) {
@@ -98,7 +94,7 @@ const UserReports = ({ userName, userEmail }) => {
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
+
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`${report.reportName || 'Vinsup_Report'}.pdf`);
     } catch (error) {
@@ -107,9 +103,8 @@ const UserReports = ({ userName, userEmail }) => {
     }
   };
 
-  // 🔥 DATA CALCULATIONS FOR MODAL TABLES 🔥
-  const myBatches = allBatches.filter(b => 
-    (b.trainerName || '').toLowerCase() === (userName || '').toLowerCase() || 
+  const myBatches = allBatches.filter(b =>
+    (b.trainerName || '').toLowerCase() === (userName || '').toLowerCase() ||
     (b.trainer || '').toLowerCase() === (userName || '').toLowerCase()
   );
 
@@ -121,8 +116,7 @@ const UserReports = ({ userName, userEmail }) => {
 
   return (
     <div style={{ padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif" }}>
-      
-      {/* Stats Cards Row */}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '30px' }}>
         <div style={{ background: '#fff', padding: '25px 20px', borderRadius: '12px', border: '1px solid #f1f5f9', display: 'flex', gap: '15px', alignItems: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
           <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: '#ecfdf5', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
@@ -158,13 +152,12 @@ const UserReports = ({ userName, userEmail }) => {
         </div>
       </div>
 
-      {/* Controls Bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
         <div style={{ position: 'relative', width: 'min(300px, 100%)' }}>
           <i className="fas fa-search" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}></i>
-          <input 
-            type="text" 
-            placeholder="Search by report name..." 
+          <input
+            type="text"
+            placeholder="Search by report name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ width: '100%', padding: '10px 15px 10px 40px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '13px', color: '#0f172a', boxSizing: 'border-box' }}
@@ -175,7 +168,6 @@ const UserReports = ({ userName, userEmail }) => {
         </div>
       </div>
 
-      {/* Main Table Container */}
       <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', overflow: 'hidden' }}>
         <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table style={{ width: '100%', minWidth: '650px', borderCollapse: 'collapse', textAlign: 'left' }}>
@@ -199,7 +191,7 @@ const UserReports = ({ userName, userEmail }) => {
                 currentReports.map((report) => {
                   const style = getTypeStyling(report.reportType);
                   const dateObj = new Date(report.createdAt || Date.now());
-                  
+
                   return (
                     <tr key={report._id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'} onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
                       <td style={{ padding: '15px 25px' }}>
@@ -241,7 +233,6 @@ const UserReports = ({ userName, userEmail }) => {
           </table>
         </div>
 
-        {/* Pagination */}
         <div style={{ padding: '15px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', flexWrap: 'wrap', gap: '10px' }}>
           {totalPages > 1 && (
             <div style={{ display: 'flex', gap: '5px' }}>
@@ -261,11 +252,10 @@ const UserReports = ({ userName, userEmail }) => {
         </div>
       </div>
 
-      {/* 🔥 ENHANCED VIEW REPORT MODAL 🔥 */}
       {viewReport && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '16px' }}>
           <div style={{ background: '#fff', width: 'min(850px, 100%)', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
-            
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 25px', borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
               <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <div style={{ background: '#eff6ff', color: '#2563eb', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -275,15 +265,14 @@ const UserReports = ({ userName, userEmail }) => {
               </h2>
               <i className="fas fa-times" onClick={() => setViewReport(null)} style={{ color: '#475569', cursor: 'pointer', fontSize: '18px' }}></i>
             </div>
-            
-            {/* 🔥 ID applied here for HTML2CANVAS capture 🔥 */}
+
             <div id="pdf-download-content" style={{ padding: '25px', overflowY: 'auto', background: '#fff' }}>
-              
+
               <div style={{ marginBottom: '20px' }}>
                 <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Report Name</p>
                 <h4 style={{ margin: 0, fontSize: '20px', color: '#0f172a' }}>{viewReport.reportName}</h4>
               </div>
-              
+
               <div style={{ display: 'flex', gap: '40px', background: '#f8fafc', padding: '15px 20px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
                 <div>
                   <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Report Type</p>
@@ -306,7 +295,6 @@ const UserReports = ({ userName, userEmail }) => {
                 </div>
               </div>
 
-              {/* 🔥 COURSE PROGRESS TABLES INSIDE MODAL 🔥 */}
               {(viewReport.reportType || '').toLowerCase().includes('course') && (
                 <div>
                   <div style={{ display: 'flex', gap: '30px', borderBottom: '1px solid #e2e8f0', marginBottom: '15px' }}>
@@ -317,7 +305,7 @@ const UserReports = ({ userName, userEmail }) => {
                       Completed Batches
                     </div>
                   </div>
-                  
+
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
                       <tr>
@@ -356,7 +344,6 @@ const UserReports = ({ userName, userEmail }) => {
                 </div>
               )}
 
-              {/* 🔥 WORKLOAD TABLES INSIDE MODAL 🔥 */}
               {(viewReport.reportType || '').toLowerCase().includes('workload') && (
                 <div>
                   <div style={{ display: 'flex', gap: '30px', borderBottom: '1px solid #e2e8f0', marginBottom: '15px' }}>
@@ -396,8 +383,7 @@ const UserReports = ({ userName, userEmail }) => {
               )}
 
             </div>
-            
-            {/* Modal Footer Controls */}
+
             <div style={{ padding: '15px 25px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '10px', background: '#fff' }}>
               <button onClick={() => setViewReport(null)} style={{ padding: '10px 16px', background: '#fff', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '13px' }}>
                  Close

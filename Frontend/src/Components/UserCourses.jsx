@@ -16,7 +16,7 @@ const UserCourses = ({ userName, userEmail }) => {
 
   useEffect(() => {
     fetchBatches();
-    fetchSyllabus(); 
+    fetchSyllabus();
   }, [userName, userEmail]);
 
   const fetchSyllabus = async () => {
@@ -43,7 +43,7 @@ const UserCourses = ({ userName, userEmail }) => {
         allBatches = Array.isArray(response.data) ? response.data : (response.data.data || []);
         setCache('batches', allBatches);
       }
-      
+
       const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
       const incomingEmail = (userEmail || auth.email || localStorage.getItem('loggedInEmail') || "").toLowerCase().trim();
       const exactName = (userName || auth.name || "Employee").toLowerCase().trim();
@@ -69,7 +69,7 @@ const UserCourses = ({ userName, userEmail }) => {
             batches: []
           };
         }
-        
+
         const batchProgress = Number(b.progress) || 0;
         const isCompleted = b.status === 'Completed' || batchProgress === 100;
 
@@ -96,7 +96,7 @@ const UserCourses = ({ userName, userEmail }) => {
       });
 
       setGroupedCourses(groups);
-      
+
       const numCourses = Object.keys(groups).length;
       const avgProg = tBatches > 0 ? Math.round(tProgress / tBatches) : 0;
 
@@ -119,7 +119,7 @@ const UserCourses = ({ userName, userEmail }) => {
 
   return (
     <div style={{ padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif", position: 'relative' }}>
-      
+
       <style>{`
         .uc-stats-grid {
           background: #fff;
@@ -161,16 +161,13 @@ const UserCourses = ({ userName, userEmail }) => {
         }
       `}</style>
 
-      {/* Header */}
       <div style={{ marginBottom: '20px' }}>
         <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>My Courses</h1>
         <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Track your enrolled courses and batch progress.</p>
       </div>
 
-      {/* Stats */}
       <div className="uc-stats-grid">
-        
-        {/* 1. Overall Progress */}
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <span style={{ fontSize: '13px', color: '#0f172a', fontWeight: 'bold', lineHeight: '1.4' }}>Overall<br/>Progress</span>
           <div style={{ width: '65px', height: '65px', borderRadius: '50%', background: `conic-gradient(#2563eb ${stats.overallProgress}%, #f1f5f9 0)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -179,20 +176,17 @@ const UserCourses = ({ userName, userEmail }) => {
             </div>
           </div>
         </div>
-        
-        {/* 2. Ongoing Batches */}
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <div style={{ background: '#fef9c3', color: '#ca8a04', width: '42px', height: '42px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px', flexShrink: 0 }}><i className="fas fa-spinner"></i></div>
           <div><h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: '#0f172a', fontWeight: 'bold' }}>{stats.ongoingBatches}</h3><span style={{ fontSize: '12px', color: '#64748b' }}>Ongoing Batches</span></div>
         </div>
 
-        {/* 3. Completed Batches */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <div style={{ background: '#dcfce7', color: '#16a34a', width: '42px', height: '42px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px', flexShrink: 0 }}><i className="fas fa-check-circle"></i></div>
           <div><h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: '#0f172a', fontWeight: 'bold' }}>{stats.completedBatches}</h3><span style={{ fontSize: '12px', color: '#64748b' }}>Completed Batches</span></div>
         </div>
 
-        {/* 4. Courses Enrolled */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <div style={{ background: '#eff6ff', color: '#2563eb', width: '42px', height: '42px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px', flexShrink: 0 }}><i className="fas fa-book-open"></i></div>
           <div><h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: '#0f172a', fontWeight: 'bold' }}>{stats.coursesEnrolled}</h3><span style={{ fontSize: '12px', color: '#64748b' }}>Courses Enrolled</span></div>
@@ -200,19 +194,18 @@ const UserCourses = ({ userName, userEmail }) => {
 
       </div>
 
-      {/* Toggle Button for Ongoing / Old Batches */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
         <h3 style={{ fontSize: '16px', color: '#0f172a', margin: 0, fontWeight: 'bold' }}>
           {showOldBatches ? 'Old Batches (Completed)' : 'Active Courses (Ongoing)'}
         </h3>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
+          <button
             onClick={() => setShowOldBatches(false)}
             style={{ padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', border: !showOldBatches ? 'none' : '1px solid #cbd5e1', background: !showOldBatches ? '#2563eb' : '#fff', color: !showOldBatches ? '#fff' : '#475569', transition: '0.2s' }}
           >
             Ongoing Batches
           </button>
-          <button 
+          <button
             onClick={() => setShowOldBatches(true)}
             style={{ padding: '8px 14px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', border: showOldBatches ? 'none' : '1px solid #cbd5e1', background: showOldBatches ? '#16a34a' : '#fff', color: showOldBatches ? '#fff' : '#475569', transition: '0.2s' }}
           >
@@ -221,12 +214,11 @@ const UserCourses = ({ userName, userEmail }) => {
         </div>
       </div>
 
-      {/* Course List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-        
+
         {displayCourses.length > 0 ? displayCourses.map((course, cIdx) => (
           <div key={cIdx} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.02)' }}>
-            
+
             <div style={{ padding: 'clamp(16px, 2.5vw, 30px)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                 <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: cIdx % 2 === 0 ? '#eff6ff' : '#dcfce7', color: cIdx % 2 === 0 ? '#2563eb' : '#16a34a', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '20px', flexShrink: 0 }}>
@@ -250,7 +242,6 @@ const UserCourses = ({ userName, userEmail }) => {
 
             <div style={{ padding: '0 clamp(16px, 2.5vw, 30px) 12px clamp(16px, 2.5vw, 30px)' }}><h4 style={{ margin: 0, fontSize: '14px', color: '#0f172a', fontWeight: 'bold' }}>Batch Progress</h4></div>
 
-            {/* Batch Rows */}
             <div style={{ padding: '0 clamp(16px, 2.5vw, 30px) clamp(16px, 2.5vw, 25px) clamp(16px, 2.5vw, 30px)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div className="uc-batch-header-grid">
                 <div>Batch Details</div>
@@ -259,11 +250,10 @@ const UserCourses = ({ userName, userEmail }) => {
 
               {course.batches.map((batch, bIdx) => {
                 const isCompleted = batch.status === 'Completed';
-                
+
                 return (
                 <div key={batch._id || bIdx} className="uc-batch-item-grid" style={{ borderBottom: bIdx !== course.batches.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
-                  
-                  {/* Col 1: Info */}
+
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <div style={{ width: '42px', height: '42px', borderRadius: '8px', background: `${batch.color}15`, color: batch.color, display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '15px', fontWeight: 'bold', flexShrink: 0 }}>
                       {batch.iconChar}
@@ -281,7 +271,6 @@ const UserCourses = ({ userName, userEmail }) => {
                     </div>
                   </div>
 
-                  {/* Col 2: Progress Bar Only */}
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                       <span style={{ fontSize: '13px', color: batch.color, fontWeight: 'bold' }}>{batch.progress}%</span>

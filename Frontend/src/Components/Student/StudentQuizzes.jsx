@@ -6,10 +6,10 @@ const StudentQuizzes = ({ userEmail }) => {
   const [stats, setStats] = useState({ total: 0, completed: 0, incomplete: 0 });
   const [loading, setLoading] = useState(true);
 
-  const [view, setView] = useState('list'); 
+  const [view, setView] = useState('list');
   const [activeQuiz, setActiveQuiz] = useState(null);
   const [currentQIndex, setCurrentQIndex] = useState(0);
-  const [answers, setAnswers] = useState({}); 
+  const [answers, setAnswers] = useState({});
   const [scoreData, setScoreData] = useState(null);
 
   const fetchQuizzes = async () => {
@@ -32,7 +32,7 @@ const StudentQuizzes = ({ userEmail }) => {
       const myResults = Array.isArray(resultRes?.data) ? resultRes.data : [];
 
       const myQuizzes = allQuizzes.filter(q => {
-         if (!q.batch) return true; 
+         if (!q.batch) return true;
          return q.batch.toLowerCase().trim() === studentBatch;
       });
 
@@ -42,11 +42,10 @@ const StudentQuizzes = ({ userEmail }) => {
       const formattedQuizzes = myQuizzes.map(q => {
           const studentResult = myResults.find(r => r.quizId === q._id);
           const isCompleted = !!studentResult;
-          
+
           if (isCompleted) completedCount++;
           else incompleteCount++;
 
-          // 🔥 FIXED: Pulling exact module name saved by trainer 🔥
           const modName = q.module || q.moduleName || q.subject || 'General Module';
 
           const createdDate = q.createdAt ? new Date(q.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Unknown Date';
@@ -78,12 +77,12 @@ const StudentQuizzes = ({ userEmail }) => {
 
   const getModuleColor = (modName) => {
     const name = (modName || '').toLowerCase();
-    if (name.includes('mongo')) return { bg: '#dcfce7', text: '#16a34a', iconBg: '#f0fdf4', iconColor: '#16a34a' }; 
-    if (name.includes('express')) return { bg: '#f3e8ff', text: '#9333ea', iconBg: '#f5f3ff', iconColor: '#9333ea' }; 
-    if (name.includes('react')) return { bg: '#eff6ff', text: '#2563eb', iconBg: '#f0f9ff', iconColor: '#2563eb' }; 
-    if (name.includes('node')) return { bg: '#fef2f2', text: '#ef4444', iconBg: '#fff1f2', iconColor: '#ef4444' }; 
+    if (name.includes('mongo')) return { bg: '#dcfce7', text: '#16a34a', iconBg: '#f0fdf4', iconColor: '#16a34a' };
+    if (name.includes('express')) return { bg: '#f3e8ff', text: '#9333ea', iconBg: '#f5f3ff', iconColor: '#9333ea' };
+    if (name.includes('react')) return { bg: '#eff6ff', text: '#2563eb', iconBg: '#f0f9ff', iconColor: '#2563eb' };
+    if (name.includes('node')) return { bg: '#fef2f2', text: '#ef4444', iconBg: '#fff1f2', iconColor: '#ef4444' };
     if (name.includes('api')) return { bg: '#f3e8ff', text: '#9333ea', iconBg: '#f5f3ff', iconColor: '#9333ea' };
-    if (name.includes('javascript') || name.includes('js')) return { bg: '#fef3c7', text: '#d97706', iconBg: '#fffbeb', iconColor: '#d97706' }; 
+    if (name.includes('javascript') || name.includes('js')) return { bg: '#fef3c7', text: '#d97706', iconBg: '#fffbeb', iconColor: '#d97706' };
     return { bg: '#f1f5f9', text: '#64748b', iconBg: '#f8fafc', iconColor: '#64748b' };
   };
 
@@ -126,7 +125,7 @@ const StudentQuizzes = ({ userEmail }) => {
       if (res.data.success) {
         setScoreData({ score: res.data.score, total: res.data.totalMarks });
         setView('result');
-        fetchQuizzes(); 
+        fetchQuizzes();
       }
     } catch (err) {
       console.error("Error submitting quiz", err);
@@ -142,7 +141,7 @@ const StudentQuizzes = ({ userEmail }) => {
 
   return (
     <div className="sq-main-wrapper">
-      
+
       {view === 'list' && (
         <div className="sq-wrapper">
           <div className="sq-header">
@@ -203,7 +202,7 @@ const StudentQuizzes = ({ userEmail }) => {
                           </td>
                           <td style={{ textAlign: 'center', fontWeight: '700', color: '#0f172a' }}>{quiz.displayQuestions}</td>
                           <td style={{ textAlign: 'center', color: '#0f172a', fontWeight: '600', fontSize: '13px' }}>{quiz.displayDate}</td>
-                          
+
                           <td style={{ textAlign: 'center', fontWeight: '700' }}>
                             {quiz.isCompleted ? (
                               <span style={{ color: '#16a34a' }}>{quiz.scoreAttained} / {quiz.totalMarks}</span>
@@ -242,7 +241,7 @@ const StudentQuizzes = ({ userEmail }) => {
              <div className="intro-icon"><i className="fas fa-laptop-code"></i></div>
              <h2>{activeQuiz.title}</h2>
              <p className="intro-desc">{activeQuiz.description || 'Get ready to test your knowledge. Make sure you have a stable internet connection.'}</p>
-             
+
              <div className="intro-meta">
                <div className="meta-box">
                   <span>Total Questions</span>
@@ -265,7 +264,7 @@ const StudentQuizzes = ({ userEmail }) => {
       {view === 'quiz' && (
         <div className="quiz-action-container">
           <div className="quiz-taking-card">
-            
+
             <div className="qt-header">
               <div className="qt-title">
                 <h3>{activeQuiz.title}</h3>
@@ -280,7 +279,7 @@ const StudentQuizzes = ({ userEmail }) => {
 
             <div className="qt-body">
               <h2 className="qt-question-text">{currentQIndex + 1}. {activeQuiz.questions[currentQIndex].question}</h2>
-              
+
               <div className="qt-options-list">
                 {activeQuiz.questions[currentQIndex].options.map((opt, i) => {
                   const isSelected = answers[currentQIndex] === opt.letter;
@@ -319,15 +318,15 @@ const StudentQuizzes = ({ userEmail }) => {
       {view === 'result' && (
         <div className="quiz-action-container">
           <div className="quiz-result-card">
-             <div className="result-icon" style={{ 
-               color: (scoreData.score / scoreData.total) * 100 >= 80 ? "#16a34a" : (scoreData.score / scoreData.total) * 100 < 40 ? "#ef4444" : "#f59e0b", 
-               background: `${(scoreData.score / scoreData.total) * 100 >= 80 ? "#16a34a" : (scoreData.score / scoreData.total) * 100 < 40 ? "#ef4444" : "#f59e0b"}20` 
+             <div className="result-icon" style={{
+               color: (scoreData.score / scoreData.total) * 100 >= 80 ? "#16a34a" : (scoreData.score / scoreData.total) * 100 < 40 ? "#ef4444" : "#f59e0b",
+               background: `${(scoreData.score / scoreData.total) * 100 >= 80 ? "#16a34a" : (scoreData.score / scoreData.total) * 100 < 40 ? "#ef4444" : "#f59e0b"}20`
              }}>
                 <i className={(scoreData.score / scoreData.total) * 100 >= 80 ? "fas fa-trophy" : (scoreData.score / scoreData.total) * 100 < 40 ? "fas fa-book-reader" : "fas fa-thumbs-up"}></i>
              </div>
              <h2>{(scoreData.score / scoreData.total) * 100 >= 80 ? "Excellent Work!" : (scoreData.score / scoreData.total) * 100 < 40 ? "Keep Practicing!" : "Good effort!"}</h2>
              <p className="result-desc">You have successfully completed the assessment.</p>
-             
+
              <div className="score-box">
                <div className="score-label">Your Score</div>
                <div className="score-value" style={{ color: (scoreData.score / scoreData.total) * 100 >= 80 ? "#16a34a" : (scoreData.score / scoreData.total) * 100 < 40 ? "#ef4444" : "#f59e0b" }}>
@@ -356,7 +355,7 @@ const StudentQuizzes = ({ userEmail }) => {
         .border-blue { border: 1px solid #e0e7ff; }
         .border-green { border: 1px solid #dcfce7; }
         .border-orange { border: 1px solid #ffedd5; }
-        
+
         .stat-icon-box { width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; flex-shrink: 0;}
         .bg-blue { background: #eff6ff; }
         .text-blue { color: #2563eb; }

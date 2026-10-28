@@ -26,7 +26,13 @@ router.post('/send', async (req, res) => {
             file: req.body.file || null
         });
         await newMessage.save();
-        res.json({ success: true, message: "Message sent to group!" });
+
+        const io = req.app.get('io');
+        if (io) {
+            io.emit('receive_group_message', newMessage);
+        }
+
+        res.json({ success: true, message: "Message sent to group!", data: newMessage });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -40,6 +46,12 @@ router.put('/edit/:id', async (req, res) => {
             { message: req.body.message },
             { new: true }
         );
+
+        const io = req.app.get('io');
+        if (io && updatedMsg) {
+            io.emit('group_message_edited', updatedMsg);
+        }
+
         res.json({ success: true, message: "Message updated!", data: updatedMsg });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -50,6 +62,12 @@ router.put('/edit/:id', async (req, res) => {
 router.delete('/delete/:id', async (req, res) => {
     try {
         await GroupMessage.findByIdAndDelete(req.params.id);
+
+        const io = req.app.get('io');
+        if (io) {
+            io.emit('group_message_deleted', { id: req.params.id });
+        }
+
         res.json({ success: true, message: "Message deleted!" });
     } catch (err) {
         res.status(500).json({ error: err.message });

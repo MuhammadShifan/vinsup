@@ -17,13 +17,11 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
           setEmpId(found.empId || found.employeeId || found._id || "EMP");
         }
       } catch (e) {
-        // Fallback
       }
     };
     fetchEmpProfile();
   }, [activeEmail]);
 
-  // 🔥 FIX: session removed from state 🔥
   const [leaveData, setLeaveData] = useState({
     leaveType: '',
     startDate: '',
@@ -47,12 +45,11 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
     fetchLeaveHistory();
   }, [activeEmail]);
 
-  // 🔥 FIX: Session logic completely removed from calculation 🔥
   useEffect(() => {
     if (leaveData.startDate && leaveData.endDate) {
       const start = new Date(leaveData.startDate);
       const end = new Date(leaveData.endDate);
-      
+
       if (end >= start) {
         const diffTime = Math.abs(end - start);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
@@ -88,9 +85,9 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
           const leaveDate = new Date(r.startDate);
           return leaveDate.getFullYear() === currentYear && leaveDate.getMonth() === currentMonth;
       });
-      
+
       let casual = 0, sick = 0, privilege = 0, compOff = 0;
-      
+
       approvedLeavesThisMonth.forEach(leave => {
           if (leave.leaveType === 'Casual Leave') casual += leave.totalDays;
           if (leave.leaveType === 'Sick Leave') sick += leave.totalDays;
@@ -128,11 +125,10 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
     }
 
     setIsSubmitting(true);
-    
+
     const todayStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     const appliedBy = userName || "Employee";
 
-    // 🔥 FIX: session removed from payload 🔥
     const payload = {
         empId: empId || "EMP",
         empName: appliedBy,
@@ -149,7 +145,6 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
         const res = await API.post('/leaves/apply', payload);
         if (res.data.success) {
             alert("Leave request submitted successfully!");
-            // 🔥 FIX: session removed from reset state 🔥
             setLeaveData({ leaveType: '', startDate: '', endDate: '', reason: '' });
             setCalculatedDays(0);
             fetchLeaveHistory();
@@ -210,23 +205,22 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
           }
         }
       `}</style>
-      
+
       <div style={{ marginBottom: '25px' }}>
         <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>Leave Request</h1>
         <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Apply for leave and track your leave status</p>
       </div>
 
       <div className="leave-main-grid">
-        
-        {/* LEFT COLUMN: APPLY FORM */}
+
         <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 30px)', border: '1px solid #e2e8f0' }}>
           <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a' }}>Apply for Leave</h3>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="leave-form-dates-grid">
                 <div style={{ gridColumn: 'span 2' }}>
                 <label style={{ display: 'block', fontSize: '13px', color: '#475569', marginBottom: '8px', fontWeight: '500' }}>Leave Type</label>
-                <select 
+                <select
                     value={leaveData.leaveType}
                     onChange={(e) => setLeaveData({...leaveData, leaveType: e.target.value})}
                     style={{ width: '100%', padding: '10px 15px', borderRadius: '6px', border: '1px solid #cbd5e1', color: '#1e293b', outline: 'none' }}
@@ -237,11 +231,11 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
                     ))}
                 </select>
                 </div>
-                
+
                 <div>
                 <label style={{ display: 'block', fontSize: '13px', color: '#475569', marginBottom: '8px', fontWeight: '500' }}>Start Date</label>
-                <input 
-                    type="date" 
+                <input
+                    type="date"
                     value={leaveData.startDate}
                     onChange={(e) => setLeaveData({...leaveData, startDate: e.target.value})}
                     style={{ width: '100%', padding: '10px 15px', borderRadius: '6px', border: '1px solid #cbd5e1', color: '#1e293b', outline: 'none', boxSizing: 'border-box' }}
@@ -250,20 +244,19 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
 
                 <div>
                 <label style={{ display: 'block', fontSize: '13px', color: '#475569', marginBottom: '8px', fontWeight: '500' }}>End Date</label>
-                <input 
-                    type="date" 
+                <input
+                    type="date"
                     value={leaveData.endDate}
                     onChange={(e) => setLeaveData({...leaveData, endDate: e.target.value})}
                     style={{ width: '100%', padding: '10px 15px', borderRadius: '6px', border: '1px solid #cbd5e1', color: '#1e293b', outline: 'none', boxSizing: 'border-box' }}
                 />
                 </div>
 
-                {/* 🔥 FIX: Session removed, Total Days now takes full width 🔥 */}
                 <div style={{ gridColumn: 'span 2' }}>
                 <label style={{ display: 'block', fontSize: '13px', color: '#475569', marginBottom: '8px', fontWeight: '500' }}>Total Days</label>
-                <input 
-                    type="text" 
-                    value={calculatedDays > 0 ? `${calculatedDays} Days` : '0 Days'} 
+                <input
+                    type="text"
+                    value={calculatedDays > 0 ? `${calculatedDays} Days` : '0 Days'}
                     readOnly
                     style={{ width: '100%', padding: '10px 15px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#64748b', outline: 'none', boxSizing: 'border-box' }}
                 />
@@ -272,10 +265,10 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
 
             <div style={{ marginBottom: '25px' }}>
                 <label style={{ display: 'block', fontSize: '13px', color: '#475569', marginBottom: '8px', fontWeight: '500' }}>Reason</label>
-                <textarea 
+                <textarea
                 value={leaveData.reason}
                 onChange={(e) => setLeaveData({...leaveData, reason: e.target.value})}
-                placeholder="Enter reason for leave..." 
+                placeholder="Enter reason for leave..."
                 rows="4"
                 style={{ width: '100%', padding: '15px', borderRadius: '6px', border: '1px solid #cbd5e1', color: '#1e293b', outline: 'none', boxSizing: 'border-box', resize: 'vertical' }}
                 ></textarea>
@@ -303,15 +296,14 @@ const UserLeaveRequest = ({ userName, userEmail }) => {
 
         </div>
 
-        {/* RIGHT COLUMN: BALANCE & HISTORY */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-          
+
           <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
               <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>Leave Balance for a month</h3>
               <a href="#" style={{ fontSize: '13px', color: '#2563eb', fontWeight: '600', textDecoration: 'none' }}>View Details</a>
             </div>
-            
+
             <div className="leave-balance-grid">
               {leaveBalances.map((leave, index) => (
                 <div key={index} style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>

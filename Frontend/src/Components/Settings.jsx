@@ -10,8 +10,8 @@ const AdminSettings = () => {
   });
 
   const [newName, setNewName] = useState('');
-  const [selectedFile, setSelectedFile] = useState(null); // 🔥 File upload state 🔥
-  
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const [passwords, setPasswords] = useState({
     current: '',
     new: '',
@@ -38,7 +38,6 @@ const AdminSettings = () => {
     setPasswords({ ...passwords, [e.target.name]: e.target.value });
   };
 
-  // Update Name
   const handleUpdateName = async () => {
     if (!newName.trim()) return alert("Name cannot be empty!");
     try {
@@ -55,15 +54,13 @@ const AdminSettings = () => {
     }
   };
 
-  // 🔥 Upload Profile Photo as File 🔥
   const handleUpdatePhoto = async () => {
     if (!selectedFile) return alert("Please select an image file first!");
-    
+
     const formData = new FormData();
-    formData.append('image', selectedFile); // Backend upload middleware-kku anuppurom
+    formData.append('image', selectedFile);
 
     try {
-      // Direct file upload to server uploads folder
       const uploadRes = await API.post('/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       }).catch(() => null);
@@ -72,7 +69,6 @@ const AdminSettings = () => {
       if (uploadRes && uploadRes.data && uploadRes.data.filePath) {
         photoUrl = getImageUrl(uploadRes.data.filePath);
       } else {
-        // Fallback to base64 if upload route is missing
         const reader = new FileReader();
         reader.readAsDataURL(selectedFile);
         reader.onload = async () => {
@@ -104,7 +100,6 @@ const AdminSettings = () => {
     }
   };
 
-  // Update Password
   const handleUpdatePassword = async () => {
     if (!passwords.current || !passwords.new || !passwords.confirm) {
       alert("Please fill in all password fields!");
@@ -232,17 +227,16 @@ const AdminSettings = () => {
       </div>
 
       <div className="settings-layout-container">
-        
-        {/* Left Profile Card */}
+
         <div className="settings-profile-card">
           <h3 style={{ margin: '0 0 25px 0', fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>Admin Profile</h3>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '25px' }}>
             <div style={{ position: 'relative', width: '100px', height: '100px', marginBottom: '15px' }}>
-              <img 
-                src={getPhotoUrl(adminData.profilePhoto)} 
-                alt="Profile" 
-                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '3px solid #f1f5f9' }} 
+              <img
+                src={getPhotoUrl(adminData.profilePhoto)}
+                alt="Profile"
+                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '3px solid #f1f5f9' }}
               />
             </div>
             <h2 style={{ margin: '0 0 5px 0', fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>{adminData.name}</h2>
@@ -261,10 +255,8 @@ const AdminSettings = () => {
           </div>
         </div>
 
-        {/* Right Settings Cards */}
         <div className="settings-forms-col">
-          
-          {/* Card 1: Change Profile Photo via File Upload */}
+
           <div className="settings-card">
             <div className="settings-card-inner">
               <div className="settings-card-header">
@@ -277,10 +269,10 @@ const AdminSettings = () => {
                 </div>
               </div>
               <div className="settings-card-body" style={{ gap: '12px' }}>
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   accept="image/*"
-                  onChange={(e) => setSelectedFile(e.target.files[0])} 
+                  onChange={(e) => setSelectedFile(e.target.files[0])}
                   style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', background: '#f8fafc', boxSizing: 'border-box' }}
                 />
                 {selectedFile && <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: '600' }}>Selected: {selectedFile.name}</span>}
@@ -293,7 +285,6 @@ const AdminSettings = () => {
             </div>
           </div>
 
-          {/* Card 2: Change Name */}
           <div className="settings-card">
             <div className="settings-card-inner">
               <div className="settings-card-header">
@@ -308,10 +299,10 @@ const AdminSettings = () => {
               <div className="settings-card-body">
                 <div className="settings-input-row">
                   <label style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>Full Name</label>
-                  <input 
-                    type="text" 
-                    value={newName} 
-                    onChange={(e) => setNewName(e.target.value)} 
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
                     style={{ width: '100%', padding: '12px 15px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
@@ -324,7 +315,6 @@ const AdminSettings = () => {
             </div>
           </div>
 
-          {/* Card 3: Change Password */}
           <div className="settings-card">
             <div className="settings-card-inner">
               <div className="settings-card-header">
@@ -337,39 +327,39 @@ const AdminSettings = () => {
                 </div>
               </div>
               <div className="settings-card-body" style={{ gap: '15px' }}>
-                
+
                 <div className="settings-input-row">
                   <label style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>Current Password</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     name="current"
                     placeholder="Enter current password"
-                    value={passwords.current} 
-                    onChange={handlePasswordChange} 
+                    value={passwords.current}
+                    onChange={handlePasswordChange}
                     style={{ width: '100%', padding: '12px 15px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
 
                 <div className="settings-input-row">
                   <label style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>New Password</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     name="new"
                     placeholder="Enter new password"
-                    value={passwords.new} 
-                    onChange={handlePasswordChange} 
+                    value={passwords.new}
+                    onChange={handlePasswordChange}
                     style={{ width: '100%', padding: '12px 15px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
 
                 <div className="settings-input-row">
                   <label style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>Confirm Password</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     name="confirm"
                     placeholder="Confirm new password"
-                    value={passwords.confirm} 
-                    onChange={handlePasswordChange} 
+                    value={passwords.confirm}
+                    onChange={handlePasswordChange}
                     style={{ width: '100%', padding: '12px 15px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>

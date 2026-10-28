@@ -4,7 +4,6 @@ const Ticket = require('../models/Ticket');
 const Employee = require('../models/Employee');
 const Notification = require('../models/Notification');
 
-// Add Notification with Duplicate Prevention 🔥
 router.post('/add', async (req, res) => {
     try {
         const { type, title, message, recipientEmail } = req.body;
@@ -38,7 +37,6 @@ router.post('/add', async (req, res) => {
     }
 });
 
-
 router.get('/user/:email', async (req, res) => {
     try {
         const email = req.params.email.toLowerCase().trim();
@@ -49,11 +47,10 @@ router.get('/user/:email', async (req, res) => {
     }
 });
 
-
 router.put('/mark-read/:id', async (req, res) => {
     try {
         const notification = await Notification.findById(req.params.id);
-        
+
         if (notification) {
             notification.isRead = true;
             await notification.save();
@@ -64,13 +61,13 @@ router.put('/mark-read/:id', async (req, res) => {
 
                 if (nameMatch && nameMatch[1]) {
                     const empName = nameMatch[1].trim();
-                    
-                    const emp = await Employee.findOne({ 
+
+                    const emp = await Employee.findOne({
                         $or: [
-                            { name: new RegExp('^' + empName + '$', 'i') }, 
+                            { name: new RegExp('^' + empName + '$', 'i') },
                             { fullName: new RegExp('^' + empName + '$', 'i') },
                             { firstName: new RegExp('^' + empName + '$', 'i') }
-                        ] 
+                        ]
                     });
 
                     if (emp && emp.email) {
@@ -83,7 +80,6 @@ router.put('/mark-read/:id', async (req, res) => {
                         );
 
                         if (resolvedTicket) {
-                            // Check duplicate for helpdesk as well inside code block if needed
                             const userNotification = new Notification({
                                 type: 'helpdesk',
                                 title: 'Ticket Resolved',
@@ -103,12 +99,11 @@ router.put('/mark-read/:id', async (req, res) => {
     }
 });
 
-
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const deletedNotification = await Notification.findByIdAndDelete(id);
-        
+
         if (!deletedNotification) {
             return res.status(404).json({ success: false, message: "Notification not found!" });
         }

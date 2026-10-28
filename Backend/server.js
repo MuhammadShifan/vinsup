@@ -23,7 +23,6 @@ const multer = require('multer');
 const app = express();
 const server = http.createServer(app);
 
-// Dynamic Socket.io CORS origin resolution to support credentials
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
@@ -32,12 +31,11 @@ const io = new Server(server, {
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   },
-  maxHttpBufferSize: 1e8 // 100 MB buffer for file payloads
+  maxHttpBufferSize: 1e8
 });
 
 app.set('io', io);
 
-// Configure allowed frontend origins from .env and defaults
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'https://vinsup-lms-by-mds.vercel.app',
@@ -51,7 +49,7 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
       return callback(null, true);
     }
-    return callback(null, true); // Allow all valid web clients
+    return callback(null, true);
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -71,14 +69,11 @@ app.use('/uploads', express.static(uploadDir));
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI;
 
-
 app.get('/', (req, res) => {
   res.send("Vinsup Academy Backend is Running Successfully!");
 });
 
-
 const Employee = require('./models/Employee');
-
 
 const authRoutes = require('./routes/authRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
@@ -93,7 +88,6 @@ const scheduleRoutes = require('./routes/scheduleRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const privateChatRoutes = require('./routes/privateChatRoutes');
 const { protect } = require('./middleware/authMiddleware');
-
 
 app.use('/api/auth', authRoutes);
 app.use('/api/employees', protect, employeeRoutes);
@@ -116,7 +110,6 @@ app.use('/api/quizzes', protect, quizRoutes);
 app.use('/api/announcements', protect, announcementRoutes);
 app.use('/api/batchchat', protect, batchChatRoutes);
 
-// Generic file upload route
 const generalUpload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => cb(null, uploadDir),
@@ -131,7 +124,6 @@ app.post('/api/upload', protect, generalUpload.single('image'), (req, res) => {
   const filePath = `uploads/${req.file.filename}`;
   res.json({ success: true, filePath });
 });
-
 
 app.get('/api/admin/profile', protect, async (req, res) => {
   try {
@@ -152,7 +144,6 @@ app.get('/api/admin/profile', protect, async (req, res) => {
   }
 });
 
-
 app.put('/api/admin/update', protect, async (req, res) => {
   try {
     const { name, profilePhoto } = req.body;
@@ -170,7 +161,6 @@ app.put('/api/admin/update', protect, async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
-
 
 app.put('/api/admin/change-password', protect, async (req, res) => {
   try {
@@ -196,10 +186,6 @@ app.put('/api/admin/change-password', protect, async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
-
-
-
-
 
 cron.schedule('59 23 * * *', async () => {
   console.log('Running Daily Attendance Reset Job...');
@@ -236,7 +222,6 @@ cron.schedule('59 23 * * *', async () => {
   }
 });
 
-
 cron.schedule('59 23 * * 0', async () => {
   console.log('Running Weekly Hours Reset Job (Sunday Night)...');
   try {
@@ -246,7 +231,6 @@ cron.schedule('59 23 * * 0', async () => {
     console.error('Error resetting weekly hours:', err);
   }
 });
-
 
 if (MONGO_URI) {
   mongoose.connect(MONGO_URI)
@@ -270,11 +254,9 @@ if (MONGO_URI) {
   console.error("MONGO_URI is missing in Environment Variables!");
 }
 
-// 7. Socket.io Event Handling
 io.on('connection', (socket) => {
   console.log(`⚡ Socket connected: ${socket.id}`);
 
-  // Join personal user room (for 1-on-1 chats)
   socket.on('join_user', (rawEmail) => {
     if (!rawEmail) return;
     let email = String(rawEmail).toLowerCase().trim();
@@ -283,7 +265,6 @@ io.on('connection', (socket) => {
     console.log(`👤 Socket ${socket.id} joined user room: ${email}`);
   });
 
-  // Join & Leave Batch Rooms
   socket.on('join_batch', (rawBatch) => {
     if (!rawBatch) return;
     const batchRoom = `batch_${String(rawBatch).trim()}`;
@@ -298,7 +279,6 @@ io.on('connection', (socket) => {
     console.log(`🚪 Socket ${socket.id} left batch room: ${batchRoom}`);
   });
 
-  // Send Private Message
   socket.on('send_private_message', async (data, callback) => {
     try {
       let senderEmail = String(data.senderEmail || '').toLowerCase().trim();
@@ -317,11 +297,9 @@ io.on('connection', (socket) => {
       });
       await newMessage.save();
 
-      // Emit to receiver & sender rooms
       io.to(receiverEmail).emit('receive_private_message', newMessage);
       io.to(senderEmail).emit('receive_private_message', newMessage);
 
-      // Send unread count update to receiver
       const unreadCount = await PrivateMessage.countDocuments({
         receiverEmail,
         isRead: false
@@ -343,7 +321,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Edit Private Message
   socket.on('edit_private_message', async ({ id, message, senderEmail, receiverEmail }) => {
     try {
       const updatedMsg = await PrivateMessage.findByIdAndUpdate(
@@ -362,7 +339,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Delete Private Message
   socket.on('delete_private_message', async ({ id, senderEmail, receiverEmail }) => {
     try {
       await PrivateMessage.findByIdAndDelete(id);
@@ -375,7 +351,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Mark Private Messages Read
   socket.on('mark_private_read', async ({ receiverEmail, senderEmail }) => {
     try {
       let rEmail = String(receiverEmail || '').toLowerCase().trim();
@@ -407,7 +382,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Send Batch Message
   socket.on('send_batch_message', async (data, callback) => {
     try {
       const { batch, senderName, senderEmail, senderRole, senderAvatar, text, attachments } = data;
@@ -447,7 +421,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// 8. Server Bind
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running with Socket.io on port ${PORT}`);
 });

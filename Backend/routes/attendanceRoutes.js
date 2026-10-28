@@ -3,7 +3,6 @@ const router = express.Router();
 const Attendance = require('../models/Attendance');
 const Student = require('../models/Student');
 
-
 router.post('/mark', async (req, res) => {
   try {
     const { studentId, studentName, date, status, markedBy } = req.body;
@@ -33,11 +32,10 @@ router.post('/mark', async (req, res) => {
       await existingAttendance.save();
     }
 
-
     const student = await Student.findOne({ studentId });
     if (student) {
       student.classesAttended = student.classesAttended || 0;
-      student.totalClasses = student.totalClasses || 60; 
+      student.totalClasses = student.totalClasses || 60;
 
       if (!oldStatus && status === 'present') {
         student.classesAttended += 1;
@@ -58,10 +56,8 @@ router.post('/mark', async (req, res) => {
   }
 });
 
-
 router.get('/history/:studentId', async (req, res) => {
   try {
-    // Latest date first varra maari sort panni edukurom
     const history = await Attendance.find({ studentId: req.params.studentId }).sort({ date: -1 });
     res.status(200).json({ success: true, data: history });
   } catch (error) {

@@ -2,18 +2,17 @@ import React, { useState, useEffect } from 'react';
 import API from '../utils/api';
 
 const UserAttendance = ({ userName, userEmail }) => {
-  const [attendanceState, setAttendanceState] = useState('idle'); 
+  const [attendanceState, setAttendanceState] = useState('idle');
   const [checkInTime, setCheckInTime] = useState(null);
   const [checkOutTime, setCheckOutTime] = useState(null);
   const [totalHours, setTotalHours] = useState('-');
   const [statusToday, setStatusToday] = useState('Pending');
-  
+
   const [currentUserData, setCurrentUserData] = useState(null);
   const [pastRecords, setPastRecords] = useState([]);
-  
+
   const [summaryStats, setSummaryStats] = useState({ total: 0, present: 0, absent: 0, late: 0, percentage: 0 });
 
-  // 🔥 NEW: Real Calendar State
   const [currentMonthDate, setCurrentMonthDate] = useState(new Date());
 
   const getSafeDate = () => {
@@ -31,7 +30,7 @@ const UserAttendance = ({ userName, userEmail }) => {
 
         if (modifier === 'PM' && hours !== 12) hours += 12;
         if (modifier === 'AM' && hours === 12) hours = 0;
-        
+
         return { hours, minutes };
       };
 
@@ -46,7 +45,7 @@ const UserAttendance = ({ userName, userEmail }) => {
 
       const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
       const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-      
+
       return `${diffHrs}h ${diffMins}m`;
     } catch (e) {
       return "-";
@@ -60,7 +59,7 @@ const UserAttendance = ({ userName, userEmail }) => {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       const empData = Array.isArray(response.data) ? response.data : (response.data.data || []);
-      
+
       const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
       const storedEmail = localStorage.getItem('loggedInEmail');
       const incomingEmail = (userEmail || auth.email || storedEmail || "").toLowerCase().trim();
@@ -68,7 +67,7 @@ const UserAttendance = ({ userName, userEmail }) => {
 
       let matchedUser = null;
       if (incomingEmail || incomingName) {
-        matchedUser = empData.find(emp => 
+        matchedUser = empData.find(emp =>
           (incomingEmail && (emp.email || '').toLowerCase().trim() === incomingEmail) ||
           (incomingName && (emp.fullName || emp.name || '').toLowerCase().trim() === incomingName)
         );
@@ -76,9 +75,9 @@ const UserAttendance = ({ userName, userEmail }) => {
 
       if (matchedUser) {
         setCurrentUserData(matchedUser);
-        
-        const todayDateStr = getSafeDate(); 
-        
+
+        const todayDateStr = getSafeDate();
+
         let currentStatus = 'Pending';
         let inTime = null;
 
@@ -91,13 +90,13 @@ const UserAttendance = ({ userName, userEmail }) => {
           currentStatus = matchedUser.todayStatus || 'Present';
           setStatusToday(currentStatus);
           inTime = matchedUser.todayCheckIn;
-          
+
           if (matchedUser.todayCheckOut && matchedUser.todayCheckOut !== "-" && matchedUser.todayCheckOut !== "Not Marked") {
              setAttendanceState('out');
              setCheckOutTime(matchedUser.todayCheckOut);
-             setTotalHours(calculateTotalHours(matchedUser.todayCheckIn, matchedUser.todayCheckOut)); 
+             setTotalHours(calculateTotalHours(matchedUser.todayCheckIn, matchedUser.todayCheckOut));
           } else {
-             setAttendanceState('in'); 
+             setAttendanceState('in');
           }
         } else {
           setAttendanceState('idle');
@@ -138,7 +137,7 @@ const UserAttendance = ({ userName, userEmail }) => {
     const todayStr = currentDate.toLocaleDateString('en-GB', options);
     const dayStr = currentDate.toLocaleDateString('en-GB', { weekday: 'long' });
 
-    let recent = []; 
+    let recent = [];
 
     if (todayStatus !== 'Pending') {
       recent.push({
@@ -158,8 +157,8 @@ const UserAttendance = ({ userName, userEmail }) => {
 
     const now = new Date();
     const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-    
-    const todayDateStr = getSafeDate(); 
+
+    const todayDateStr = getSafeDate();
     const currentHour = now.getHours();
     const empName = currentUserData.fullName || currentUserData.name || userName || 'Employee';
 
@@ -173,24 +172,24 @@ const UserAttendance = ({ userName, userEmail }) => {
         setAttendanceState('in');
         setCheckInTime(timeString);
         setStatusToday(newStatus);
-        
+
         await API.put(`/employees/${currentUserData._id || currentUserData.empId}`, {
           todayCheckIn: timeString,
           todayStatus: newStatus,
-          lastAttendanceDate: todayDateStr, 
-          todayCheckOut: "-" 
+          lastAttendanceDate: todayDateStr,
+          todayCheckOut: "-"
         });
 
         await API.post('/notifications/add', {
           type: 'Attendance',
           title: 'Employee Checked In',
           message: `${empName} has checked in at ${timeString}. Status: ${newStatus}`
-        }).catch(err => console.log(err)); 
+        }).catch(err => console.log(err));
 
         alert(`Checked In Successfully at ${timeString}! Status: ${newStatus}`);
-        
+
         setTimeout(() => {
-          fetchUserData(); 
+          fetchUserData();
         }, 500);
 
       } catch (error) {
@@ -220,11 +219,11 @@ const UserAttendance = ({ userName, userEmail }) => {
           }).catch(err => console.log(err));
 
           alert(`Checked Out Successfully at ${timeString}!`);
-          
+
           setTimeout(() => {
-            fetchUserData(); 
+            fetchUserData();
           }, 500);
-          
+
         } catch (error) {
           console.error("Failed to check out", error);
           setAttendanceState('in');
@@ -235,10 +234,9 @@ const UserAttendance = ({ userName, userEmail }) => {
     }
   };
 
-  // 🔥 NEW: Real Calendar Logic Generation
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const todayDate = new Date();
-  
+
   const currentYear = currentMonthDate.getFullYear();
   const currentMonthIndex = currentMonthDate.getMonth();
   const monthName = currentMonthDate.toLocaleString('default', { month: 'long' });
@@ -250,16 +248,13 @@ const UserAttendance = ({ userName, userEmail }) => {
   const handleNextMonth = () => setCurrentMonthDate(new Date(currentYear, currentMonthIndex + 1, 1));
 
   const calendarGrid = [];
-  // Add empty slots for days before the 1st of the month
   for (let i = 0; i < firstDayOfMonth; i++) {
     calendarGrid.push(null);
   }
-  
-  // Add actual days of the month
+
   for (let i = 1; i <= daysInMonth; i++) {
     let stat = 'off';
-    
-    // If it's today's date in real life, show the current attendance status
+
     if (i === todayDate.getDate() && currentMonthIndex === todayDate.getMonth() && currentYear === todayDate.getFullYear()) {
       stat = statusToday === 'Pending' ? 'off' : statusToday.toLowerCase();
     }
@@ -274,19 +269,19 @@ const UserAttendance = ({ userName, userEmail }) => {
 
   return (
     <div style={{ padding: 'clamp(14px, 2.5vw, 30px)', fontFamily: "'Inter', sans-serif", width: '100%', boxSizing: 'border-box' }}>
-      
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', gap: '15px', flexWrap: 'wrap' }}>
         <div>
           <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: 'clamp(1.25rem, 2vw, 1.5rem)', fontWeight: 'bold' }}>Attendance</h1>
           <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Track your daily attendance and view history</p>
         </div>
-        
-        <button 
+
+        <button
           onClick={handleCheckInOut}
           disabled={attendanceState === 'out'}
           style={{
             background: attendanceState === 'idle' ? '#2563eb' : attendanceState === 'in' ? '#ef4444' : '#94a3b8',
-            color: '#fff', border: 'none', padding: '12px 25px', borderRadius: '8px', 
+            color: '#fff', border: 'none', padding: '12px 25px', borderRadius: '8px',
             fontSize: '14px', fontWeight: 'bold', cursor: attendanceState === 'out' ? 'not-allowed' : 'pointer',
             display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: '0.3s',
             minHeight: '42px'
@@ -302,7 +297,7 @@ const UserAttendance = ({ userName, userEmail }) => {
           <div style={{ background: '#dcfce7', width: '50px', height: '50px', minWidth: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#16a34a', fontSize: '24px' }}><i className="far fa-calendar-check"></i></div>
           <div><p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#64748b' }}>Present Days</p><h3 style={{ margin: 0, fontSize: '20px', color: '#0f172a' }}>{summaryStats.present}</h3><span style={{ fontSize: '11px', color: '#64748b' }}>Total</span></div>
         </div>
-        
+
         <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', gap: '15px', alignItems: 'center' }}>
           <div style={{ background: '#fee2e2', width: '50px', height: '50px', minWidth: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ef4444', fontSize: '24px' }}><i className="far fa-calendar-times"></i></div>
           <div><p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#64748b' }}>Absent Days</p><h3 style={{ margin: 0, fontSize: '20px', color: '#0f172a' }}>{summaryStats.absent}</h3><span style={{ fontSize: '11px', color: '#64748b' }}>Total</span></div>
@@ -321,7 +316,7 @@ const UserAttendance = ({ userName, userEmail }) => {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '20px' }}>
         <div style={{ background: '#fff', padding: 'clamp(16px, 2.5vw, 25px)', borderRadius: '12px', border: '1px solid #e2e8f0', boxSizing: 'border-box', overflowX: 'auto' }}>
-          
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '10px', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>Attendance Calendar</h3>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -336,7 +331,7 @@ const UserAttendance = ({ userName, userEmail }) => {
               <div key={day} style={{ fontWeight: '600', color: '#64748b', fontSize: '12px', paddingBottom: '10px', borderBottom: '1px solid #e2e8f0' }}>{day}</div>
             ))}
           </div>
-          
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center' }}>
             {calendarGrid.map((item, idx) => (
               <div key={idx} style={{ padding: '10px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
@@ -353,7 +348,7 @@ const UserAttendance = ({ userName, userEmail }) => {
                     )}
                   </>
                 ) : (
-                  <span style={{ padding: '10px 0' }}></span> 
+                  <span style={{ padding: '10px 0' }}></span>
                 )}
               </div>
             ))}
@@ -370,8 +365,8 @@ const UserAttendance = ({ userName, userEmail }) => {
           <div style={{ background: '#fff', padding: 'clamp(16px, 2.5vw, 25px)', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
             <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a' }}>Attendance Summary</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '25px', flexWrap: 'wrap' }}>
-              <div style={{ width: '120px', height: '120px', borderRadius: '50%', 
-                  background: summaryStats.total === 0 ? '#f1f5f9' : `conic-gradient(#10b981 0% ${presentEnd}%, #f59e0b ${presentEnd}% ${lateEnd}%, #ef4444 ${lateEnd}% 100%)`, 
+              <div style={{ width: '120px', height: '120px', borderRadius: '50%',
+                  background: summaryStats.total === 0 ? '#f1f5f9' : `conic-gradient(#10b981 0% ${presentEnd}%, #f59e0b ${presentEnd}% ${lateEnd}%, #ef4444 ${lateEnd}% 100%)`,
                   display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
                 <div style={{ width: '90px', height: '90px', background: '#fff', borderRadius: '50%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                   <span style={{ fontSize: '11px', color: '#64748b' }}>Total Days</span>
@@ -390,7 +385,7 @@ const UserAttendance = ({ userName, userEmail }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
               <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>Recent Attendance</h3>
             </div>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {pastRecords.length > 0 ? pastRecords.map((rec, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
@@ -416,13 +411,13 @@ const UserAttendance = ({ userName, userEmail }) => {
 
       <div style={{ background: '#fff', padding: 'clamp(16px, 2.5vw, 25px)', borderRadius: '12px', border: '1px solid #e2e8f0', marginTop: '25px' }}>
         <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a' }}>Attendance Details - Today</h3>
-        
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '15px' }}>
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
             <div style={{ background: '#dcfce7', color: '#16a34a', width: '40px', height: '40px', minWidth: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="far fa-calendar-check"></i></div>
             <div><p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#64748b' }}>Check In</p><strong style={{ fontSize: '14px', color: '#0f172a' }}>{checkInTime || '--:--'}</strong></div>
           </div>
-          
+
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
             <div style={{ background: '#fee2e2', color: '#ef4444', width: '40px', height: '40px', minWidth: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="far fa-calendar-times"></i></div>
             <div><p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#64748b' }}>Check Out</p><strong style={{ fontSize: '14px', color: '#0f172a' }}>{checkOutTime || '--:--'}</strong></div>
@@ -437,10 +432,10 @@ const UserAttendance = ({ userName, userEmail }) => {
             <div style={{ background: '#f0fdf4', color: '#16a34a', width: '40px', height: '40px', minWidth: '40px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px' }}><i className="fas fa-toggle-on"></i></div>
             <div>
               <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#64748b' }}>Status</p>
-              <span style={{ 
-                  background: statusToday === 'Pending' ? '#f1f5f9' : statusToday === 'Present' ? '#dcfce7' : '#ffedd5', 
-                  color: statusToday === 'Pending' ? '#64748b' : statusToday === 'Present' ? '#16a34a' : '#ea580c', 
-                  padding: '3px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' 
+              <span style={{
+                  background: statusToday === 'Pending' ? '#f1f5f9' : statusToday === 'Present' ? '#dcfce7' : '#ffedd5',
+                  color: statusToday === 'Pending' ? '#64748b' : statusToday === 'Present' ? '#16a34a' : '#ea580c',
+                  padding: '3px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold'
                 }}>
                 {statusToday}
               </span>
@@ -453,7 +448,7 @@ const UserAttendance = ({ userName, userEmail }) => {
           </div>
         </div>
       </div>
-      
+
     </div>
   );
 };

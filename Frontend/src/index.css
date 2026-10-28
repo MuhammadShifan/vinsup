@@ -1,6 +1,4 @@
-/* ==========================================================================
-   GLOBAL RESPONSIVE RESET & BASE STYLES
-   ========================================================================== */
+
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -34,7 +32,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Responsive Media Primitives */
 img, svg, video, canvas, audio, iframe, embed, object {
   display: block;
   max-width: 100%;
@@ -44,7 +41,6 @@ img {
   height: auto;
 }
 
-/* Accessible Inputs and Tap Targets */
 button, input, select, textarea {
   font-family: inherit;
   font-size: 100%;
@@ -56,12 +52,10 @@ button {
   touch-action: manipulation;
 }
 
-/* Prevent text overflow issues */
 p, h1, h2, h3, h4, h5, h6, span, a, label, td, th {
   overflow-wrap: break-word;
 }
 
-/* Smooth Horizontal Scrolling */
 .table-responsive,
 .table-container,
 .custom-scroll,
@@ -70,7 +64,6 @@ p, h1, h2, h3, h4, h5, h6, span, a, label, td, th {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

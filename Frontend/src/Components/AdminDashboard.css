@@ -3,7 +3,7 @@
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
-  background-color: #f4f7fa; 
+  background-color: #f4f7fa;
 }
 
 .admin-layout {
@@ -14,7 +14,6 @@ body {
   overflow-x: hidden;
 }
 
-/* ================= Sidebar ================= */
 .sidebar {
   width: 260px;
   background-color: #0b2b8e;
@@ -34,8 +33,8 @@ body {
 .students-list-sidebar,
 .tr-chat-sidebar,
 .sidebar-list {
-  -ms-overflow-style: none !important;  /* IE and Edge */
-  scrollbar-width: none !important;  /* Firefox */
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 .sidebar::-webkit-scrollbar,
@@ -170,7 +169,7 @@ body {
   min-width: 0;
   width: 100%;
   max-width: 100vw;
-  transition: margin-left 0.3s ease-in-out; 
+  transition: margin-left 0.3s ease-in-out;
 }
 
 .main-content.expand {
@@ -181,7 +180,6 @@ body {
   margin-left: 260px;
 }
 
-/* Header */
 .top-header {
   background-color: #fff;
   height: 70px;
@@ -264,7 +262,6 @@ body {
   color: #6b7280;
 }
 
-/* Dashboard Area */
 .dashboard-container {
   padding: 30px;
 }
@@ -281,10 +278,9 @@ body {
   margin: 0 0 25px 0;
 }
 
-/* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); 
+  grid-template-columns: repeat(5, 1fr);
   gap: 15px;
   margin-bottom: 25px;
 }
@@ -340,7 +336,6 @@ body {
   font-weight: 600;
 }
 
-/* Shared Dashboard Card Styles */
 .dashboard-card {
   background: #fff;
   border-radius: 12px;
@@ -369,15 +364,13 @@ body {
   cursor: pointer;
 }
 
-/* Middle Grid */
 .middle-grid {
   display: grid;
-  grid-template-columns: 1fr; 
+  grid-template-columns: 1fr;
   gap: 20px;
   margin-bottom: 20px;
 }
 
-/* Timeline Schedule */
 .timeline {
   display: flex;
   flex-direction: column;
@@ -435,7 +428,6 @@ body {
 .status-badge.green { background-color: #dcfce7; color: #16a34a; }
 .status-badge.blue { background-color: #dbeafe; color: #2563eb; }
 
-/* Progress List */
 .progress-list {
   display: flex;
   flex-direction: column;
@@ -472,7 +464,7 @@ body {
 }
 
 .progress-scroll-container {
-  max-height: 280px; /* Thappu thavara 5 items-kku mela pona scroll aagum */
+  max-height: 280px;
   overflow-y: auto;
   padding-right: 10px;
 }
@@ -481,7 +473,6 @@ body {
 .progress-scroll-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 .progress-scroll-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* Bottom Grid */
 .bottom-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -518,7 +509,7 @@ body {
 }
 
 .list-scroll-container {
-  max-height: 320px; 
+  max-height: 320px;
   overflow-y: auto;
   padding-right: 10px;
 }
@@ -526,7 +517,7 @@ body {
 .list-scroll-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
 .list-scroll-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 .list-scroll-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-                                                                                 
+
 .icon.green { background: #dcfce7; color: #16a34a; }
 .icon.purple { background: #f3e8ff; color: #9333ea; }
 .icon.yellow { background: #fef9c3; color: #ca8a04; }
@@ -548,7 +539,6 @@ body {
   padding: 20px 0;
 }
 
-/* Responsive adjustments across all viewports */
 @media (max-width: 1200px) {
   .stats-grid { grid-template-columns: repeat(3, 1fr); }
   .middle-grid { grid-template-columns: 1fr; }

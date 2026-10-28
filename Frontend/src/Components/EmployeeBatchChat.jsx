@@ -6,10 +6,10 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
   const [myBatches, setMyBatches] = useState([]);
   const [activeBatch, setActiveBatch] = useState(null);
   const [myAvatar, setMyAvatar] = useState("");
-  
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [unreadCounts, setUnreadCounts] = useState({}); 
+  const [unreadCounts, setUnreadCounts] = useState({});
   const [loading, setLoading] = useState(true);
 
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -35,26 +35,29 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
     const fetchInitialData = async () => {
       try {
         const activeEmail = (userEmail || "").toLowerCase().trim();
-        
-        // 1. Fetch Batches
+
         const bRes = await API.get('/batches').catch(() => null);
         const allB = Array.isArray(bRes?.data) ? bRes.data : (bRes?.data?.data || []);
-        
-        const trainerBatches = allB.filter(b => {
-          const trainerStr = (b.trainer || b.trainerName || b.assignedTo || b.faculty || '').toLowerCase().trim();
-          return trainerStr === (userName || "").toLowerCase().trim() || trainerStr === activeEmail || trainerStr === 'admin';
-        });
+
+        let trainerBatches = allB;
+        const normalizedUser = (userName || "").toLowerCase().trim();
+        const normalizedEmail = activeEmail.toLowerCase().trim();
+
+        if (normalizedUser !== 'admin' && normalizedEmail !== 'admin@vinsup.com') {
+          trainerBatches = allB.filter(b => {
+            const trainerStr = (b.trainer || b.trainerName || b.assignedTo || b.faculty || '').toLowerCase().trim();
+            return trainerStr === normalizedUser || trainerStr === normalizedEmail || trainerStr === 'admin';
+          });
+        }
 
         const batchNames = trainerBatches.map(b => String(b.batchName || b.courseName || '').trim()).filter(Boolean);
         const uniqueBatches = [...new Set(batchNames)];
-        
+
         setMyBatches(uniqueBatches);
         if (uniqueBatches.length > 0) setActiveBatch(uniqueBatches[0]);
 
-        // Join socket rooms for each batch
         uniqueBatches.forEach((b) => socket.emit('join_batch', b));
 
-        // 2. Fetch Trainer's Profile Photo
         const empRes = await API.get('/employees').catch(() => null);
         const allEmp = Array.isArray(empRes?.data) ? empRes.data : (empRes?.data?.data || []);
         const currentEmp = allEmp.find(e => (e.email || '').toLowerCase().trim() === activeEmail);
@@ -77,7 +80,7 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
         const res = await API.get(`/batchchat/${encodeURIComponent(b)}`);
         const msgs = res.data;
         const lastRead = localStorage.getItem(`chat_last_read_${b}`) || 0;
-        
+
         const unread = msgs.filter(m => new Date(m.timestamp).getTime() > parseInt(lastRead)).length;
         counts[b] = unread;
       }));
@@ -115,11 +118,10 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
   useEffect(() => {
     if (activeBatch && messages.length > 0) {
       localStorage.setItem(`chat_last_read_${activeBatch}`, Date.now());
-      setUnreadCounts(prev => ({ ...prev, [activeBatch]: 0 })); 
+      setUnreadCounts(prev => ({ ...prev, [activeBatch]: 0 }));
     }
   }, [activeBatch, messages]);
 
-  // Socket Event: Listen for incoming batch messages
   useEffect(() => {
     const handleReceiveBatchMessage = (msg) => {
       const currentActive = activeBatchRef.current;
@@ -150,7 +152,7 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
 
     const newAttachments = [];
     for (let file of files) {
-      if (file.size > 5 * 1024 * 1024) { 
+      if (file.size > 5 * 1024 * 1024) {
         alert(`File ${file.name} is larger than 5MB! Skipping.`);
         continue;
       }
@@ -172,14 +174,15 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
     e.preventDefault();
     if ((!newMessage.trim() && selectedFiles.length === 0) || !activeBatch) return;
 
+    const isStaffAdmin = (userName || '').toLowerCase() === 'admin' || (userEmail || '').toLowerCase() === 'admin@vinsup.com';
     const payload = {
       batch: activeBatch.trim(),
-      senderName: userName || "Trainer",
-      senderEmail: userEmail || "trainer@admin.com",
-      senderRole: 'Trainer',
+      senderName: userName || (isStaffAdmin ? "Admin" : "Trainer"),
+      senderEmail: userEmail || (isStaffAdmin ? "admin@vinsup.com" : "trainer@admin.com"),
+      senderRole: isStaffAdmin ? 'Admin' : 'Trainer',
       senderAvatar: myAvatar,
       text: newMessage.trim(),
-      attachments: selectedFiles 
+      attachments: selectedFiles
     };
 
     setNewMessage("");
@@ -198,7 +201,7 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
 
   return (
     <div className="tr-chat-wrapper">
-      
+
       <div className="tr-chat-sidebar">
         <h3 className="tr-sidebar-title">My Batches</h3>
         {myBatches.length > 0 ? (
@@ -207,7 +210,7 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
               <li key={i} className={`tr-batch-item ${activeBatch === b ? 'active' : ''}`} onClick={() => setActiveBatch(b)}>
                 <div className="tr-batch-icon"><i className="fas fa-users"></i></div>
                 <div className="tr-batch-name">{b}</div>
-                
+
                 {unreadCounts[b] > 0 && (
                   <div className="unread-badge">{unreadCounts[b]}</div>
                 )}
@@ -240,26 +243,26 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
                   const isMe = msg.senderRole !== 'Student' && ((userEmail && msg.senderEmail === userEmail) || (userName && msg.senderName === userName));
                   return (
                     <div key={index} className={`chat-msg-row ${isMe ? 'me' : 'others'}`}>
-                      
+
                       {!isMe && (
                         <div className="msg-avatar">
-                          <img 
-                            src={getPhotoUrl(msg.senderAvatar, msg.senderName)} 
-                            alt="User" 
+                          <img
+                            src={getPhotoUrl(msg.senderAvatar, msg.senderName)}
+                            alt="User"
                             onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.senderName)}&background=random&color=fff`; }}
                           />
                         </div>
                       )}
-                      
+
                       <div className={`chat-bubble ${isMe ? 'my-bubble' : 'other-bubble'}`}>
                         {!isMe && (
                           <div className="msg-sender">
-                            {msg.senderName} 
+                            {msg.senderName}
                             {msg.senderRole === 'Student' && <span className="student-badge">Student</span>}
                             {msg.senderRole === 'Admin' && <span className="admin-badge">Admin</span>}
                           </div>
                         )}
-                        
+
                         {msg.attachments && msg.attachments.length > 0 && (
                           <div className="msg-attachments-grid">
                             {msg.attachments.map((att, i) => (
@@ -324,7 +327,7 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
         .tr-batch-item.active .tr-batch-icon { background: #2563eb; color: #fff; }
         .tr-batch-icon { width: 36px; height: 36px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; justify-content: center; align-items: center; font-size: 14px; transition: 0.2s; flex-shrink: 0;}
         .tr-batch-name { font-size: 14px; font-weight: 600; color: inherit; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
-        
+
         .unread-badge { background: #ef4444; color: #fff; font-size: 11px; font-weight: bold; width: 20px; height: 20px; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0;}
 
         .tr-chat-main { flex: 1; display: flex; flex-direction: column; background: #fff; min-width: 0;}
@@ -338,10 +341,10 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
         .chat-msg-row { display: flex; gap: 10px; align-items: flex-end; width: 100%; }
         .chat-msg-row.me { justify-content: flex-end; }
         .chat-msg-row.others { justify-content: flex-start; }
-        
+
         .msg-avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex-shrink: 0; margin-bottom: 25px; background: #e2e8f0;}
         .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        
+
         .chat-bubble { max-width: min(450px, 80%); padding: 10px 14px; border-radius: 12px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
         .my-bubble { background: #2563eb; color: #fff; border-bottom-right-radius: 4px; }
         .other-bubble { background: #fff; color: #0f172a; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; }
@@ -357,7 +360,7 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
         .chat-image { max-width: 100%; max-height: 200px; border-radius: 8px; display: block; border: 1px solid rgba(0,0,0,0.1); }
         .chat-file-link { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 10px 14px; border-radius: 8px; color: inherit; text-decoration: none; font-size: 13px; font-weight: 600; }
         .chat-file-link:hover { background: rgba(0,0,0,0.1); }
-        
+
         .file-preview-area { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px clamp(14px, 2vw, 24px); background: #f8fafc; border-top: 1px solid #e2e8f0; max-height: 80px; overflow-y: auto;}
         .file-preview-item { background: #fff; border: 1px solid #cbd5e1; border-radius: 20px; padding: 6px 12px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #475569; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
         .file-preview-item button { background: none; border: none; color: #ef4444; cursor: pointer; padding: 0; display: flex; font-size: 14px;}
@@ -369,7 +372,7 @@ const EmployeeBatchChat = ({ userName, userEmail }) => {
         .chat-footer input[type="text"]:focus { border-color: #3b82f6; }
         .chat-footer button[type="submit"] { width: 42px; height: 42px; border-radius: 50%; background: #2563eb; color: #fff; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 15px; transition: 0.2s; flex-shrink: 0;}
         .chat-footer button[type="submit"]:disabled { background: #94a3b8; cursor: not-allowed; }
-        
+
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }

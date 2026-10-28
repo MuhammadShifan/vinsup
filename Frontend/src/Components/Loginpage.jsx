@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import "../App.css"; 
+import "../App.css";
 import logoImage from "../assets/logo.png";
 import backgroundImage from "../assets/loginbg.png";
 import API from "../utils/api";
@@ -10,7 +10,7 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
     if (!email.trim() && !password.trim()) {
       alert("Please enter both Email Address and Password!");
@@ -29,19 +29,18 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
 
       if (result.success) {
         alert(`Login successful! Welcome ${result.user.name}.`);
-        
-        const userData = { 
-          email: email.toLowerCase().trim(), 
-          role: result.user.role, 
+
+        const userData = {
+          email: email.toLowerCase().trim(),
+          role: result.user.role,
           name: result.user.name,
           profilePhoto: result.user.profilePhoto || ''
         };
 
-        // 🔥 JWT TOKEN & USER DATA STORAGE 🔥
-        localStorage.setItem('token', result.token); 
+        localStorage.setItem('token', result.token);
         localStorage.setItem('userAuth', JSON.stringify(userData));
-        
-        onLoginSuccess(userData); 
+
+        onLoginSuccess(userData);
       } else {
         alert(result.message || "Invalid Email or Password! Please try again.");
       }
@@ -70,7 +69,7 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
   return (
     <div className="login-wrapper">
       <div className="login-container">
-        
+
         <div className="left-panel" style={{ backgroundImage: `url(${backgroundImage})` }}>
           <div className="left-content-overlay">
             <div className="header-logo">
@@ -78,7 +77,7 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
                  <img src={logoImage} alt="Vinsup Academy Logo" />
               </div>
             </div>
-            
+
             <div className="system-details">
               <h1>Training <span>Management</span> System</h1>
               <p>Track teachers, batches, attendance, syllabus and roadmaps in one powerful platform.</p>
@@ -111,10 +110,10 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
               <label htmlFor="email">Email Address</label>
               <div className="input-icon-wrapper">
                 <i className="far fa-envelope"></i>
-                <input 
-                  type="email" 
-                  id="email" 
-                  placeholder="Enter your email" 
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -125,15 +124,15 @@ const TrainingManagementSystem = ({ onLoginSuccess }) => {
               <label htmlFor="password">Password</label>
               <div className="input-icon-wrapper">
                 <i className="fas fa-lock"></i>
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  id="password" 
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                <i 
-                  className={showPassword ? "far fa-eye password-toggle" : "far fa-eye-slash password-toggle"} 
+                <i
+                  className={showPassword ? "far fa-eye password-toggle" : "far fa-eye-slash password-toggle"}
                   onClick={() => setShowPassword(!showPassword)}
                   style={{ cursor: 'pointer' }}
                   title={showPassword ? "Hide password" : "Show password"}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './Employees.css'; 
+import './Employees.css';
 import API from '../utils/api';
 import { getCache, setCache, clearCache } from '../utils/cache';
 
@@ -19,10 +19,9 @@ const Courses = () => {
     enrolledStudents: '',
     description: ''
   };
-  
+
   const [formData, setFormData] = useState(initialFormState);
 
-  // 1. FETCH API (GET) with Caching
   const fetchCourses = async (forceRefresh = false) => {
     try {
       if (!forceRefresh) {
@@ -58,10 +57,9 @@ const Courses = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  // 2. DELETE API
   const handleDelete = async (courseToDelete, e) => {
     e.preventDefault();
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (window.confirm(`Are you sure you want to delete ${courseToDelete.courseName}?`)) {
       try {
         const response = await API.delete(`/courses/delete/${courseToDelete._id}`);
@@ -80,20 +78,19 @@ const Courses = () => {
 
   const handleEdit = (courseToEdit, e) => {
     e.preventDefault();
-    e.stopPropagation(); 
+    e.stopPropagation();
     setFormData({
       courseName: courseToEdit.courseName,
       duration: courseToEdit.duration,
       level: courseToEdit.level,
-      batches: courseToEdit.batches || '',            
-      enrolledStudents: courseToEdit.enrolledStudents || '', 
+      batches: courseToEdit.batches || '',
+      enrolledStudents: courseToEdit.enrolledStudents || '',
       description: courseToEdit.description,
     });
-    setEditId(courseToEdit._id); 
+    setEditId(courseToEdit._id);
     setShowAddForm(true);
   };
 
-  // 3. SAVE / UPDATE API (POST & PUT)
   const handleSaveCourse = async (e) => {
     e.preventDefault();
 
@@ -103,7 +100,7 @@ const Courses = () => {
         if (response.data?.success || response.status === 200) {
           clearCache('courses');
           alert("Course Updated Successfully! ✏️");
-          fetchCourses(true); 
+          fetchCourses(true);
         } else {
           alert("Error: " + (response.data?.message || "Could not update course"));
         }
@@ -112,15 +109,15 @@ const Courses = () => {
         if (response.data?.success || response.status === 201 || response.status === 200) {
           clearCache('courses');
           alert("New Course Added! 🚀");
-          fetchCourses(true); 
+          fetchCourses(true);
         } else {
-          alert("Error: " + (response.data?.message || "Could not add course")); 
+          alert("Error: " + (response.data?.message || "Could not add course"));
         }
       }
-      
+
       setShowAddForm(false);
       setEditId(null);
-      setFormData(initialFormState); 
+      setFormData(initialFormState);
     } catch (error) {
       console.error("Error saving course:", error);
       const msg = error.response?.data?.message || "Something went wrong saving the course!";
@@ -129,16 +126,15 @@ const Courses = () => {
   };
 
   const displayedCourses = courseList.filter(course => {
-    if (!searchInput) return true; 
+    if (!searchInput) return true;
     const query = searchInput.toLowerCase();
-    
+
     const matchName = course.courseName?.toLowerCase().includes(query);
     const matchDesc = course.description?.toLowerCase().includes(query);
-    
+
     return matchName || matchDesc;
   });
 
-  // Badge Color Style Logic
   const getLevelStyle = (level) => {
     switch (level) {
       case 'Advanced': return { color: '#2563eb', backgroundColor: '#dbeafe', padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' };
@@ -181,7 +177,7 @@ const Courses = () => {
                   <option value="Advanced">Advanced</option>
                 </select>
               </div>
-              
+
               <div className="input-group">
                 <label>Total Batches</label>
                 <input type="number" name="batches" value={formData.batches} onChange={handleInputChange} placeholder="e.g. 4" min="0" />
@@ -225,9 +221,9 @@ const Courses = () => {
       <div className="filters-bar" style={{ display: 'flex', gap: '10px', background: '#fff', padding: '15px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', flexWrap: 'wrap' }}>
         <div className="search-box" style={{ flex: 1, minWidth: 'min(100%, 260px)' }}>
           <i className="fas fa-search"></i>
-          <input 
-            type="text" 
-            placeholder="Search courses by name or description..." 
+          <input
+            type="text"
+            placeholder="Search courses by name or description..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
           />
@@ -252,7 +248,7 @@ const Courses = () => {
               displayedCourses.map((course, index) => (
                 <tr key={course._id || index}>
                   <td style={{ textAlign: 'center' }}>{index + 1}</td>
-                  
+
                   <td>
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                       <div style={{ textAlign: 'center' }}>
@@ -261,21 +257,20 @@ const Courses = () => {
                       </div>
                     </div>
                   </td>
-                  
-                  {/* 🔥 FIX: Description text marubadiyum justify aakiyachu 🔥 */}
+
                   <td style={{ fontSize: '13px', color: '#475569', lineHeight: '1.5', textAlign: 'justify' }}>
                     {course.description || '-'}
                   </td>
-                  
+
                   <td style={{ textAlign: 'center' }}>
                     <span style={getLevelStyle(course.level)}>
                       {course.level}
                     </span>
                   </td>
-                  
+
                   <td style={{ fontWeight: '600', color: '#334155', textAlign: 'center' }}>{course.batches || 0}</td>
                   <td style={{ fontWeight: '600', color: '#334155', textAlign: 'center' }}>{course.enrolledStudents || 0}</td>
-                  
+
                   <td style={{ textAlign: 'center' }}>
                     <button type="button" className="action-btn edit" onClick={(e) => handleEdit(course, e)} style={{ marginRight: '8px', color: '#3b82f6', background: '#eff6ff' }}><i className="fas fa-edit"></i></button>
                     <button type="button" className="action-btn delete" onClick={(e) => handleDelete(course, e)} style={{ color: '#ef4444', background: '#fef2f2' }}><i className="fas fa-trash"></i></button>

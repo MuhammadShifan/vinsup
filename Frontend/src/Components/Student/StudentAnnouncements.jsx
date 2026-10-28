@@ -7,18 +7,15 @@ const StudentAnnouncements = ({ userEmail }) => {
   const [loading, setLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState('latest');
 
-  // 🔥 FIX 1: Bullet-proof target audience extractor 🔥
   const extractTargetAudience = (ann, sBatch) => {
     if (ann.audienceType === 'All Students') return 'All Students';
     if (ann.targetBatch) return ann.targetBatch;
 
-    // 1. Standard known keys check
     const keys = ['audienceType', 'targetBatch', 'audience', 'Audience', 'targetAudience', 'batch', 'Batch', 'batchName', 'course', 'Course', 'sendTo', 'target', 'assignedTo'];
     for (let k of keys) {
         if (ann[k] && typeof ann[k] === 'string' && ann[k].trim() !== '') return ann[k];
     }
-    
-    // 2. Deep scan: find any short string matching 'All Students' or the student's specific batch
+
     const lowerBatch = (sBatch || '').toLowerCase().trim();
     for (let k in ann) {
         const val = ann[k];
@@ -28,8 +25,8 @@ const StudentAnnouncements = ({ userEmail }) => {
             if (lowerBatch && (lVal === lowerBatch || lVal.includes(lowerBatch))) return val;
         }
     }
-    
-    return null; 
+
+    return null;
   };
 
   useEffect(() => {
@@ -37,59 +34,49 @@ const StudentAnnouncements = ({ userEmail }) => {
       try {
         const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
         const activeEmail = (userEmail || auth.email || "").toLowerCase().trim();
-        
-        // 1. Fetch Student Details (to know their exact batch)
+
         const stuRes = await API.get('/students').catch(() => null);
         const allStudents = stuRes?.data?.data || stuRes?.data || [];
         const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
-        
-        // Extract student's batch safely
+
         const studentBatchRaw = currentStudent ? (currentStudent.batch || currentStudent.Batch || currentStudent.course || currentStudent.Course || '') : '';
         const studentBatch = String(studentBatchRaw).toLowerCase().trim();
 
-        // 2. Fetch Announcements from Backend
         const annRes = await API.get('/announcements').catch(() => null);
         const allAnn = Array.isArray(annRes?.data) ? annRes.data : (annRes?.data?.data || []);
 
         let formattedAnns = [];
 
         if (allAnn.length > 0) {
-          
-          // 🔥 FIX 2: Strict Filtering Logic - ONLY allow exact matches 🔥
+
           const myAnns = allAnn.filter(a => {
             const rawTarget = extractTargetAudience(a, studentBatch);
-            
-            // If we found a logical audience target
+
             if (rawTarget) {
                 const target = rawTarget.toLowerCase().trim();
-                // Check if it's for everyone
                 if (target === 'all students' || target === 'all' || target === 'everyone') return true;
-                // Check if it's strictly for this student's batch
                 if (studentBatch && (target === studentBatch || target.includes(studentBatch) || studentBatch.includes(target))) return true;
-                
-                return false; // Hide from other batches
+
+                return false;
             }
 
-            // 3. Absolute Fallback: Deep JSON string search (if keys are highly nested/obscure)
             const annStr = JSON.stringify(a).toLowerCase();
             if (annStr.includes('all students') || annStr.includes('"audience":"all"') || annStr.includes('"batch":"all"')) {
                 a._inferredTarget = 'All Students';
                 return true;
             }
             if (studentBatch && studentBatch !== '' && annStr.includes(studentBatch)) {
-                a._inferredTarget = studentBatch; // Found student's batch in deep string
+                a._inferredTarget = studentBatch;
                 return true;
             }
-            
-            // If it doesn't match 'All Students' or the user's batch anywhere, strictly hide it!
-            return false; 
+
+            return false;
           });
 
-          // Format the data mapping to backend fields for UI
           formattedAnns = myAnns.map(a => {
             const createdDateObj = a.createdAt ? new Date(a.createdAt) : new Date();
             const finalAudience = a._inferredTarget || extractTargetAudience(a, studentBatch) || 'Target Group';
-            
+
             return {
               ...a,
               _id: a._id || Math.random().toString(),
@@ -102,7 +89,6 @@ const StudentAnnouncements = ({ userEmail }) => {
             };
           });
 
-          // Default sort to latest
           formattedAnns.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         }
 
@@ -112,7 +98,7 @@ const StudentAnnouncements = ({ userEmail }) => {
         } else {
           setSelectedAnn(null);
         }
-        
+
         setLoading(false);
 
       } catch (error) {
@@ -126,17 +112,16 @@ const StudentAnnouncements = ({ userEmail }) => {
     fetchAnnouncements();
   }, [userEmail]);
 
-  // Color mapping for different announcement types
   const getTypeStyles = (type, target) => {
     const t = (type || '').toLowerCase();
     const aud = (target || '').toLowerCase();
-    
-    if (t === 'holiday') return { dot: '#16a34a', badgeBg: '#eff6ff', badgeText: '#3b82f6' }; 
-    if (t === 'event' || aud.includes('mern') || aud.includes('new')) return { dot: '#f59e0b', badgeBg: '#fff7ed', badgeText: '#ea580c' }; 
-    if (t === 'reminder') return { dot: '#3b82f6', badgeBg: '#eff6ff', badgeText: '#3b82f6' }; 
-    if (t === 'info' || aud.includes('devops')) return { dot: '#8b5cf6', badgeBg: '#f5f3ff', badgeText: '#9333ea' }; 
-    if (t === 'workshop' || aud.includes('ui')) return { dot: '#10b981', badgeBg: '#f0fdf4', badgeText: '#16a34a' }; 
-    
+
+    if (t === 'holiday') return { dot: '#16a34a', badgeBg: '#eff6ff', badgeText: '#3b82f6' };
+    if (t === 'event' || aud.includes('mern') || aud.includes('new')) return { dot: '#f59e0b', badgeBg: '#fff7ed', badgeText: '#ea580c' };
+    if (t === 'reminder') return { dot: '#3b82f6', badgeBg: '#eff6ff', badgeText: '#3b82f6' };
+    if (t === 'info' || aud.includes('devops')) return { dot: '#8b5cf6', badgeBg: '#f5f3ff', badgeText: '#9333ea' };
+    if (t === 'workshop' || aud.includes('ui')) return { dot: '#10b981', badgeBg: '#f0fdf4', badgeText: '#16a34a' };
+
     return { dot: '#64748b', badgeBg: '#f1f5f9', badgeText: '#64748b' };
   };
 
@@ -154,14 +139,12 @@ const StudentAnnouncements = ({ userEmail }) => {
 
   return (
     <div className="sa-main-container">
-      
-      {/* Header */}
+
       <div className="sa-page-header">
         <h1>Announcements</h1>
         <p className="breadcrumb">Home &gt; Announcements</p>
       </div>
 
-      {/* Info Banner */}
       <div className="sa-info-banner">
         <div className="sa-banner-icon"><i className="fas fa-bullhorn"></i></div>
         <div>
@@ -170,12 +153,10 @@ const StudentAnnouncements = ({ userEmail }) => {
         </div>
       </div>
 
-      {/* Main Layout Grid */}
       <div className="sa-content-layout">
-        
-        {/* LEFT COLUMN: List */}
+
         <div className="sa-list-panel">
-          
+
           <div className="sa-list-header">
             <div className="sa-tabs">
               <button className="sa-tab active">All Announcements</button>
@@ -196,17 +177,17 @@ const StudentAnnouncements = ({ userEmail }) => {
               announcements.map((ann) => {
                 const styles = getTypeStyles(ann.type, ann.targetAudience);
                 const isActive = selectedAnn?._id === ann._id;
-                
+
                 return (
-                  <div 
-                    key={ann._id} 
+                  <div
+                    key={ann._id}
                     className={`sa-card ${isActive ? 'active' : ''}`}
                     onClick={() => setSelectedAnn(ann)}
                   >
                     <div className="sa-card-icon" style={{ background: isActive ? '#eff6ff' : '#f8fafc', color: '#3b82f6' }}>
                       <i className="fas fa-bullhorn"></i>
                     </div>
-                    
+
                     <div className="sa-card-content">
                       <div className="sa-card-top">
                         <div className="sa-card-title-row">
@@ -218,13 +199,13 @@ const StudentAnnouncements = ({ userEmail }) => {
                           <span>{ann.date}<br/>{ann.time}</span>
                         </div>
                       </div>
-                      
+
                       <p className="sa-card-desc">
-                        {ann.description && ann.description.length > 90 
-                          ? ann.description.substring(0, 90) + '...' 
+                        {ann.description && ann.description.length > 90
+                          ? ann.description.substring(0, 90) + '...'
                           : (ann.description || "No details provided")}
                       </p>
-                      
+
                       <span className="sa-audience-badge" style={{ background: styles.badgeBg, color: styles.badgeText }}>
                         For: {ann.targetAudience}
                       </span>
@@ -240,7 +221,6 @@ const StudentAnnouncements = ({ userEmail }) => {
             )}
           </div>
 
-          {/* Pagination Footer */}
           {announcements.length > 0 && (
             <div className="sa-pagination-footer">
               <span className="sa-page-info">Showing {announcements.length > 0 ? 1 : 0} to {announcements.length > 5 ? 5 : announcements.length} of {announcements.length} announcements</span>
@@ -254,10 +234,9 @@ const StudentAnnouncements = ({ userEmail }) => {
           )}
         </div>
 
-        {/* RIGHT COLUMN: Details */}
         <div className="sa-details-panel">
           <h2 className="sa-details-header-title">Announcement Details</h2>
-          
+
           <div className="sa-details-card">
             {selectedAnn ? (
               <>
@@ -266,15 +245,15 @@ const StudentAnnouncements = ({ userEmail }) => {
                   <div className="sa-details-meta">
                     <h3>{selectedAnn.title}</h3>
                     <p className="sa-details-time">{selectedAnn.date} • {selectedAnn.time}</p>
-                    <span className="sa-audience-badge" style={{ 
-                      background: getTypeStyles(selectedAnn.type, selectedAnn.targetAudience).badgeBg, 
-                      color: getTypeStyles(selectedAnn.type, selectedAnn.targetAudience).badgeText 
+                    <span className="sa-audience-badge" style={{
+                      background: getTypeStyles(selectedAnn.type, selectedAnn.targetAudience).badgeBg,
+                      color: getTypeStyles(selectedAnn.type, selectedAnn.targetAudience).badgeText
                     }}>
                       For: {selectedAnn.targetAudience}
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="sa-details-body">
                   {(selectedAnn.description || '').split('\n').map((line, i) => (
                     <p key={i}>{line}</p>
@@ -294,11 +273,11 @@ const StudentAnnouncements = ({ userEmail }) => {
 
       <style>{`
         .sa-main-container { padding: clamp(14px, 2.5vw, 32px); font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; box-sizing: border-box; color: #0f172a; width: 100%; overflow-x: hidden;}
-        
+
         .sa-page-header { margin-bottom: 24px; }
         .sa-page-header h1 { font-size: clamp(20px, 3vw, 22px); font-weight: 800; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.5px;}
         .breadcrumb { font-size: 13px; color: #64748b; font-weight: 500; margin: 0;}
-        
+
         /* Banner */
         .sa-info-banner { background: #eff6ff; border-radius: 12px; padding: clamp(14px, 2vw, 20px); display: flex; align-items: center; gap: 16px; margin-bottom: 24px; border: 1px solid #dbeafe; flex-wrap: wrap; }
         .sa-banner-icon { width: 44px; height: 44px; background: #dbeafe; color: #2563eb; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; flex-shrink: 0; }
@@ -307,7 +286,7 @@ const StudentAnnouncements = ({ userEmail }) => {
 
         /* Grid Layout */
         .sa-content-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 24px; align-items: start; }
-        
+
         @media (max-width: 992px) {
           .sa-content-layout {
             grid-template-columns: 1fr;
@@ -316,35 +295,35 @@ const StudentAnnouncements = ({ userEmail }) => {
 
         /* Left Panel */
         .sa-list-panel { display: flex; flex-direction: column; gap: 0; background: transparent; }
-        
+
         .sa-list-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #cbd5e1; margin-bottom: 20px; padding-bottom: 0; flex-wrap: wrap; gap: 10px; }
         .sa-tabs { display: flex; gap: 24px; }
         .sa-tab { background: none; border: none; font-size: 14px; font-weight: 700; color: #64748b; padding: 0 0 12px 0; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
         .sa-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
-        
+
         .sa-filter { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: #64748b; font-size: 13px; font-weight: 600;}
         .sa-filter select { border: none; background: transparent; color: #0f172a; font-weight: 600; font-size: 13px; outline: none; cursor: pointer; font-family: inherit;}
-        
+
         .sa-cards-container { display: flex; flex-direction: column; gap: 16px; max-height: 600px; overflow-y: auto; padding-right: 4px; }
-        
+
         /* Announcement Card */
         .sa-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: clamp(14px, 2vw, 20px); display: flex; gap: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
         .sa-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .sa-card.active { border-color: #2563eb; background: #fafafa; }
-        
+
         .sa-card-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; flex-shrink: 0; }
-        
+
         .sa-card-content { flex: 1; min-width: 0; }
         .sa-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 10px; flex-wrap: wrap; }
         .sa-card-title-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
         .sa-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;}
         .sa-card-title { font-size: 14px; font-weight: 800; color: #0f172a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        
+
         .sa-card-datetime { text-align: right; display: flex; gap: 6px; align-items: flex-start; color: #64748b; font-size: 11px; font-weight: 500; line-height: 1.4; flex-shrink: 0;}
         .sa-card-datetime i { margin-top: 2px; }
-        
+
         .sa-card-desc { font-size: 13px; color: #475569; margin: 0 0 16px 0; line-height: 1.5; word-break: break-word; }
-        
+
         .sa-audience-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; text-transform: capitalize;}
 
         /* Pagination */
@@ -358,14 +337,14 @@ const StudentAnnouncements = ({ userEmail }) => {
         /* Right Panel (Details) */
         .sa-details-panel { display: flex; flex-direction: column; }
         .sa-details-header-title { font-size: 16px; font-weight: 800; color: #0f172a; margin: 0 0 16px 0; }
-        
+
         .sa-details-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: clamp(16px, 2.5vw, 24px); box-shadow: 0 1px 3px rgba(0,0,0,0.02); min-height: 350px; }
-        
+
         .sa-details-top-box { background: #f8fafc; border-radius: 10px; padding: clamp(14px, 2vw, 20px); display: flex; gap: 16px; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; }
         .sa-details-icon { width: 44px; height: 44px; background: #eff6ff; color: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; flex-shrink: 0;}
         .sa-details-meta h3 { margin: 0 0 6px 0; font-size: 16px; font-weight: 800; color: #0f172a; word-break: break-word; }
         .sa-details-time { margin: 0 0 12px 0; font-size: 12px; color: #64748b; font-weight: 500; }
-        
+
         .sa-details-body { font-size: 14px; color: #1e293b; line-height: 1.8; word-break: break-word; }
         .sa-details-body p { margin: 0 0 16px 0; }
 

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import API from '../utils/api';
 
-const TicketNotification = () => {
+const TicketNotification = ({ onNavigate }) => {
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Fetch only Admin Notifications
   const fetchNotifications = async () => {
     try {
       const res = await API.get('/notifications/user/admin');
@@ -16,27 +15,25 @@ const TicketNotification = () => {
     }
   };
 
-  // Auto-refresh every 10 seconds
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 10000); 
+    const interval = setInterval(fetchNotifications, 10000);
     return () => clearInterval(interval);
   }, []);
 
   const handleMarkRead = async (id) => {
     try {
       await API.put(`/notifications/mark-read/${id}`);
-      fetchNotifications(); // Refresh list after marking as read
+      fetchNotifications();
     } catch (err) {
       console.error("Error marking notification as read:", err);
     }
   };
 
-  // 🔥 PUDHUSU: Delete Notification Functionality 🔥
   const handleDeleteNotification = async (id) => {
     try {
       await API.delete(`/notifications/${id}`);
-      fetchNotifications(); // Refresh list after deleting
+      fetchNotifications();
     } catch (err) {
       console.error("Error deleting notification:", err);
     }
@@ -46,8 +43,8 @@ const TicketNotification = () => {
 
   return (
     <div style={{ position: 'relative' }}>
-      <div 
-        onClick={() => setIsOpen(!isOpen)} 
+      <div
+        onClick={() => setIsOpen(!isOpen)}
         style={{ cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', borderRadius: '50%', background: '#f1f5f9' }}
       >
         <i className="far fa-bell" style={{ fontSize: '20px', color: '#475569' }}></i>
@@ -57,28 +54,27 @@ const TicketNotification = () => {
           </span>
         )}
       </div>
-      
+
       {isOpen && (
         <div style={{ position: 'absolute', top: '50px', right: 0, width: 'min(360px, calc(100vw - 32px))', maxWidth: 'calc(100vw - 32px)', background: '#fff', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.12)', border: '1px solid #e2e8f0', zIndex: 1000, overflow: 'hidden' }}>
           <div style={{ padding: '14px 18px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0, fontSize: '15px', color: '#0f172a', fontWeight: 'bold' }}>Updates & Notifications</h3>
             <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: '600', cursor: 'pointer' }} onClick={() => setIsOpen(false)}>Close</span>
           </div>
-          
+
           <div style={{ maxHeight: 'min(350px, 60vh)', overflowY: 'auto' }} className="custom-scroll">
             {notifications.length > 0 ? notifications.map(notif => (
               <div key={notif._id} style={{ padding: '14px 18px', borderBottom: '1px solid #f1f5f9', background: notif.isRead ? '#fff' : '#eff6ff', transition: '0.2s' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                   <h4 style={{ margin: 0, fontSize: '13px', color: '#0f172a', fontWeight: '600' }}>{notif.title}</h4>
-                  
-                  {/* Time and Delete Icon combined */}
+
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '10px', flexShrink: 0 }}>
                     <span style={{ fontSize: '11px', color: '#64748b', whiteSpace: 'nowrap' }}>
                        {new Date(notif.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </span>
-                    <i 
-                      className="fas fa-trash-alt" 
-                      onClick={() => handleDeleteNotification(notif._id)} 
+                    <i
+                      className="fas fa-trash-alt"
+                      onClick={() => handleDeleteNotification(notif._id)}
                       style={{ fontSize: '12px', color: '#ef4444', cursor: 'pointer' }}
                       title="Delete Notification"
                     ></i>
@@ -102,6 +98,30 @@ const TicketNotification = () => {
               </div>
             )}
           </div>
+
+          {onNavigate && (
+            <div style={{ padding: '10px 18px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', textAlign: 'center' }}>
+              <button
+                onClick={() => {
+                  onNavigate('Admin Desk');
+                  setIsOpen(false);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#2563eb',
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <i className="fas fa-headset"></i> Go to Admin Desk
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

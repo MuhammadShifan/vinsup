@@ -10,7 +10,7 @@ const studentSchema = new mongoose.Schema({
   address: { type: String, required: true },
   emergencyName: { type: String },
   emergencyPhone: { type: String },
-  profilePhoto: { type: String }, // Upload aagura image path
+  profilePhoto: { type: String },
   course: { type: String, required: true, index: true },
   batch: { type: String, required: true, index: true },
   trainer: { type: String, index: true },
@@ -40,7 +40,7 @@ const studentSchema = new mongoose.Schema({
       type: { type: String, enum: ['Individual', 'Group'] },
       assignedDate: { type: String },
       dueDate: { type: String },
-      status: { type: String, default: 'Assigned' } 
+      status: { type: String, default: 'Assigned' }
     }
   ]
 

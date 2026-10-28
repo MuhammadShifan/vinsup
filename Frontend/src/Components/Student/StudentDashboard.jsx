@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import API, { getBaseUrl, getImageUrl } from '../../utils/api';
-import '../AdminDashboard.css'; 
-import logoImage from '../../assets/logo.png'; 
-import StudentMyCourse from './StudentMyCourse'; 
-import StudentQuizzes from './StudentQuizzes'; 
+import socket from '../../utils/socket';
+import '../AdminDashboard.css';
+import logoImage from '../../assets/logo.png';
+import StudentMyCourse from './StudentMyCourse';
+import StudentQuizzes from './StudentQuizzes';
 import StudentAnnouncements from './StudentAnnouncements';
+import StudentBatchChat from './StudentBatchChat';
 
 const StudentDashboard = ({ userName, userEmail, onLogout }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 992);
   const [activeTab, setActiveTab] = useState('Dashboard');
-  
-  // Badge counts
+
   const [unreadQuizCount, setUnreadQuizCount] = useState(0);
   const [unreadAnnCount, setUnreadAnnCount] = useState(0);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
 
   const [myBatch, setMyBatch] = useState("");
   const [incompleteQuizzes, setIncompleteQuizzes] = useState([]);
@@ -29,6 +31,7 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
   const sidebarMenu = [
     { name: 'Dashboard', icon: 'fas fa-th-large' },
     { name: 'My Course', icon: 'fas fa-book-open' },
+    { name: 'Batch Chat', icon: 'fas fa-comments', badge: unreadChatCount },
     { name: 'Quizzes', icon: 'fas fa-question-circle', badge: unreadQuizCount },
     { name: 'Announcements', icon: 'fas fa-bullhorn', badge: unreadAnnCount }
   ];
@@ -52,7 +55,7 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
         const stuRes = await API.get('/students').catch(() => null);
         const allStudents = stuRes?.data?.data || stuRes?.data || [];
         const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
-        
+
         if (currentStudent) {
             const rawPhoto = currentStudent.profilePhoto || currentStudent.photo || currentStudent.image || currentStudent.avatar || '';
             setStudentPhoto(getPhotoUrl(rawPhoto, firstName));
@@ -69,13 +72,13 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
             const batchRes = await API.get('/batches').catch(() => null);
             const allBatches = Array.isArray(batchRes?.data) ? batchRes.data : (batchRes?.data?.data || []);
             const currentBatch = allBatches.find(b => String(b.batchName || b.courseName || '').trim().toLowerCase() === batchName.toLowerCase());
-            
+
             if (currentBatch && (currentBatch.trainer || currentBatch.trainerName)) {
                 const trainerQuery = String(currentBatch.trainer || currentBatch.trainerName).toLowerCase().trim();
                 const empRes = await API.get('/employees').catch(() => null);
                 const allEmp = Array.isArray(empRes?.data) ? empRes.data : (empRes?.data?.data || []);
                 const trainerObj = allEmp.find(e => (e.fullName || '').toLowerCase().trim() === trainerQuery || (e.email || '').toLowerCase().trim() === trainerQuery);
-                
+
                 if (trainerObj) {
                     setTrainerInfo({
                         name: trainerObj.fullName || trainerObj.name || trainerQuery,
@@ -90,7 +93,7 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
 
         const quizRes = await API.get('/quizzes/all').catch(() => null);
         const allQuizzes = Array.isArray(quizRes?.data) ? quizRes.data : (quizRes?.data?.data || quizRes?.data?.quizzes || []);
-        
+
         const resultsRes = await API.get(`/quizzes/results/${activeEmail}`).catch(() => null);
         const myResults = Array.isArray(resultsRes?.data) ? resultsRes.data : [];
         const completedQuizIds = myResults.map(r => String(r.quizId));
@@ -114,8 +117,7 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
         if (Array.isArray(annRes?.data)) allAnn = annRes.data;
         else if (Array.isArray(annRes?.data?.data)) allAnn = annRes.data.data;
         else if (Array.isArray(annRes?.data?.announcements)) allAnn = annRes.data.announcements;
-        
-        // Filter announcements specifically for this student and their batch
+
         const myAnns = allAnn.filter(a => {
           const aud = (a.audienceType || a.audience || a.targetAudience || '').toLowerCase().trim();
           if (aud === 'all students' || aud === 'all' || aud === 'everyone') return true;
@@ -137,10 +139,42 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
           setUnreadAnnCount(unreadA);
         }
 
+        if (batchName) {
+          const chatRes = await API.get(`/batchchat/${encodeURIComponent(batchName)}`).catch(() => null);
+          const msgs = Array.isArray(chatRes?.data) ? chatRes.data : [];
+          const cacheKey = `chat_last_read_v3_${batchName}_${activeEmail}`;
+          if (activeTab === 'Batch Chat') {
+            localStorage.setItem(cacheKey, Date.now().toString());
+            setUnreadChatCount(0);
+          } else {
+            const lastRead = localStorage.getItem(cacheKey) || 0;
+            const unreadChats = msgs.filter(m => new Date(m.timestamp).getTime() > parseInt(lastRead) && (m.senderEmail || '').toLowerCase() !== activeEmail).length;
+            setUnreadChatCount(unreadChats);
+          }
+        }
+
       } catch (err) { console.log("Error loading dashboard data:", err); }
     };
     fetchData();
   }, [userEmail, firstName, activeTab]);
+
+  useEffect(() => {
+    if (!myBatch) return;
+    socket.emit('join_batch', myBatch);
+    const handleReceiveBatch = (msg) => {
+      if (String(msg.batch).trim() === String(myBatch).trim()) {
+        if (activeTab === 'Batch Chat') {
+          setUnreadChatCount(0);
+          const cacheKey = `chat_last_read_v3_${myBatch}_${activeEmail}`;
+          localStorage.setItem(cacheKey, Date.now().toString());
+        } else if ((msg.senderEmail || '').toLowerCase() !== activeEmail) {
+          setUnreadChatCount(prev => prev + 1);
+        }
+      }
+    };
+    socket.on('receive_batch_message', handleReceiveBatch);
+    return () => socket.off('receive_batch_message', handleReceiveBatch);
+  }, [myBatch, activeTab, activeEmail]);
 
   const renderBadge = (count) => {
     if (count <= 0) return null;
@@ -159,9 +193,9 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
   return (
     <div className="admin-layout">
       {isSidebarOpen && (
-        <div 
-          className="sidebar-backdrop active" 
-          onClick={() => setIsSidebarOpen(false)} 
+        <div
+          className="sidebar-backdrop active"
+          onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
@@ -170,17 +204,24 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
         <ul className="sidebar-menu">
           {sidebarMenu.map((item, index) => (
             <li key={index} className={item.name === activeTab ? 'active' : ''}>
-              <a 
-                href="#" 
-                onClick={(e) => { 
-                  e.preventDefault(); 
-                  setActiveTab(item.name); 
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveTab(item.name);
+                  if (item.name === 'Batch Chat') {
+                    setUnreadChatCount(0);
+                    if (myBatch) {
+                      localStorage.setItem(`chat_last_read_v3_${myBatch}_${activeEmail}`, Date.now().toString());
+                    }
+                  }
                   if (window.innerWidth <= 992) setIsSidebarOpen(false);
-                }} 
+                }}
                 style={{ display: 'flex', alignItems: 'center', width: '100%' }}
               >
                   <i className={item.icon} style={{ width: '25px' }}></i>
                   <span>{item.name}</span>
+                  {item.name === 'Batch Chat' && renderBadge(unreadChatCount)}
                   {item.name === 'Quizzes' && renderBadge(unreadQuizCount)}
                   {item.name === 'Announcements' && renderBadge(unreadAnnCount)}
               </a>
@@ -207,13 +248,13 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
             <div className="date-display">
               <i className="far fa-calendar-alt"></i> {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
             </div>
-            
+
             <div className="user-profile">
               <div className="avatar">
-                <img 
-                  src={studentPhoto || `https://ui-avatars.com/api/?name=${firstName}&background=f1f5f9&color=2563eb`} 
-                  alt="Profile" 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} 
+                <img
+                  src={studentPhoto || `https://ui-avatars.com/api/?name=${firstName}&background=f1f5f9&color=2563eb`}
+                  alt="Profile"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
                   onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${firstName}&background=f1f5f9&color=2563eb`; }}
                 />
               </div>
@@ -289,10 +330,10 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '220px', overflowY: 'auto' }} className="custom-scroll">
                      {batchMembers.length > 0 ? batchMembers.map((member, i) => (
                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                         <img 
-                           src={getPhotoUrl(member.profilePhoto || member.photo || member.image, member.fullName || member.name)} 
-                           alt="member" 
-                           style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }} 
+                         <img
+                           src={getPhotoUrl(member.profilePhoto || member.photo || member.image, member.fullName || member.name)}
+                           alt="member"
+                           style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
                          />
                          <div>
                            <h4 style={{ margin: '0 0 2px 0', fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>{member.fullName || member.name || 'Student'}</h4>
@@ -308,10 +349,10 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
                  <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', textAlign: 'center' }}>
                    <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold', textAlign: 'left' }}>Assigned Trainer</h3>
                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '10px 0' }}>
-                     <img 
-                       src={trainerInfo.photo} 
-                       alt="Trainer" 
-                       style={{ width: '85px', height: '85px', borderRadius: '50%', objectFit: 'cover', marginBottom: '12px', border: '3px solid #eff6ff', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }} 
+                     <img
+                       src={trainerInfo.photo}
+                       alt="Trainer"
+                       style={{ width: '85px', height: '85px', borderRadius: '50%', objectFit: 'cover', marginBottom: '12px', border: '3px solid #eff6ff', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}
                      />
                      <h4 style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: '800', color: '#0f172a' }}>{trainerInfo.name}</h4>
                      <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#64748b' }}>{trainerInfo.email || 'Trainer & Mentor'}</p>
@@ -324,11 +365,12 @@ const StudentDashboard = ({ userName, userEmail, onLogout }) => {
           )}
 
           {activeTab === 'My Course' && <StudentMyCourse userName={displayName} userEmail={activeEmail} />}
+          {activeTab === 'Batch Chat' && <StudentBatchChat userName={displayName} userEmail={activeEmail} />}
           {activeTab === 'Quizzes' && <StudentQuizzes userEmail={activeEmail} />}
           {activeTab === 'Announcements' && <StudentAnnouncements userEmail={activeEmail} />}
         </div>
       </main>
-      
+
       <style>{`
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }

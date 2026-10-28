@@ -26,7 +26,6 @@ const AdminUserChat = ({ onRead }) => {
   }, [selectedUser]);
 
   useEffect(() => {
-    // Join Admin room in Socket.io
     socket.emit('join_user', adminEmail);
 
     const fetchEmployees = async () => {
@@ -42,7 +41,6 @@ const AdminUserChat = ({ onRead }) => {
     fetchEmployees();
     fetchUnreadCounts();
 
-    // Socket Event: Real-time incoming private message
     const handleReceiveMessage = (msg) => {
       const currentSelected = selectedUserRef.current;
       const sEmail = (msg.senderEmail || '').toLowerCase().trim();
@@ -71,7 +69,6 @@ const AdminUserChat = ({ onRead }) => {
         }
       }
 
-      // If message is from someone else, increment unread count for that sender
       if (sEmail && sEmail !== myAdminEmail) {
         setUnreadCounts((prev) => ({
           ...prev,
@@ -80,19 +77,16 @@ const AdminUserChat = ({ onRead }) => {
       }
     };
 
-    // Socket Event: Message edited
     const handleMessageEdited = (updatedMsg) => {
       setChatMessages((prev) =>
         prev.map((m) => (m._id === updatedMsg._id ? updatedMsg : m))
       );
     };
 
-    // Socket Event: Message deleted
     const handleMessageDeleted = ({ id }) => {
       setChatMessages((prev) => prev.filter((m) => m._id !== id));
     };
 
-    // Socket Event: Unread counts update
     const handleUnreadUpdate = () => {
       fetchUnreadCounts();
     };
@@ -121,7 +115,6 @@ const AdminUserChat = ({ onRead }) => {
     }
   };
 
-  // Immediate state reset and race-condition free fetch
   useEffect(() => {
     if (!selectedUser || !selectedUser.email) {
       setChatMessages([]);
@@ -131,7 +124,6 @@ const AdminUserChat = ({ onRead }) => {
     const targetEmail = selectedUser.email.toLowerCase().trim();
     let isCurrent = true;
 
-    // Immediately clear chat to prevent previous user's messages from lingering
     setChatMessages([]);
     setLoadingChat(true);
 
@@ -155,7 +147,6 @@ const AdminUserChat = ({ onRead }) => {
 
     loadChat();
 
-    // Mark as read
     socket.emit('mark_private_read', {
       receiverEmail: adminEmail,
       senderEmail: targetEmail
@@ -178,7 +169,6 @@ const AdminUserChat = ({ onRead }) => {
     };
   }, [selectedUser?.email]);
 
-  // Auto-scroll on new messages
   useEffect(() => {
     if (messagesEndRef.current && !editingMsgId) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -202,7 +192,7 @@ const AdminUserChat = ({ onRead }) => {
             name: file.name,
             type: file.type,
             size: file.size,
-            data: reader.result 
+            data: reader.result
           });
         };
         reader.readAsDataURL(file);
@@ -211,7 +201,7 @@ const AdminUserChat = ({ onRead }) => {
 
     const newFilesArray = await Promise.all(filePromises);
     setSelectedFiles(prev => [...prev, ...newFilesArray]);
-    e.target.value = null; 
+    e.target.value = null;
   };
 
   const removeFile = (indexToRemove) => {
@@ -258,8 +248,8 @@ const AdminUserChat = ({ onRead }) => {
 
         socket.emit('send_private_message', payload);
       }
-    } catch (err) { 
-      console.error("Error sending message:", err); 
+    } catch (err) {
+      console.error("Error sending message:", err);
     }
   };
 
@@ -294,15 +284,14 @@ const AdminUserChat = ({ onRead }) => {
     } catch(err) { console.error("Error updating message:", err); }
   };
 
-  const filteredEmployees = employees.filter(emp => 
-    (emp.fullName || emp.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filteredEmployees = employees.filter(emp =>
+    (emp.fullName || emp.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
     (emp.email || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    // 🔥 FIX 2: Strict height 100vh with overflow hidden 🔥
     <div style={{ padding: 'clamp(12px, 2vw, 20px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif", background: '#f8fafc', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      
+
       <style>
         {`
           .scroll-bar::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -310,7 +299,7 @@ const AdminUserChat = ({ onRead }) => {
           .scroll-bar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
           .msg-actions { opacity: 0; transition: opacity 0.2s; }
           .msg-container:hover .msg-actions { opacity: 1; }
-          
+
           .admin-chat-grid {
             display: grid;
             grid-template-columns: 320px minmax(0, 1fr);
@@ -320,7 +309,7 @@ const AdminUserChat = ({ onRead }) => {
             width: 100%;
             box-sizing: border-box;
           }
-          
+
           .mobile-chat-back {
             display: none;
             background: #f1f5f9;
@@ -365,15 +354,14 @@ const AdminUserChat = ({ onRead }) => {
       </div>
 
       <div className="admin-chat-grid">
-        
-        {/* LEFT PANEL */}
+
         <div className="admin-chat-users" style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100%' }}>
           <div style={{ padding: '15px', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
             <div style={{ position: 'relative' }}>
               <i className="fas fa-search" style={{ position: 'absolute', left: '12px', top: '10px', color: '#94a3b8', fontSize: '13px' }}></i>
-              <input 
-                type="text" 
-                placeholder="Search employees..." 
+              <input
+                type="text"
+                placeholder="Search employees..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ width: '100%', padding: '8px 10px 8px 35px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', boxSizing: 'border-box' }}
@@ -384,11 +372,11 @@ const AdminUserChat = ({ onRead }) => {
             {filteredEmployees.map(emp => {
               const empName = emp.fullName || emp.name || "Employee";
               const isSelected = selectedUser && selectedUser.email === emp.email;
-              const unreadMsgCount = unreadCounts[emp.email] || 0; 
+              const unreadMsgCount = unreadCounts[emp.email] || 0;
 
               return (
-                <div 
-                  key={emp._id || emp.email} 
+                <div
+                  key={emp._id || emp.email}
                   onClick={() => setSelectedUser(emp)}
                   style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', cursor: 'pointer', background: isSelected ? '#eff6ff' : '#fff', borderBottom: '1px solid #f1f5f9', transition: '0.2s', borderLeft: isSelected ? '4px solid #2563eb' : '4px solid transparent' }}
                 >
@@ -399,7 +387,7 @@ const AdminUserChat = ({ onRead }) => {
                     <h4 style={{ margin: '0 0 2px 0', fontSize: '13px', color: '#0f172a', fontWeight: isSelected || unreadMsgCount > 0 ? 'bold' : '600', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{empName}</h4>
                     <p style={{ margin: 0, fontSize: '11px', color: '#64748b', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{emp.designation || 'Employee'}</p>
                   </div>
-                  
+
                   {unreadMsgCount > 0 && (
                     <div style={{ background: '#ef4444', color: '#fff', fontSize: '10px', fontWeight: 'bold', padding: '2px 6px', borderRadius: '10px' }}>
                       {unreadMsgCount}
@@ -411,7 +399,6 @@ const AdminUserChat = ({ onRead }) => {
           </div>
         </div>
 
-        {/* RIGHT PANEL: CHAT WINDOW */}
         <div className="admin-chat-window" style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0, height: '100%' }}>
           {selectedUser ? (
             <>
@@ -438,11 +425,11 @@ const AdminUserChat = ({ onRead }) => {
                   chatMessages.map((msg, idx) => {
                     const isMe = msg.senderEmail === adminEmail;
                     const msgTime = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    
+
                     return (
                       <div key={msg._id || idx} className="msg-container" style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
                         {!isMe && <span style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px', marginLeft: '5px', fontWeight: '600' }}>{msg.senderName}</span>}
-                        
+
                         {editingMsgId === msg._id ? (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#fff', padding: '12px', borderRadius: '12px', border: '1px solid #2563eb', width: '280px', maxWidth: '100%' }}>
                             <input type="text" value={editingMsgText} onChange={(e) => setEditingMsgText(e.target.value)} autoFocus style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
@@ -454,7 +441,7 @@ const AdminUserChat = ({ onRead }) => {
                         ) : (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexDirection: isMe ? 'row-reverse' : 'row' }}>
                             <div style={{ background: isMe ? '#2563eb' : '#fff', color: isMe ? '#fff' : '#1e293b', padding: '10px 16px', borderRadius: isMe ? '16px 16px 0 16px' : '16px 16px 16px 0', maxWidth: 'min(450px, 85vw)', fontSize: '14px', lineHeight: '1.5', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: isMe ? 'none' : '1px solid #e2e8f0', wordWrap: 'break-word', overflow: 'hidden' }}>
-                              
+
                               {msg.file && (
                                 <div style={{ marginBottom: msg.message ? '8px' : '0' }}>
                                   {msg.file.fileType?.startsWith('image/') ? (
@@ -474,7 +461,7 @@ const AdminUserChat = ({ onRead }) => {
 
                               {msg.message && <div>{msg.message}</div>}
                             </div>
-                            
+
                             {isMe && (
                               <div className="msg-actions" style={{ display: 'flex', gap: '10px' }}>
                                 <i className="fas fa-pen" onClick={() => { setEditingMsgId(msg._id); setEditingMsgText(msg.message); }} style={{ fontSize: '12px', color: '#94a3b8', cursor: 'pointer', transition: '0.2s' }} title="Edit"></i>
@@ -521,17 +508,17 @@ const AdminUserChat = ({ onRead }) => {
                   <input type="file" multiple onChange={handleFileChange} style={{ display: 'none' }} />
                 </label>
 
-                <input 
-                  type="text" 
-                  value={newMsg} 
-                  onChange={(e) => setNewMsg(e.target.value)} 
-                  placeholder="Type your message to Admin..." 
-                  disabled={!!editingMsgId} 
-                  style={{ flex: 1, minWidth: 0, padding: '10px 18px', borderRadius: '30px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', background: editingMsgId ? '#f1f5f9' : '#f8fafc', color: '#1e293b', boxSizing: 'border-box' }} 
+                <input
+                  type="text"
+                  value={newMsg}
+                  onChange={(e) => setNewMsg(e.target.value)}
+                  placeholder="Type your message to Admin..."
+                  disabled={!!editingMsgId}
+                  style={{ flex: 1, minWidth: 0, padding: '10px 18px', borderRadius: '30px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', background: editingMsgId ? '#f1f5f9' : '#f8fafc', color: '#1e293b', boxSizing: 'border-box' }}
                 />
-                <button 
-                  type="submit" 
-                  disabled={(!newMsg.trim() && selectedFiles.length === 0) || !!editingMsgId} 
+                <button
+                  type="submit"
+                  disabled={(!newMsg.trim() && selectedFiles.length === 0) || !!editingMsgId}
                   style={{ background: (newMsg.trim() || selectedFiles.length > 0) && !editingMsgId ? '#2563eb' : '#cbd5e1', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: (newMsg.trim() || selectedFiles.length > 0) && !editingMsgId ? 'pointer' : 'not-allowed', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '15px', transition: '0.2s', flexShrink: 0, boxShadow: (newMsg.trim() || selectedFiles.length > 0) && !editingMsgId ? '0 4px 6px rgba(37, 99, 235, 0.2)' : 'none' }}>
                   <i className="fas fa-paper-plane" style={{ marginLeft: '-2px' }}></i>
                 </button>

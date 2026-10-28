@@ -28,7 +28,6 @@ const UserAdminChat = ({ userName, userEmail }) => {
     setChatMessages([]);
     setLoadingChat(true);
 
-    // Join personal user room in Socket.io
     socket.emit('join_user', activeEmail);
 
     const loadChat = async () => {
@@ -51,7 +50,6 @@ const UserAdminChat = ({ userName, userEmail }) => {
 
     loadChat();
 
-    // Mark messages from admin as read on load
     socket.emit('mark_private_read', {
       receiverEmail: activeEmail,
       senderEmail: 'admin@vinsup.com'
@@ -126,7 +124,7 @@ const UserAdminChat = ({ userName, userEmail }) => {
             name: file.name,
             type: file.type,
             size: file.size,
-            data: reader.result 
+            data: reader.result
           });
         };
         reader.readAsDataURL(file);
@@ -135,8 +133,8 @@ const UserAdminChat = ({ userName, userEmail }) => {
 
     const newFilesArray = await Promise.all(filePromises);
     setSelectedFiles(prev => [...prev, ...newFilesArray]);
-    
-    e.target.value = null; 
+
+    e.target.value = null;
   };
 
   const removeFile = (indexToRemove) => {
@@ -191,8 +189,8 @@ const UserAdminChat = ({ userName, userEmail }) => {
         message: shortMsg
       }).catch(err => console.log("Notification error:", err));
 
-    } catch (err) { 
-      console.error("Error sending message:", err); 
+    } catch (err) {
+      console.error("Error sending message:", err);
       alert("Failed to send message.");
     }
   };
@@ -230,7 +228,7 @@ const UserAdminChat = ({ userName, userEmail }) => {
 
   return (
     <div style={{ padding: 'clamp(12px, 2vw, 25px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif", background: '#f8fafc', height: 'calc(100vh - 70px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      
+
       <style>
         {`
           .chat-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -247,10 +245,9 @@ const UserAdminChat = ({ userName, userEmail }) => {
         <p style={{ margin: 0, color: '#64748b', fontSize: '13px' }}>Direct and secure conversation with the administration team.</p>
       </div>
 
-      {/* Responsive Chat Grid */}
       <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gridTemplateRows: 'minmax(0, 1fr)', width: '100%', minHeight: 0 }}>
         <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-          
+
           <div style={{ padding: '14px clamp(14px, 2vw, 25px)', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '15px', background: '#fff', flexShrink: 0 }}>
             <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#0f172a', fontSize: '16px', fontWeight: 'bold', border: '1px solid #cbd5e1', flexShrink: 0 }}>
               A
@@ -264,11 +261,11 @@ const UserAdminChat = ({ userName, userEmail }) => {
             {chatMessages.length > 0 ? chatMessages.map((msg, idx) => {
               const isMe = msg.senderEmail === activeEmail;
               const msgTime = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-              
+
               return (
                 <div key={msg._id || idx} className="msg-container" style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
                   {!isMe && <span style={{ fontSize: '12px', color: '#64748b', marginBottom: '5px', marginLeft: '5px', fontWeight: '600' }}>Admin</span>}
-                  
+
                   {editingMsgId === msg._id ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: '#fff', padding: '15px', borderRadius: '12px', border: '1px solid #2563eb', width: '300px', maxWidth: '100%' }}>
                       <input type="text" value={editingMsgText} onChange={(e) => setEditingMsgText(e.target.value)} autoFocus style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
@@ -280,7 +277,7 @@ const UserAdminChat = ({ userName, userEmail }) => {
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexDirection: isMe ? 'row-reverse' : 'row', maxWidth: '100%' }}>
                       <div style={{ background: isMe ? '#2563eb' : '#fff', color: isMe ? '#fff' : '#1e293b', padding: '12px 18px', borderRadius: isMe ? '18px 18px 0 18px' : '18px 18px 18px 0', maxWidth: 'min(500px, 85vw)', fontSize: '14px', lineHeight: '1.5', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: isMe ? 'none' : '1px solid #e2e8f0', wordWrap: 'break-word', overflow: 'hidden' }}>
-                        
+
                         {msg.file && (
                           <div style={{ marginBottom: msg.message ? '8px' : '0' }}>
                             {msg.file.fileType?.startsWith('image/') ? (
@@ -300,7 +297,7 @@ const UserAdminChat = ({ userName, userEmail }) => {
 
                         {msg.message && <div>{msg.message}</div>}
                       </div>
-                      
+
                       {isMe && (
                         <div className="msg-actions" style={{ display: 'flex', gap: '10px' }}>
                           <i className="fas fa-pen" onClick={() => { setEditingMsgId(msg._id); setEditingMsgText(msg.message); }} style={{ fontSize: '12px', color: '#94a3b8', cursor: 'pointer', transition: '0.2s' }} title="Edit"></i>
@@ -332,7 +329,6 @@ const UserAdminChat = ({ userName, userEmail }) => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* 🔥 File Previews Container 🔥 */}
           {selectedFiles.length > 0 && (
             <div style={{ width: '100%', background: '#f1f5f9', borderTop: '1px solid #e2e8f0', padding: '10px 20px', boxSizing: 'border-box', flexShrink: 0, overflow: 'hidden' }}>
               <div className="chat-scroll" style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '6px' }}>
@@ -351,24 +347,23 @@ const UserAdminChat = ({ userName, userEmail }) => {
             </div>
           )}
 
-          {/* 🔥 Message Form 🔥 */}
           <form onSubmit={handleSendMessage} style={{ padding: '14px clamp(12px, 2vw, 25px)', background: '#fff', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '12px', alignItems: 'center', width: '100%', boxSizing: 'border-box', flexShrink: 0 }}>
             <label style={{ cursor: 'pointer', color: '#64748b', fontSize: '18px', display: 'flex', alignItems: 'center', flexShrink: 0 }} title="Attach Files">
               <i className="fas fa-paperclip"></i>
               <input type="file" multiple onChange={handleFileChange} style={{ display: 'none' }} />
             </label>
 
-            <input 
-              type="text" 
-              value={newMsg} 
-              onChange={(e) => setNewMsg(e.target.value)} 
-              placeholder="Type your message to Admin..." 
-              disabled={!!editingMsgId} 
-              style={{ flex: 1, minWidth: 0, padding: '12px 20px', borderRadius: '30px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', background: editingMsgId ? '#f1f5f9' : '#f8fafc', color: '#1e293b', boxSizing: 'border-box' }} 
+            <input
+              type="text"
+              value={newMsg}
+              onChange={(e) => setNewMsg(e.target.value)}
+              placeholder="Type your message to Admin..."
+              disabled={!!editingMsgId}
+              style={{ flex: 1, minWidth: 0, padding: '12px 20px', borderRadius: '30px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', background: editingMsgId ? '#f1f5f9' : '#f8fafc', color: '#1e293b', boxSizing: 'border-box' }}
             />
-            <button 
-              type="submit" 
-              disabled={(!newMsg.trim() && selectedFiles.length === 0) || !!editingMsgId} 
+            <button
+              type="submit"
+              disabled={(!newMsg.trim() && selectedFiles.length === 0) || !!editingMsgId}
               style={{ background: (newMsg.trim() || selectedFiles.length > 0) && !editingMsgId ? '#2563eb' : '#cbd5e1', color: '#fff', border: 'none', width: '42px', height: '42px', borderRadius: '50%', cursor: (newMsg.trim() || selectedFiles.length > 0) && !editingMsgId ? 'pointer' : 'not-allowed', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '16px', transition: '0.2s', flexShrink: 0, boxShadow: (newMsg.trim() || selectedFiles.length > 0) && !editingMsgId ? '0 4px 6px rgba(37, 99, 235, 0.2)' : 'none' }}>
               <i className="fas fa-paper-plane" style={{ marginLeft: '-2px' }}></i>
             </button>

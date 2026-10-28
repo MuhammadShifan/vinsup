@@ -2,104 +2,51 @@ import React, { useState, useEffect, useRef } from 'react';
 import API, { getImageUrl, getBaseUrl } from '../utils/api';
 import './AdminDashboard.css';
 import logoImage from '../assets/logo.png';
-import MyProfile from './MyProfile'; 
+import MyProfile from './MyProfile';
 import UserAttendance from './UserAttendance';
 import UserLeaveRequest from './UserLeaveRequest';
-import UserSchedule from './UserSchedule'; 
+import UserSchedule from './UserSchedule';
 import UserTasks from './UserTasks';
 import UserHelpdesk from './UserHelpdesk';
 import UserReports from './UserReports';
 import UserCourses from './UserCourses';
-import EmployeeAnnouncements from './EmployeeAnnouncements'; 
+import EmployeeAnnouncements from './EmployeeAnnouncements';
 import EmployeeMyClasses from './EmployeeMyClasses';
-import EmployeeQuizzes from './EmployeeQuizzes'; 
+import EmployeeQuizzes from './EmployeeQuizzes';
+import UserAdminChat from './UserAdminChat';
+import EmployeeBatchChat from './EmployeeBatchChat';
+import CompanyGroupChat from './CompanyGroupChat';
+import socket from '../utils/socket';
 
 const UserDashboard = ({ userName, userEmail, onLogout }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 992);
-  const [activeTab, setActiveTab] = useState('Dashboard'); 
+  const [activeTab, setActiveTab] = useState('Dashboard');
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
   const storedEmail = localStorage.getItem('loggedInEmail');
   const activeEmail = (userEmail || auth.email || storedEmail || "").toLowerCase().trim();
 
+  const [notifications, setNotifications] = useState([]);
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+  const [studentChatsUnreadCount, setStudentChatsUnreadCount] = useState(0);
+
   const handleTabClick = (tabName) => {
     setActiveTab(tabName);
+    if (tabName === 'Admin Chat') {
+      API.put('/privatechat/mark-read', {
+        receiverEmail: currentUserEmail,
+        senderEmail: 'admin@vinsup.com'
+      }).catch(() => {});
+      setChatUnreadCount(0);
+    }
+    if (tabName === 'Student Chats') {
+      setStudentChatsUnreadCount(0);
+    }
     if (window.innerWidth <= 992) {
       setIsSidebarOpen(false);
     }
   };
-
-  const [notifications, setNotifications] = useState([]);
-
-  // Floating Group Chat States
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [newMsg, setNewMsg] = useState("");
-  const messagesEndRef = useRef(null);
-
-  const [editingMsgId, setEditingMsgId] = useState(null);
-  const [editingMsgText, setEditingMsgText] = useState("");
-
-  const [selectedGroupFiles, setSelectedGroupFiles] = useState([]);
-  const [groupUnreadCount, setGroupUnreadCount] = useState(0);
-
-  const [chatPos, setChatPos] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragInfo = useRef({ isDragging: false, startX: 0, startY: 0, initialPos: { x: 0, y: 0 }, hasMoved: false });
-
-  const handlePointerDown = (e) => {
-    dragInfo.current = {
-      isDragging: true,
-      startX: e.clientX,
-      startY: e.clientY,
-      initialPos: { ...chatPos },
-      hasMoved: false
-    };
-    document.addEventListener('pointermove', handlePointerMove);
-    document.addEventListener('pointerup', handlePointerUp);
-  };
-
-  const handlePointerMove = (e) => {
-    if (!dragInfo.current.isDragging) return;
-    
-    const dx = e.clientX - dragInfo.current.startX;
-    const dy = e.clientY - dragInfo.current.startY;
-    
-    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-       dragInfo.current.hasMoved = true;
-       setIsDragging(true);
-    }
-
-    let newX = dragInfo.current.initialPos.x + dx;
-    let newY = dragInfo.current.initialPos.y + dy;
-
-    const maxX = 40; 
-    const maxY = 40;
-    const minX = -(window.innerWidth - 100);
-    const minY = -(window.innerHeight - 100);
-
-    if (newX > maxX) newX = maxX;
-    if (newY > maxY) newY = maxY;
-    if (newX < minX) newX = minX;
-    if (newY < minY) newY = minY;
-
-    setChatPos({ x: newX, y: newY });
-  };
-
-  const handlePointerUp = () => {
-    dragInfo.current.isDragging = false;
-    setTimeout(() => setIsDragging(false), 50); 
-    document.removeEventListener('pointermove', handlePointerMove);
-    document.removeEventListener('pointerup', handlePointerUp);
-  };
-
-  useEffect(() => {
-    return () => {
-      document.removeEventListener('pointermove', handlePointerMove);
-      document.removeEventListener('pointerup', handlePointerUp);
-    };
-  }, []);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -116,24 +63,24 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
       empId: "N/A", joinedOn: "N/A", email: userEmail || "N/A", phone: "N/A",
       dob: "N/A", location: "N/A", gender: "N/A",
       address: { current: "N/A", permanent: "N/A" },
-      summary: { experience: "0 Years", batches: 0, students: 0 }, 
+      summary: { experience: "0 Years", batches: 0, students: 0 },
       account: { username: "Loading...", lastLogin: "Today" }
     },
     attendanceToday: { status: "Pending", checkInTime: "--:--", checkOutTime: "--:--", date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }), day: new Date().toLocaleDateString('en-GB', { weekday: 'short' }), isCheckedIn: false },
-    myBatchesData: [], 
+    myBatchesData: [],
     tasksData: [],
     scheduleToday: [],
-    leaveBalance: { 
-      totalAvailable: 8, 
-      totalDays: 8, 
-      breakdown: [ 
-        { type: "Casual Leave", used: 0, total: 2, color: "#10b981" }, 
+    leaveBalance: {
+      totalAvailable: 8,
+      totalDays: 8,
+      breakdown: [
+        { type: "Casual Leave", used: 0, total: 2, color: "#10b981" },
         { type: "Sick Leave", used: 0, total: 2, color: "#3b82f6" },
         { type: "Privilege Leave", used: 0, total: 1, color: "#a855f7" },
-        { type: "Comp Off", used: 0, total: 3, color: "#f59e0b" } 
-      ] 
+        { type: "Comp Off", used: 0, total: 3, color: "#f59e0b" }
+      ]
     },
-    birthdays: [] 
+    birthdays: []
   });
 
   useEffect(() => {
@@ -150,8 +97,8 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         } catch (e) {
           console.warn("Employees fetch warning:", e.message);
         }
-        
-        const currentUser = empData.find(emp => 
+
+        const currentUser = empData.find(emp =>
           (incomingEmail && (emp.email || '').toLowerCase().trim() === incomingEmail) ||
           (exactDBName && (emp.fullName || emp.name || '').toLowerCase().trim() === exactDBName.toLowerCase().trim()) ||
           (exactDBName && (emp.username || '').toLowerCase().trim() === exactDBName.toLowerCase().trim()) ||
@@ -161,8 +108,8 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         if (currentUser) {
           exactDBName = currentUser.fullName || currentUser.name || exactDBName;
           const rawImage = currentUser.profilePhoto || currentUser.profilePic || currentUser.image || currentUser.avatar || currentUser.photo || currentUser.pic || currentUser.profileImage || currentUser.empImage || currentUser.file;
-          
-          let finalImage = ""; 
+
+          let finalImage = "";
           if (rawImage && !rawImage.includes('randomuser.me')) {
             finalImage = getImageUrl(rawImage);
           }
@@ -172,36 +119,35 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
             profile: { ...prev.profile, name: exactDBName, role: currentUser.designation || currentUser.role || "Trainer", profilePic: finalImage },
             profileDetails: {
               ...prev.profileDetails,
-              fullName: exactDBName, 
-              email: currentUser.email || incomingEmail || prev.profileDetails.email, 
+              fullName: exactDBName,
+              email: currentUser.email || incomingEmail || prev.profileDetails.email,
               phone: currentUser.phone || prev.profileDetails.phone,
-              role: currentUser.designation || currentUser.role || "Trainer", 
+              role: currentUser.designation || currentUser.role || "Trainer",
               empId: currentUser.empId || currentUser.employeeId || currentUser.id || "N/A",
-              dob: currentUser.dob || currentUser.dateOfBirth || "N/A", 
-              gender: currentUser.gender || "N/A", 
+              dob: currentUser.dob || currentUser.dateOfBirth || "N/A",
+              gender: currentUser.gender || "N/A",
               joinedOn: currentUser.doj || currentUser.joinedOn || currentUser.joinDate || "N/A",
-              location: currentUser.location || currentUser.city || currentUser.address || "N/A", 
+              location: currentUser.location || currentUser.city || currentUser.address || "N/A",
               address: { current: currentUser.address || "N/A", permanent: currentUser.address || "N/A" },
               account: { username: currentUser.username || (currentUser.email ? currentUser.email.split('@')[0] : "Trainer"), lastLogin: "Today" },
               summary: { ...prev.profileDetails.summary, experience: currentUser.experience ? `${currentUser.experience} Years` : "0 Years" }
             },
-            attendanceToday: { 
+            attendanceToday: {
                 ...prev.attendanceToday,
-                status: (currentUser.todayStatus && currentUser.todayStatus !== 'Not Marked') ? currentUser.todayStatus : "Pending", 
-                checkInTime: (currentUser.todayCheckIn && currentUser.todayCheckIn !== "-") ? currentUser.todayCheckIn : "--:--", 
+                status: (currentUser.todayStatus && currentUser.todayStatus !== 'Not Marked') ? currentUser.todayStatus : "Pending",
+                checkInTime: (currentUser.todayCheckIn && currentUser.todayCheckIn !== "-") ? currentUser.todayCheckIn : "--:--",
                 checkOutTime: (currentUser.todayCheckOut && currentUser.todayCheckOut !== "-") ? currentUser.todayCheckOut : "--:--"
             }
           }));
         }
 
-        // Fetch Tasks
         let myTasks = [];
         try {
           const taskResponse = await API.get('/tasks');
           const tasks = Array.isArray(taskResponse.data) ? taskResponse.data : (taskResponse.data.data || []);
           myTasks = tasks.filter(t => {
             const assigned = (t.assignedTo || '').toLowerCase().trim();
-            return assigned === exactDBName.toLowerCase().trim() || 
+            return assigned === exactDBName.toLowerCase().trim() ||
                    assigned === (currentUser?.fullName || '').toLowerCase().trim() ||
                    assigned === (currentUser?.name || '').toLowerCase().trim() ||
                    assigned === (currentUser?.username || '').toLowerCase().trim() ||
@@ -214,14 +160,13 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         const activeTasks = myTasks.filter(t => t.status !== 'Completed');
         setTrainerData(prev => ({ ...prev, tasksData: activeTasks }));
 
-        // Fetch Batches
         let myBatches = [];
         try {
           const batchResponse = await API.get('/batches');
           const allBatches = Array.isArray(batchResponse.data) ? batchResponse.data : (batchResponse.data.data || []);
           myBatches = allBatches.filter(b => {
             const trainer = (b.trainerName || b.trainer || b.assignedTo || b.faculty || '').toLowerCase().trim();
-            return trainer === exactDBName.toLowerCase().trim() || 
+            return trainer === exactDBName.toLowerCase().trim() ||
                    trainer === (currentUser?.fullName || '').toLowerCase().trim() ||
                    trainer === (currentUser?.name || '').toLowerCase().trim() ||
                    trainer === (currentUser?.username || '').toLowerCase().trim() ||
@@ -244,33 +189,32 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
           let studentsCount = Array.isArray(b.students) ? b.students.length : (Array.isArray(b.enrolledStudents) ? b.enrolledStudents.length : Number(b.studentsCount || 0));
 
           return {
-            id: b._id || idx, 
-            course: b.courseName || b.course || "Training Class", 
+            id: b._id || idx,
+            course: b.courseName || b.course || "Training Class",
             batchName: String(b.batchName || b.batchId || `Batch-${idx+1}`).trim(),
-            students: studentsCount, 
-            days: bDays, 
-            time: `${tTime} - ${eTime}`, 
-            room: b.room || "Lab 1", 
+            students: studentsCount,
+            days: bDays,
+            time: `${tTime} - ${eTime}`,
+            room: b.room || "Lab 1",
             status: b.status || "Ongoing",
-            color: idx % 2 === 0 ? "#3b82f6" : "#a855f7", 
-            bgColor: idx % 2 === 0 ? "#eff6ff" : "#f3e8ff", 
+            color: idx % 2 === 0 ? "#3b82f6" : "#a855f7",
+            bgColor: idx % 2 === 0 ? "#eff6ff" : "#f3e8ff",
             initial: `B${idx+1}`
           };
         });
 
         const activeAllocatedBatches = allocatedBatches.filter(batch => batch.status !== 'Completed' && batch.status !== 'completed');
 
-        // Fetch Leaves
         let usedCasual = 0, usedSick = 0, usedPrivilege = 0, usedCompOff = 0;
         try {
           const leavesResponse = await API.get('/leaves');
           const allLeaves = Array.isArray(leavesResponse.data) ? leavesResponse.data : (leavesResponse.data.data || []);
-          const myLeaves = allLeaves.filter(l => 
-            (l.empEmail || '').toLowerCase().trim() === incomingEmail || 
+          const myLeaves = allLeaves.filter(l =>
+            (l.empEmail || '').toLowerCase().trim() === incomingEmail ||
             (l.empName || '').toLowerCase().trim() === exactDBName.toLowerCase().trim() ||
             (l.empName || '').toLowerCase().trim() === (currentUser?.fullName || '').toLowerCase().trim()
           );
-          
+
           myLeaves.forEach(l => {
             if (l.status === 'Approved') {
               const lType = (l.leaveType || '').toLowerCase();
@@ -285,7 +229,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         }
 
         const today = new Date(); today.setHours(0, 0, 0, 0);
-        
+
         let myScheduleToday = [];
         try {
           let allEvents = [];
@@ -295,9 +239,9 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
           } catch(err1) {
             const schedRes = await API.get(`/schedule`).catch(() => ({ data: [] }));
             const allSched = Array.isArray(schedRes.data) ? schedRes.data : (schedRes.data.data || []);
-            allEvents = allSched.filter(ev => 
-              (ev.email && ev.email.toLowerCase() === incomingEmail) || 
-              (ev.empEmail && ev.empEmail.toLowerCase() === incomingEmail) || 
+            allEvents = allSched.filter(ev =>
+              (ev.email && ev.email.toLowerCase() === incomingEmail) ||
+              (ev.empEmail && ev.empEmail.toLowerCase() === incomingEmail) ||
               (ev.assignedTo && ev.assignedTo.toLowerCase() === exactDBName.toLowerCase())
             );
           }
@@ -305,10 +249,10 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
           const y = today.getFullYear();
           const m = String(today.getMonth() + 1).padStart(2, '0');
           const d = String(today.getDate()).padStart(2, '0');
-          
-          const formatYMD = `${y}-${m}-${d}`; 
-          const formatDMY = `${d}-${m}-${y}`; 
-          
+
+          const formatYMD = `${y}-${m}-${d}`;
+          const formatDMY = `${d}-${m}-${y}`;
+
           myScheduleToday = allEvents.filter(ev => {
             const evDate = ev.startDate || ev.date || ev.scheduleDate || "";
             return evDate.includes(formatYMD) || evDate.includes(formatDMY);
@@ -332,26 +276,26 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         const totalAvail = Math.max(0, 2 - usedCasual) + Math.max(0, 2 - usedSick) + Math.max(0, 1 - usedPrivilege) + Math.max(0, 3 - usedCompOff);
 
         setTrainerData(prev => ({
-          ...prev, 
+          ...prev,
           myBatchesData: activeAllocatedBatches,
           scheduleToday: myScheduleToday,
-          profileDetails: { 
-            ...prev.profileDetails, 
-            summary: { 
-              ...prev.profileDetails.summary, 
-              batches: activeAllocatedBatches.length, 
-              students: activeAllocatedBatches.reduce((sum, batch) => sum + batch.students, 0) 
-            } 
+          profileDetails: {
+            ...prev.profileDetails,
+            summary: {
+              ...prev.profileDetails.summary,
+              batches: activeAllocatedBatches.length,
+              students: activeAllocatedBatches.reduce((sum, batch) => sum + batch.students, 0)
+            }
           },
-          leaveBalance: { 
-            totalAvailable: totalAvail, 
-            totalDays: 8, 
-            breakdown: [ 
-              { type: "Casual Leave", used: usedCasual, total: 2, color: "#10b981" }, 
-              { type: "Sick Leave", used: usedSick, total: 2, color: "#3b82f6" }, 
-              { type: "Privilege Leave", used: usedPrivilege, total: 1, color: "#a855f7" }, 
-              { type: "Comp Off", used: usedCompOff, total: 3, color: "#f59e0b" } 
-            ] 
+          leaveBalance: {
+            totalAvailable: totalAvail,
+            totalDays: 8,
+            breakdown: [
+              { type: "Casual Leave", used: usedCasual, total: 2, color: "#10b981" },
+              { type: "Sick Leave", used: usedSick, total: 2, color: "#3b82f6" },
+              { type: "Privilege Leave", used: usedPrivilege, total: 1, color: "#a855f7" },
+              { type: "Comp Off", used: usedCompOff, total: 3, color: "#f59e0b" }
+            ]
           }
         }));
       } catch (error) { console.error("Error fetching user data:", error); }
@@ -410,164 +354,100 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
     }
   }, [activeEmail]);
 
-  const fetchChatMessages = async () => {
-    try {
-      const res = await API.get('/groupchat');
-      const messages = Array.isArray(res.data) ? res.data : (res.data?.data || []);
-      setChatMessages(messages);
-
-      if (isChatOpen) {
-        localStorage.setItem('groupChatSeenCount', messages.length.toString());
-        setGroupUnreadCount(0);
-      } else {
-        const seenCount = parseInt(localStorage.getItem('groupChatSeenCount') || '0', 10);
-        if (messages.length > seenCount) {
-          setGroupUnreadCount(messages.length - seenCount);
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching chat:", err);
-    }
-  };
-
-  useEffect(() => {
-    let interval;
-    if (!editingMsgId) { 
-      fetchChatMessages();
-      interval = setInterval(fetchChatMessages, 3000); 
-    }
-    return () => clearInterval(interval);
-  }, [isChatOpen, editingMsgId]);
-
-  useEffect(() => {
-    if (messagesEndRef.current && !editingMsgId) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [chatMessages.length, isChatOpen]);
-
-  const toggleGroupChat = () => {
-    if (!isDragging) {
-      const nextState = !isChatOpen;
-      setIsChatOpen(nextState);
-      if (nextState) {
-        localStorage.setItem('groupChatSeenCount', chatMessages.length.toString());
-        setGroupUnreadCount(0);
-      }
-    }
-  };
-
-  const handleGroupFileChange = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-
-    const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024);
-    if (validFiles.length < files.length) {
-      alert("Some files were larger than 5MB and were skipped.");
-    }
-
-    const filePromises = validFiles.map(file => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          resolve({ name: file.name, type: file.type, size: file.size, data: reader.result });
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-
-    const newFilesArray = await Promise.all(filePromises);
-    setSelectedGroupFiles(prev => [...prev, ...newFilesArray]);
-    e.target.value = null; 
-  };
-
-  const removeGroupFile = (indexToRemove) => {
-    setSelectedGroupFiles(prev => prev.filter((_, index) => index !== indexToRemove));
-  };
-
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!newMsg.trim() && selectedGroupFiles.length === 0) return;
-
-    const senderName = trainerData.profile.name !== "Loading..." ? trainerData.profile.name : (userName || "Employee");
-    const senderEmail = trainerData.profileDetails.email !== "Loading..." ? trainerData.profileDetails.email : (userEmail || "test@vinsup.com");
-
-    try {
-      if (selectedGroupFiles.length > 0) {
-        for (let i = 0; i < selectedGroupFiles.length; i++) {
-          const filePayload = {
-            fileName: selectedGroupFiles[i].name,
-            fileType: selectedGroupFiles[i].type,
-            fileData: selectedGroupFiles[i].data
-          };
-
-          await API.post('/groupchat/send', { 
-            senderName, 
-            senderEmail, 
-            message: i === 0 ? newMsg : "", 
-            file: filePayload 
-          });
-        }
-      } else {
-        await API.post('/groupchat/send', { 
-          senderName, 
-          senderEmail, 
-          message: newMsg,
-          file: null 
-        });
-      }
-      
-      setNewMsg("");
-      setSelectedGroupFiles([]);
-      fetchChatMessages(); 
-    } catch (err) { console.error("Error sending message:", err); }
-  };
-
-  const handleDeleteMessage = async (id) => {
-    if(!window.confirm("Are you sure you want to delete this message?")) return;
-    try {
-      await API.delete(`/groupchat/delete/${id}`);
-      fetchChatMessages();
-    } catch(err) { console.error("Error deleting message:", err); }
-  };
-
-  const handleUpdateMessage = async (id) => {
-    if(!editingMsgText.trim()) return;
-    try {
-      await API.put(`/groupchat/edit/${id}`, { message: editingMsgText });
-      setEditingMsgId(null);
-      setEditingMsgText("");
-      fetchChatMessages();
-    } catch(err) { console.error("Error updating message:", err); }
-  };
-
-  const unreadCount = Array.isArray(notifications) ? notifications.filter(n => !n.isRead).length : 0;
-
-  const sidebarMenu = [
-    { name: 'Dashboard', icon: 'fas fa-th-large' }, 
-    { name: 'My Profile', icon: 'far fa-user' }, 
-    { name: 'My Classes', icon: 'fas fa-book-reader' },
-    { name: 'Quizzes', icon: 'fas fa-check-square' },
-    { name: 'Attendance', icon: 'far fa-calendar-check' },
-    { name: 'Leave Request', icon: 'far fa-envelope-open' }, 
-    { name: 'My Schedule', icon: 'far fa-calendar-alt' }, 
-    { name: 'Courses', icon: 'fas fa-book' }, 
-    { name: 'Tasks', icon: 'fas fa-tasks' },
-    { name: 'Reports', icon: 'fas fa-chart-bar' }, 
-    { name: 'Announcements', icon: 'fas fa-bullhorn' },  
-    { name: 'Helpdesk', icon: 'far fa-life-ring' }
-  ];
-
-  const displayName = (trainerData.profile.name && trainerData.profile.name !== "Loading...") 
-    ? trainerData.profile.name 
+  const displayName = (trainerData.profile.name && trainerData.profile.name !== "Loading...")
+    ? trainerData.profile.name
     : (userName || auth.name || (activeEmail ? activeEmail.split('@')[0] : "Trainer"));
   const firstName = displayName.split(' ')[0] || "Trainer";
   const currentUserEmail = (trainerData.profileDetails.email && trainerData.profileDetails.email !== "Loading..." && trainerData.profileDetails.email !== "N/A")
     ? trainerData.profileDetails.email
     : (activeEmail || "trainer@vinsup.com");
 
+  const fetchChatUnreadCount = async () => {
+    try {
+      const emailToUse = (currentUserEmail || activeEmail).toLowerCase().trim();
+      if (!emailToUse) return;
+      const res = await API.get(`/privatechat/unread/${emailToUse}`);
+      if (res.data && res.data.success) {
+        setChatUnreadCount(res.data.unreadCount || 0);
+      }
+    } catch (e) {}
+  };
+
+  const checkStudentChatsUnread = async () => {
+    try {
+      const bRes = await API.get('/batches').catch(() => null);
+      const allB = Array.isArray(bRes?.data) ? bRes.data : (bRes?.data?.data || []);
+      const trainerBatches = allB.filter(b => {
+        const trainerStr = (b.trainer || b.trainerName || b.assignedTo || b.faculty || '').toLowerCase().trim();
+        return trainerStr === (displayName || "").toLowerCase().trim() || trainerStr === (currentUserEmail || "").toLowerCase().trim() || trainerStr === 'admin';
+      });
+      const batchNames = [...new Set(trainerBatches.map(b => String(b.batchName || b.courseName || '').trim()).filter(Boolean))];
+
+      let totalUnread = 0;
+      await Promise.all(batchNames.map(async (batch) => {
+        const res = await API.get(`/batchchat/${encodeURIComponent(batch)}`).catch(() => null);
+        if (res && res.data && Array.isArray(res.data)) {
+          const lastRead = localStorage.getItem(`chat_last_read_${batch}`) || 0;
+          const unread = res.data.filter(m => new Date(m.timestamp).getTime() > parseInt(lastRead) && (m.senderEmail || '').toLowerCase() !== (currentUserEmail || '').toLowerCase()).length;
+          totalUnread += unread;
+        }
+      }));
+      setStudentChatsUnreadCount(totalUnread);
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    if (!currentUserEmail) return;
+    socket.emit('join_user', currentUserEmail);
+    const handleUnreadUpdate = () => fetchChatUnreadCount();
+    socket.on('unread_count_update', handleUnreadUpdate);
+    socket.on('receive_private_message', handleUnreadUpdate);
+    fetchChatUnreadCount();
+    checkStudentChatsUnread();
+
+    const interval = setInterval(() => {
+      fetchChatUnreadCount();
+      checkStudentChatsUnread();
+    }, 8000);
+
+    return () => {
+      clearInterval(interval);
+      socket.off('unread_count_update', handleUnreadUpdate);
+      socket.off('receive_private_message', handleUnreadUpdate);
+    };
+  }, [currentUserEmail]);
+
+  useEffect(() => {
+    const handleBatchMsg = () => {
+      if (activeTab === 'Student Chats') return;
+      checkStudentChatsUnread();
+    };
+    socket.on('receive_batch_message', handleBatchMsg);
+    return () => socket.off('receive_batch_message', handleBatchMsg);
+  }, [activeTab]);
+
+  const unreadCount = Array.isArray(notifications) ? notifications.filter(n => !n.isRead).length : 0;
+
+  const sidebarMenu = [
+    { name: 'Dashboard', icon: 'fas fa-th-large' },
+    { name: 'My Profile', icon: 'far fa-user' },
+    { name: 'My Classes', icon: 'fas fa-book-reader' },
+    { name: 'Admin Chat', icon: 'far fa-comment-dots' },
+    { name: 'Student Chats', icon: 'fas fa-comments' },
+    { name: 'Quizzes', icon: 'fas fa-check-square' },
+    { name: 'Attendance', icon: 'far fa-calendar-check' },
+    { name: 'Leave Request', icon: 'far fa-envelope-open' },
+    { name: 'My Schedule', icon: 'far fa-calendar-alt' },
+    { name: 'Courses', icon: 'fas fa-book' },
+    { name: 'Tasks', icon: 'fas fa-tasks' },
+    { name: 'Reports', icon: 'fas fa-chart-bar' },
+    { name: 'Announcements', icon: 'fas fa-bullhorn' },
+    { name: 'Helpdesk', icon: 'far fa-life-ring' }
+  ];
+
   return (
     <div className="admin-layout">
-      
+
       <style>
         {`
           .batch-scroll-container::-webkit-scrollbar { width: 6px; }
@@ -578,9 +458,9 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
       </style>
 
       {isSidebarOpen && (
-        <div 
-          className="sidebar-backdrop active" 
-          onClick={() => setIsSidebarOpen(false)} 
+        <div
+          className="sidebar-backdrop active"
+          onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
@@ -589,12 +469,12 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
         <ul className="sidebar-menu">
           {sidebarMenu.map((item, index) => (
             <li key={index} className={item.name === activeTab ? 'active' : ''}>
-              <a 
-                href="#" 
-                onClick={(e) => { 
-                  e.preventDefault(); 
-                  handleTabClick(item.name); 
-                }} 
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleTabClick(item.name);
+                }}
                 style={{ display: 'flex', alignItems: 'center', width: '100%' }}
               >
                   <i className={item.icon}></i>
@@ -602,6 +482,16 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
                   {item.name === 'Tasks' && trainerData.tasksData.length > 0 && (
                     <span style={{ marginLeft: 'auto', background: '#ea580c', color: '#fff', fontSize: '11px', padding: '2px 7px', borderRadius: '10px', fontWeight: 'bold' }}>
                       {trainerData.tasksData.length}
+                    </span>
+                  )}
+                  {item.name === 'Admin Chat' && chatUnreadCount > 0 && (
+                    <span className="chat-badge" style={{ marginLeft: 'auto', background: '#ef4444', color: '#fff', fontSize: '11px', padding: '2px 7px', borderRadius: '10px', fontWeight: 'bold' }}>
+                      {chatUnreadCount > 99 ? '99+' : chatUnreadCount}
+                    </span>
+                  )}
+                  {item.name === 'Student Chats' && studentChatsUnreadCount > 0 && (
+                    <span className="chat-badge" style={{ marginLeft: 'auto', background: '#ef4444', color: '#fff', fontSize: '11px', padding: '2px 7px', borderRadius: '10px', fontWeight: 'bold' }}>
+                      {studentChatsUnreadCount > 99 ? '99+' : studentChatsUnreadCount}
                     </span>
                   )}
               </a>
@@ -614,7 +504,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
       </aside>
 
       <main className={`main-content ${isSidebarOpen ? 'shrink' : 'expand'}`}>
-        
+
         <header className="top-header">
           <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <i className="fas fa-bars menu-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}></i>
@@ -622,7 +512,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
           </div>
 
           <div className="header-right">
-            
+
             <div className="date-display">
               <i className="far fa-calendar-alt"></i> {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
             </div>
@@ -634,7 +524,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
                   <span className="dot" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '16px', height: '16px', fontSize: '10px', color: '#fff', background: '#ef4444', borderRadius: '50%', position: 'absolute', top: '-6px', right: '-8px', border: '2px solid #fff', fontWeight: 'bold' }}>{unreadCount}</span>
                 )}
               </div>
-              
+
               {isNotificationOpen && (
                 <div style={{ position: 'absolute', top: '40px', right: 0, width: 'min(360px, calc(100vw - 30px))', maxWidth: 'calc(100vw - 30px)', background: '#fff', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0', zIndex: 1000, overflow: 'hidden', textAlign: 'left' }}>
                   <div style={{ padding: '15px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -650,9 +540,9 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
                             <span style={{ fontSize: '11px', color: '#6b7280', whiteSpace: 'nowrap' }}>
                                {new Date(notif.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                             </span>
-                            <i 
-                              className="fas fa-trash-alt" 
-                              onClick={() => handleDeleteNotification(notif._id)} 
+                            <i
+                              className="fas fa-trash-alt"
+                              onClick={() => handleDeleteNotification(notif._id)}
                               style={{ fontSize: '12px', color: '#ef4444', cursor: 'pointer' }}
                               title="Delete Notification"
                             ></i>
@@ -675,7 +565,7 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
                 </div>
               )}
             </div>
-            
+
             <div className="user-profile">
               <div className="avatar">
                 {trainerData.profile.profilePic ? (
@@ -768,11 +658,11 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
                     <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>Today's Schedule</h3>
                     <a href="#" onClick={(e) => { e.preventDefault(); handleTabClick('My Schedule'); }} style={{ color: '#2563eb', fontSize: '12px', fontWeight: '600', textDecoration: 'none' }}>View All</a>
                   </div>
-                  
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '180px', overflowY: 'auto' }} className="batch-scroll-container">
                     {trainerData.scheduleToday.length > 0 ? trainerData.scheduleToday.map((ev, i) => {
                       let dotColor = '#64748b'; let bgLight = '#f8fafc';
-                      
+
                       const evType = ev.type || ev.eventType || 'Other';
                       const evTitle = ev.title || ev.eventName || ev.taskName || 'Scheduled Event';
                       const evTime = ev.startTime || ev.time || 'All Day';
@@ -803,8 +693,9 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
           </div>
         )}
 
-        {/* Other Tabs */}
         {activeTab === 'My Profile' && <MyProfile trainerData={trainerData} />}
+        {activeTab === 'Admin Chat' && <UserAdminChat userName={displayName} userEmail={currentUserEmail} />}
+        {activeTab === 'Student Chats' && <EmployeeBatchChat userName={displayName} userEmail={currentUserEmail} />}
         {activeTab === 'Attendance' && <UserAttendance userName={displayName} userEmail={currentUserEmail} />}
         {activeTab === 'Leave Request' && <UserLeaveRequest userName={displayName} userEmail={currentUserEmail} />}
         {activeTab === 'My Schedule' && <UserSchedule userName={displayName} userEmail={currentUserEmail} />}
@@ -818,147 +709,10 @@ const UserDashboard = ({ userName, userEmail, onLogout }) => {
 
       </main>
 
-      <div 
-        style={{
-          position: 'fixed',
-          bottom: 'min(40px, 16px)',
-          right: 'min(40px, 16px)',
-          zIndex: 1000,
-          transform: `translate(${chatPos.x}px, ${chatPos.y}px)`,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          pointerEvents: 'none'
-        }}
-      >
-        {isChatOpen && (
-          <div style={{ pointerEvents: 'auto', width: 'min(400px, calc(100vw - 32px))', height: 'min(560px, calc(100vh - 100px))', background: '#fff', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #e2e8f0', animation: 'fadeIn 0.2s ease-out', marginBottom: '15px' }}>
-            
-            <div 
-              onPointerDown={handlePointerDown} 
-              style={{ background: '#2563eb', padding: '20px', color: '#fff', display: 'flex', alignItems: 'center', gap: '15px', cursor: isDragging ? 'grabbing' : 'grab', flexShrink: 0 }}
-            >
-              <div style={{ width: '45px', height: '45px', borderRadius: '50%', background: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#2563eb', fontSize: '20px' }}>
-                <i className="fas fa-users"></i>
-              </div>
-              <div>
-                <h3 style={{ margin: '0 0 3px 0', fontSize: '16px', fontWeight: 'bold' }}>Company Group Chat</h3>
-              </div>
-            </div>
-
-            <div className="chat-scroll" style={{ flex: 1, padding: '20px', overflowY: 'auto', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '20px', minHeight: 0 }}>
-              {chatMessages.length > 0 ? chatMessages.map((msg, idx) => {
-                const isMe = msg.senderEmail === currentUserEmail;
-                const msgTime = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                return (
-                  <div key={msg._id || idx} className="msg-container" style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
-                    {!isMe && <span style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px', marginLeft: '5px', fontWeight: '600' }}>{msg.senderName}</span>}
-                    
-                    {editingMsgId === msg._id ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#fff', padding: '12px', borderRadius: '12px', border: '1px solid #2563eb', width: '80%' }}>
-                        <input type="text" value={editingMsgText} onChange={(e) => setEditingMsgText(e.target.value)} autoFocus style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '13px', outline: 'none' }} />
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                          <button onClick={() => { setEditingMsgId(null); setEditingMsgText(""); }} style={{ padding: '4px 10px', fontSize: '11px', cursor: 'pointer', background: '#f1f5f9', border: 'none', borderRadius: '4px', fontWeight: '600' }}>Cancel</button>
-                          <button onClick={() => handleUpdateMessage(msg._id)} style={{ padding: '4px 10px', fontSize: '11px', cursor: 'pointer', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: '600' }}>Save</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexDirection: isMe ? 'row-reverse' : 'row', maxWidth: '100%' }}>
-                        <div style={{ background: isMe ? '#2563eb' : '#fff', color: isMe ? '#fff' : '#1e293b', padding: '12px 18px', borderRadius: isMe ? '16px 16px 0 16px' : '16px 16px 16px 0', maxWidth: '250px', fontSize: '14px', lineHeight: '1.5', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: isMe ? 'none' : '1px solid #e2e8f0', wordWrap: 'break-word', overflow: 'hidden' }}>
-                          
-                          {msg.file && (
-                            <div style={{ marginBottom: msg.message ? '8px' : '0' }}>
-                              {msg.file.fileType?.startsWith('image/') ? (
-                                <img src={msg.file.fileData} alt="attachment" style={{ maxWidth: '100%', maxHeight: '150px', borderRadius: '6px', display: 'block', cursor: 'pointer' }} onClick={() => window.open(msg.file.fileData)} />
-                              ) : msg.file.fileType?.startsWith('video/') ? (
-                                <video controls style={{ maxWidth: '100%', maxHeight: '150px', borderRadius: '6px', display: 'block' }}>
-                                  <source src={msg.file.fileData} type={msg.file.fileType} />
-                                </video>
-                              ) : (
-                                <a href={msg.file.fileData} download={msg.file.fileName} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: isMe ? '#fff' : '#2563eb', textDecoration: 'none', background: isMe ? 'rgba(255,255,255,0.15)' : '#f1f5f9', padding: '6px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '600' }}>
-                                  <i className="fas fa-file-alt" style={{ fontSize: '14px', flexShrink: 0 }}></i>
-                                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{msg.file.fileName}</span>
-                                </a>
-                              )}
-                            </div>
-                          )}
-
-                          {msg.message && <div>{msg.message}</div>}
-                        </div>
-                        
-                        {isMe && (
-                          <div className="msg-actions" style={{ display: 'flex', gap: '10px' }}>
-                            <i className="fas fa-pen" onClick={() => { setEditingMsgId(msg._id); setEditingMsgText(msg.message); }} style={{ fontSize: '12px', color: '#94a3b8', cursor: 'pointer' }} title="Edit"></i>
-                            <i className="fas fa-trash" onClick={() => handleDeleteMessage(msg._id)} style={{ fontSize: '12px', color: '#ef4444', cursor: 'pointer' }} title="Delete"></i>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    <span style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px', marginRight: isMe ? '5px' : '0', marginLeft: !isMe ? '5px' : '0' }}>
-                      {msgTime}
-                    </span>
-                  </div>
-                );
-              }) : (
-                <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', marginTop: '50px' }}>
-                  <i className="far fa-comments" style={{ fontSize: '40px', marginBottom: '10px', color: '#cbd5e1' }}></i>
-                  <p>No messages yet.<br/>Start the conversation!</p>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {selectedGroupFiles.length > 0 && (
-              <div style={{ width: '100%', background: '#f1f5f9', borderTop: '1px solid #e2e8f0', padding: '8px 15px', boxSizing: 'border-box', flexShrink: 0, overflow: 'hidden' }}>
-                <div className="chat-scroll" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px', width: '100%' }}>
-                  {selectedGroupFiles.map((file, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fff', padding: '4px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', whiteSpace: 'nowrap', flexShrink: 0, maxWidth: '150px' }}>
-                      {file.type.startsWith('image/') ? (
-                        <img src={file.data} alt="prev" style={{ width: '18px', height: '18px', objectFit: 'cover', borderRadius: '3px', flexShrink: 0 }} />
-                      ) : (
-                        <i className="fas fa-file-alt" style={{ fontSize: '12px', color: '#2563eb', flexShrink: 0 }}></i>
-                      )}
-                      <span style={{ fontSize: '11px', fontWeight: '600', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
-                      <i className="fas fa-times" onClick={() => removeGroupFile(idx)} style={{ cursor: 'pointer', color: '#ef4444', fontSize: '10px', marginLeft: '5px', flexShrink: 0 }}></i>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <form onSubmit={handleSendMessage} style={{ padding: '15px', background: '#fff', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0 }}>
-              
-              <label style={{ cursor: 'pointer', color: '#64748b', fontSize: '18px', display: 'flex', alignItems: 'center', flexShrink: 0 }} title="Attach Files">
-                <i className="fas fa-paperclip"></i>
-                <input type="file" multiple onChange={handleGroupFileChange} style={{ display: 'none' }} />
-              </label>
-
-              <input type="text" value={newMsg} onChange={(e) => setNewMsg(e.target.value)} placeholder="Type a message..." disabled={!!editingMsgId} style={{ flex: 1, minWidth: 0, padding: '12px 15px', borderRadius: '30px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', background: editingMsgId ? '#f1f5f9' : '#f8fafc', boxSizing: 'border-box' }} />
-              
-              <button type="submit" disabled={(!newMsg.trim() && selectedGroupFiles.length === 0) || !!editingMsgId} style={{ background: (newMsg.trim() || selectedGroupFiles.length > 0) && !editingMsgId ? '#2563eb' : '#94a3b8', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: (newMsg.trim() || selectedGroupFiles.length > 0) && !editingMsgId ? 'pointer' : 'not-allowed', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '14px', transition: '0.2s', flexShrink: 0 }}>
-                <i className="fas fa-paper-plane"></i>
-              </button>
-
-            </form>
-          </div>
-        )}
-
-        <div 
-          onPointerDown={handlePointerDown}
-          onClick={toggleGroupChat}
-          style={{ position: 'relative', pointerEvents: 'auto', width: '65px', height: '65px', borderRadius: '50%', background: '#2563eb', color: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '28px', boxShadow: '0 10px 25px -5px rgba(37, 99, 235, 0.4)', cursor: isDragging ? 'grabbing' : 'pointer', transition: isDragging ? 'none' : 'transform 0.2s, background 0.2s', transform: isChatOpen ? 'scale(0.9)' : 'scale(1)', border: '3px solid #fff' }}
-        >
-          <i className={isChatOpen ? "fas fa-times" : "fas fa-comment-dots"}></i>
-          {!isChatOpen && groupUnreadCount > 0 && (
-            <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#ef4444', color: '#fff', fontSize: '11px', fontWeight: 'bold', width: '22px', height: '22px', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '50%', border: '2px solid #fff' }}>
-              {groupUnreadCount > 99 ? '99+' : groupUnreadCount}
-            </span>
-          )}
-        </div>
-      </div>
-
+      <CompanyGroupChat
+        currentUserName={displayName}
+        currentUserEmail={currentUserEmail}
+      />
     </div>
   );
 };

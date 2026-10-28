@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Helper function to resolve backend server URL dynamically
 export const getBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL;
   if (envUrl) {
@@ -20,33 +19,42 @@ export const getBaseUrl = () => {
   return 'https://vinsup-4vt5.onrender.com';
 };
 
-// Helper function to resolve image & file asset URLs dynamically
 export const getImageUrl = (rawPath, fallback = '') => {
   if (!rawPath || typeof rawPath !== 'string') return fallback;
-  if (
-    rawPath.startsWith('http://') ||
-    rawPath.startsWith('https://') ||
-    rawPath.startsWith('data:image') ||
-    rawPath.startsWith('blob:')
-  ) {
+  if (rawPath.startsWith('data:image') || rawPath.startsWith('blob:')) {
     return rawPath;
   }
-  const cleanPath = rawPath.replace(/\\/g, '/').replace(/^\/+/, '');
+  let pathStr = rawPath;
+  if (pathStr.includes('/uploads/')) {
+    pathStr = pathStr.substring(pathStr.indexOf('/uploads/') + 1);
+  } else if (pathStr.startsWith('http://') || pathStr.startsWith('https://')) {
+    return pathStr;
+  }
+  const cleanPath = pathStr.replace(/\\/g, '/').replace(/^\/+/, '');
   const prefix = cleanPath.startsWith('uploads/') ? '' : 'uploads/';
   return `${getBaseUrl()}/${prefix}${cleanPath}`;
 };
 
-// Create an axios instance with base URL
+export const getAlternativeImageUrl = (currentUrl) => {
+  if (!currentUrl || typeof currentUrl !== 'string') return '';
+  if (currentUrl.includes('localhost:5001')) {
+    return currentUrl.replace('http://localhost:5001', 'https://vinsup-4vt5.onrender.com');
+  }
+  if (currentUrl.includes('vinsup-4vt5.onrender.com')) {
+    return currentUrl.replace('https://vinsup-4vt5.onrender.com', 'http://localhost:5001');
+  }
+  return '';
+};
+
 export const API = axios.create({
   baseURL: `${getBaseUrl()}/api`,
 });
 
-// Configure default axios base URL for any component that uses global axios
 axios.defaults.baseURL = `${getBaseUrl()}/api`;
 
 const attachToken = (config) => {
   let token = localStorage.getItem('token');
-  
+
   if (!token) {
     try {
       const userAuth = JSON.parse(localStorage.getItem('userAuth') || '{}');
@@ -54,7 +62,6 @@ const attachToken = (config) => {
         token = userAuth.token;
       }
     } catch (e) {
-      // Ignore parse error
     }
   }
 
@@ -68,11 +75,9 @@ const attachToken = (config) => {
   return config;
 };
 
-// Request Interceptor: Attach JWT Bearer token to all outgoing requests
 API.interceptors.request.use(attachToken, (error) => Promise.reject(error));
 axios.interceptors.request.use(attachToken, (error) => Promise.reject(error));
 
-// Response Interceptor: Handle auth errors
 const handleAuthError = (error) => {
   if (error.response && error.response.status === 401) {
     console.warn('[API] 401 Unauthorized:', error.response.data?.message || 'Session expired or missing token');

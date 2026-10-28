@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken'); // 🔥 JWT Import pannirukku 🔥
+const jwt = require('jsonwebtoken');
 const generateToken = require('../config/generateToken');
 const Employee = require('../models/Employee');
 const Student = require('../models/Student');
 const Admin = require('../models/Admin');
-
 
 router.post('/login', async (req, res) => {
   try {
@@ -16,7 +15,6 @@ router.post('/login', async (req, res) => {
     if (!cleanEmail || !cleanPassword) {
       return res.status(400).json({ success: false, message: "Please provide both email and password!" });
     }
-
 
     const admin = await Admin.findOne({ email: cleanEmail });
     if (admin) {
@@ -38,7 +36,6 @@ router.post('/login', async (req, res) => {
       }
     }
 
-
     const employee = await Employee.findOne({ email: cleanEmail });
     if (employee) {
       const empDobFormatted = employee.dob ? new Date(employee.dob).toISOString().split('T')[0].replace(/-/g, '') : '';
@@ -59,16 +56,15 @@ router.post('/login', async (req, res) => {
       }
     }
 
-
     const student = await Student.findOne({ email: cleanEmail });
     if (student) {
       let studentDobMatch = false;
       if (student.dob) {
-        const dobStr = new Date(student.dob).toISOString().split('T')[0]; 
+        const dobStr = new Date(student.dob).toISOString().split('T')[0];
         const [year, month, day] = dobStr.split('-');
         const formats = [
-          `${day}${month}${year}`, 
-          `${year}${month}${day}`, 
+          `${day}${month}${year}`,
+          `${year}${month}${day}`,
           `${day}-${month}-${year}`,
           dobStr
         ];
@@ -82,7 +78,7 @@ router.post('/login', async (req, res) => {
 
         return res.status(200).json({
           success: true,
-          token, 
+          token,
           user: {
             name: student.name || student.fullName || 'Student',
             email: student.email,

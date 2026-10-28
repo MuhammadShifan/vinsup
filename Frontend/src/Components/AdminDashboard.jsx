@@ -1,28 +1,34 @@
 import { useState, useEffect } from 'react';
 import './AdminDashboard.css';
-import logoImage from '../assets/logo.png'; 
+import logoImage from '../assets/logo.png';
 import API from '../utils/api';
-import Employees from './Employees'; 
-import Courses from './Courses'; 
-import Batches from './Batches'; 
+import Employees from './Employees';
+import Courses from './Courses';
+import Batches from './Batches';
 import Syllabus from './Syllabus';
 import Attendance from './Attendance';
 import Reports from './Reports';
 import TicketNotification from './TicketNotification';
 import AdminTasks from './AdminTasks';
-import AdminLeaveRequests from './AdminLeaveRequests'; 
+import AdminLeaveRequests from './AdminLeaveRequests';
 import AdminIDCards from './AdminIDCards';
 import Students from './Students';
-import Settings from './Settings'; 
+import Settings from './Settings';
+import AdminUserChat from './AdminUserChat';
+import EmployeeBatchChat from './EmployeeBatchChat';
+import CompanyGroupChat from './CompanyGroupChat';
+import AdminHelpdesk from './AdminHelpdesk';
+import socket from '../utils/socket';
 
 const AdminDashboard = ({ userName, onLogout }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 992);
   const [activeTab, setActiveTab] = useState('Dashboard');
 
   const [employeesList, setEmployeesList] = useState([]);
-  const [pendingLeaveCount, setPendingLeaveCount] = useState(0); 
+  const [pendingLeaveCount, setPendingLeaveCount] = useState(0);
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+  const [openTicketsCount, setOpenTicketsCount] = useState(0);
 
-  // 🔥 ADMIN PROFILE STATE FOR GLOBAL HEADER SYNC 🔥
   const [adminProfile, setAdminProfile] = useState({
     name: userName || 'Admin',
     profilePhoto: ''
@@ -34,7 +40,6 @@ const AdminDashboard = ({ userName, onLogout }) => {
     year: 'numeric'
   });
 
-  // Fetch Admin Profile Data for Global Header Sync
   const fetchAdminHeaderProfile = async () => {
     try {
       const res = await API.get('/admin/profile');
@@ -47,6 +52,17 @@ const AdminDashboard = ({ userName, onLogout }) => {
       }
     } catch (err) {
       console.error("Error fetching admin header profile:", err);
+    }
+  };
+
+  const fetchChatUnreadCount = async () => {
+    try {
+      const res = await API.get('/privatechat/unread/admin');
+      if (res.data && res.data.success) {
+        setChatUnreadCount(res.data.unreadCount || 0);
+      }
+    } catch (err) {
+      console.error("Error fetching unread chat count:", err);
     }
   };
 
@@ -63,14 +79,36 @@ const AdminDashboard = ({ userName, onLogout }) => {
     updateLeaveBadge();
     window.addEventListener('storage', updateLeaveBadge);
 
+    socket.emit('join_user', 'admin@vinsup.com');
+    const handleUnreadUpdate = () => fetchChatUnreadCount();
+    socket.on('unread_count_update', handleUnreadUpdate);
+    socket.on('receive_private_message', handleUnreadUpdate);
+    fetchChatUnreadCount();
+
+    const fetchTicketsCount = async () => {
+      try {
+        const res = await API.get('/tickets');
+        const data = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        const count = data.filter(t => t.status === 'Open' || t.status === 'In Progress').length;
+        setOpenTicketsCount(count);
+      } catch (e) {
+      }
+    };
+
+    fetchTicketsCount();
+
     const interval = setInterval(() => {
       updateLeaveBadge();
-      fetchAdminHeaderProfile(); // Sync profile updates in real-time
+      fetchAdminHeaderProfile();
+      fetchChatUnreadCount();
+      fetchTicketsCount();
     }, 10000);
 
     return () => {
       window.removeEventListener('storage', updateLeaveBadge);
       clearInterval(interval);
+      socket.off('unread_count_update', handleUnreadUpdate);
+      socket.off('receive_private_message', handleUnreadUpdate);
     };
   }, []);
 
@@ -82,7 +120,10 @@ const AdminDashboard = ({ userName, onLogout }) => {
     { name: 'Batches', icon: 'fas fa-layer-group' },
     { name: 'Syllabus', icon: 'fas fa-clipboard-list' },
     { name: 'Attendance', icon: 'fas fa-calendar-check' },
-    { name: 'Leave Requests', icon: 'fas fa-envelope-open-text' }, 
+    { name: 'Leave Requests', icon: 'fas fa-envelope-open-text' },
+    { name: 'Admin Desk', icon: 'fas fa-headset' },
+    { name: 'User Chats', icon: 'far fa-comment-dots' },
+    { name: 'Batch Chat', icon: 'fas fa-comments' },
     { name: 'Tasks', icon: 'fas fa-tasks' },
     { name: 'Reports', icon: 'fas fa-chart-line' },
     { name: 'ID Cards', icon: 'fas fa-id-card' },
@@ -100,7 +141,7 @@ const AdminDashboard = ({ userName, onLogout }) => {
   const [batchProgress, setBatchProgress] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [upcomingDeadlines, setUpcomingDeadlines] = useState([]);
-  
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -127,7 +168,7 @@ const AdminDashboard = ({ userName, onLogout }) => {
             progress: batch.progress || 0,
             color: '#3b82f6'
           }))
-          .sort((a, b) => b.progress - a.progress); 
+          .sort((a, b) => b.progress - a.progress);
 
         setBatchProgress(formattedProgress);
 
@@ -160,7 +201,7 @@ const AdminDashboard = ({ userName, onLogout }) => {
 
   return (
     <div className="admin-layout">
-        
+
       <style>
         {`
           .chat-badge { background: #ef4444; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px; margin-left: auto; font-weight: bold; }
@@ -168,9 +209,9 @@ const AdminDashboard = ({ userName, onLogout }) => {
       </style>
 
       {isSidebarOpen && (
-        <div 
-          className="sidebar-backdrop active" 
-          onClick={() => setIsSidebarOpen(false)} 
+        <div
+          className="sidebar-backdrop active"
+          onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
@@ -181,20 +222,26 @@ const AdminDashboard = ({ userName, onLogout }) => {
         <ul className="sidebar-menu">
           {sidebarMenu.map((item, index) => (
             <li key={index} className={item.name === activeTab ? 'active' : ''}>
-              <a 
-                href="#" 
-                onClick={(e) => { 
-                  e.preventDefault(); 
-                  setActiveTab(item.name); 
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveTab(item.name);
                   if (window.innerWidth <= 992) setIsSidebarOpen(false);
                 }}
                 style={{ display: 'flex', alignItems: 'center' }}
               >
                 <i className={item.icon}></i>
                 <span>{item.name}</span>
-                
+
                 {item.name === 'Leave Requests' && pendingLeaveCount > 0 && (
                     <span className="chat-badge">{pendingLeaveCount}</span>
+                )}
+                {(item.name === 'Admin Desk' || item.name === 'Helpdesk') && openTicketsCount > 0 && (
+                    <span className="chat-badge">{openTicketsCount > 99 ? '99+' : openTicketsCount}</span>
+                )}
+                {item.name === 'User Chats' && chatUnreadCount > 0 && (
+                    <span className="chat-badge">{chatUnreadCount > 99 ? '99+' : chatUnreadCount}</span>
                 )}
               </a>
             </li>
@@ -210,8 +257,8 @@ const AdminDashboard = ({ userName, onLogout }) => {
       <main className={`main-content ${isSidebarOpen ? 'shrink' : 'expand'}`}>
         <header className="top-header">
           <div className="header-left">
-            <i 
-              className="fas fa-bars menu-toggle" 
+            <i
+              className="fas fa-bars menu-toggle"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             ></i>
           </div>
@@ -221,10 +268,9 @@ const AdminDashboard = ({ userName, onLogout }) => {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <TicketNotification />
+              <TicketNotification onNavigate={(tab) => { setActiveTab(tab || 'Admin Desk'); if (window.innerWidth <= 992) setIsSidebarOpen(false); }} />
             </div>
 
-            {/* 🔥 TOP RIGHT HEADER: DYNAMIC ADMIN NAME & PHOTO 🔥 */}
             <div className="user-profile">
               <div className="avatar" style={{ overflow: 'hidden', padding: 0 }}>
                 {adminProfile.profilePhoto ? (
@@ -240,7 +286,7 @@ const AdminDashboard = ({ userName, onLogout }) => {
             </div>
           </div>
         </header>
-        
+
         {activeTab === 'Dashboard' && (
           <div className="dashboard-container">
             <div className="page-header">
@@ -268,7 +314,7 @@ const AdminDashboard = ({ userName, onLogout }) => {
                   <h3>Batch Progress Overview</h3>
                   <span style={{ fontSize: '13px', color: '#64748b' }}>Showing all active batches</span>
                 </div>
-                
+
                 <div className="progress-scroll-container">
                   <div className="progress-list">
                     {batchProgress.length > 0 ? (
@@ -293,7 +339,7 @@ const AdminDashboard = ({ userName, onLogout }) => {
             </div>
 
             <div className="bottom-grid">
-              
+
               <div className="dashboard-card">
                 <div className="card-header">
                   <h3>Recent Activity</h3>
@@ -350,12 +396,20 @@ const AdminDashboard = ({ userName, onLogout }) => {
         {activeTab === 'Batches' && <Batches />}
         {activeTab === 'Syllabus' && <Syllabus/>}
         {activeTab === 'Attendance' && <Attendance/>}
-        {activeTab === 'Leave Requests' && <AdminLeaveRequests/>} 
+        {activeTab === 'Leave Requests' && <AdminLeaveRequests/>}
+        {(activeTab === 'Admin Desk' || activeTab === 'Helpdesk' || activeTab === 'admindesk' || activeTab === 'AdminHelpdesk') && <AdminHelpdesk />}
+        {activeTab === 'User Chats' && <AdminUserChat onRead={() => setChatUnreadCount(0)} />}
+        {activeTab === 'Batch Chat' && <EmployeeBatchChat userName="Admin" userEmail="admin@vinsup.com" />}
         {activeTab === 'Reports' && <Reports/>}
         {activeTab === 'Tasks' && <AdminTasks />}
         {activeTab === 'Settings' && <Settings />}
 
       </main>
+
+      <CompanyGroupChat
+        currentUserName={adminProfile.name || 'Admin'}
+        currentUserEmail="admin@vinsup.com"
+      />
     </div>
   );
 };

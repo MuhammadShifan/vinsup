@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Quiz = require('../models/Quiz');
-const QuizResult = require('../models/QuizResult'); // 🔥 Pudhusa add pannadhu
-
+const QuizResult = require('../models/QuizResult');
 
 router.get('/all', async (req, res) => {
   try {
@@ -13,7 +12,6 @@ router.get('/all', async (req, res) => {
   }
 });
 
-
 router.get('/:id/results', async (req, res) => {
   try {
     const results = await QuizResult.find({ quizId: req.params.id });
@@ -23,7 +21,6 @@ router.get('/:id/results', async (req, res) => {
   }
 });
 
-
 router.get('/results/:email', async (req, res) => {
   try {
     const results = await QuizResult.find({ studentEmail: req.params.email });
@@ -32,7 +29,6 @@ router.get('/results/:email', async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
-
 
 router.post('/submit', async (req, res) => {
   try {
@@ -66,7 +62,6 @@ router.post('/submit', async (req, res) => {
   }
 });
 
-
 router.post('/', async (req, res) => {
   try {
     const newQuiz = new Quiz(req.body);
@@ -77,7 +72,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-
 router.get('/:email', async (req, res) => {
   try {
     const quizzes = await Quiz.find({ trainerEmail: req.params.email }).sort({ createdAt: -1 });
@@ -87,7 +81,6 @@ router.get('/:email', async (req, res) => {
   }
 });
 
-
 router.put('/:id', async (req, res) => {
   try {
     const updatedQuiz = await Quiz.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -96,7 +89,6 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
-
 
 router.delete('/:id', async (req, res) => {
   try {

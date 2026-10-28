@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import API, { getImageUrl } from '../utils/api';
 
 const EmployeeQuizzes = ({ userName, userEmail }) => {
-  const [activeTab, setActiveTab] = useState('all'); 
+  const [activeTab, setActiveTab] = useState('all');
   const [quizzesList, setQuizzesList] = useState([]);
   const [myBatches, setMyBatches] = useState([]);
   const [allStudents, setAllStudents] = useState([]);
@@ -13,11 +13,11 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
   const [currentQuizId, setCurrentQuizId] = useState(null);
   const [title, setTitle] = useState("");
   const [batch, setBatch] = useState("");
-  const [moduleName, setModuleName] = useState(""); 
+  const [moduleName, setModuleName] = useState("");
   const [totalQuestions, setTotalQuestions] = useState(1);
   const [totalMarks, setTotalMarks] = useState(1);
   const [description, setDescription] = useState("");
-  
+
   const [questions, setQuestions] = useState([
     {
       id: Date.now(),
@@ -130,22 +130,21 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
 
   const handleSaveQuiz = async () => {
     if (!title.trim() || !batch || !moduleName) return alert("Please fill the Quiz Title, Batch, and select a Module.");
-    
+
     for (let i = 0; i < questions.length; i++) {
         if(!questions[i].question.trim()) return alert(`Please enter the question text for Question ${i + 1}`);
     }
 
-    // 🔥 FIXED: Explicitly mapping both module and moduleName 🔥
-    const payload = { 
-      title, 
-      batch, 
-      module: moduleName, 
-      moduleName: moduleName, 
-      totalQuestions, 
-      totalMarks, 
-      description, 
-      trainerEmail: activeEmail, 
-      questions 
+    const payload = {
+      title,
+      batch,
+      module: moduleName,
+      moduleName: moduleName,
+      totalQuestions,
+      totalMarks,
+      description,
+      trainerEmail: activeEmail,
+      questions
     };
 
     try {
@@ -156,10 +155,10 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
         await API.post('/quizzes', payload);
         alert("Quiz Created Successfully! 🎉");
       }
-      
+
       resetForm();
-      fetchData(); 
-      setActiveTab('all'); 
+      fetchData();
+      setActiveTab('all');
     } catch (error) {
       console.error("Error saving quiz:", error);
       alert("Failed to save quiz. Is backend running?");
@@ -194,7 +193,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
     if (!window.confirm("Are you sure you want to delete this quiz?")) return;
     try {
       await API.delete(`/quizzes/${id}`);
-      fetchData(); 
+      fetchData();
     } catch (error) {
       console.error("Error deleting quiz:", error);
     }
@@ -224,7 +223,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
 
   return (
     <div className="quiz-wrapper">
-      
+
       {activeTab === 'all' ? (
         <>
           <div className="quiz-header-container">
@@ -239,7 +238,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
               <button className={`quiz-tab-btn ${activeTab === 'all' ? 'active' : ''}`} onClick={() => {resetForm(); setActiveTab('all');}}>All Quizzes</button>
             </div>
             <button className="quiz-create-btn" onClick={() => {
-              resetForm(); 
+              resetForm();
               if(availableModules.length > 0) setModuleName(availableModules[0]);
               setActiveTab('create');
             }}><i className="fas fa-plus"></i> Create Quiz</button>
@@ -264,9 +263,9 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
 
           <div className="quiz-search-container">
             <div className="quiz-search-box">
-              <input 
-                type="text" 
-                placeholder="Search quizzes by title or batch..." 
+              <input
+                type="text"
+                placeholder="Search quizzes by title or batch..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -388,7 +387,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
 
           <div className="cq-card">
             <h2 className="cq-card-title">Quiz Details</h2>
-            
+
             <div className="cq-details-grid">
               <div className="cq-input-group">
                 <label>Quiz Title <span className="req">*</span></label>
@@ -438,7 +437,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
           <div className="cq-questions-list">
             {questions.map((q, idx) => (
               <div className="cq-q-card" key={q.id}>
-                
+
                 <div className="cq-q-top">
                   <div className="cq-q-num">{idx + 1}</div>
                   <div className="cq-input-group" style={{flex: 1, margin: 0, minWidth: '200px'}}>
@@ -459,10 +458,10 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
                     <div className="cq-opt-row" key={oIdx}>
                       <div className="cq-opt-circle">{opt.letter}</div>
                       <input type="text" className="cq-input" value={opt.text} onChange={(e) => handleOptionChange(q.id, opt.letter, e.target.value)} placeholder={`Option ${opt.letter}`} />
-                      <input 
-                        type="radio" 
-                        name={`correct-${q.id}`} 
-                        className="cq-radio" 
+                      <input
+                        type="radio"
+                        name={`correct-${q.id}`}
+                        className="cq-radio"
                         checked={opt.letter === q.correct}
                         onChange={() => handleQuestionChange(q.id, 'correct', opt.letter)}
                       />
@@ -517,14 +516,14 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
         .quiz-table th { background: #f8fafc; padding: 16px 24px; font-size: 12px; font-weight: 700; color: #1e293b; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; z-index: 10;}
         .quiz-table td { padding: 16px 24px; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
         .quiz-table tr:last-child td { border-bottom: none; }
-        
+
         .q-title-box { display: flex; flex-direction: column; gap: 4px; }
         .q-title { font-size: 14px; font-weight: 700; color: #020617; }
         .q-desc { font-size: 12px; color: #64748b; }
-        
+
         .q-batch-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; white-space: nowrap; }
         .q-batch-badge.blue { background: #eff6ff; color: #2563eb; }
-        
+
         .q-bold-text { font-size: 13px; font-weight: 700; color: #0f172a; }
 
         .q-actions { display: flex; gap: 8px; justify-content: flex-end; }
@@ -536,14 +535,14 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
 
         .cq-view { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
+
         .cq-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 15px; }
         .cq-back-btn { background: #ffffff; border: 1px solid #cbd5e1; color: #2563eb; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
         .cq-back-btn:hover { background: #f1f5f9; }
 
         .cq-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: clamp(16px, 2.5vw, 24px); margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
         .cq-card-title { font-size: 16px; font-weight: 800; color: #020617; margin: 0 0 20px 0; }
-        
+
         .cq-details-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
@@ -563,7 +562,7 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
 
         .cq-questions-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 30px; }
         .cq-q-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: clamp(16px, 2vw, 24px); box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
-        
+
         .cq-q-top { display: flex; gap: 16px; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; }
         .cq-q-num { width: 34px; height: 34px; border-radius: 50%; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: 800; color: #0f172a; flex-shrink: 0; margin-bottom: 3px;}
         .cq-del-btn { background: #fef2f2; border: 1px solid #fca5a5; color: #ef4444; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; height: 42px; }
@@ -589,21 +588,21 @@ const EmployeeQuizzes = ({ userName, userEmail }) => {
         .cq-cancel-btn:hover { background: #f8fafc; color: #0f172a; }
         .cq-save-btn { background: #2563eb; border: none; color: #ffffff; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .cq-save-btn:hover { background: #1d4ed8; }
-        
+
         .fw-bold { font-weight: 700; }
         .fw-semibold { font-weight: 600; }
         .text-muted { color: #64748b; }
         .cls-td-user { display: flex; align-items: center; gap: 12px; }
         .cls-td-user img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
         .badge-pending { background: #f1f5f9; color: #64748b; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-        
+
         .quiz-pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; flex-wrap: wrap; gap: 15px; }
         .q-page-text { font-size: 13px; color: #64748b; }
         .q-pagination { display: flex; gap: 6px; }
         .q-page-btn { width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; font-size: 13px; font-weight: 600; color: #475569; cursor: pointer; transition: 0.2s; }
         .q-page-btn:hover { background: #f8fafc; }
         .q-page-btn.active { background: #2563eb; border-color: #2563eb; color: #ffffff; }
-        
+
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }

@@ -9,20 +9,15 @@ const Syllabus = () => {
   const [syllabusList, setSyllabusList] = useState([]);
   const [searchInput, setSearchInput] = useState('');
 
-  // Dynamic Courses Dropdown
   const [coursesList, setCoursesList] = useState([]);
 
-  // View Modal State
   const [viewSyllabus, setViewSyllabus] = useState(null);
 
-  // Basic Info State
   const initialFormState = { courseName: '', duration: '', description: '' };
   const [formData, setFormData] = useState(initialFormState);
 
-  // Dynamic Modules State
   const [modules, setModules] = useState([{ title: '', topics: [''] }]);
 
-  // 1. FETCH SYLLABUS API (GET) with cache
   const fetchSyllabus = async (forceRefresh = false) => {
     try {
       if (!forceRefresh) {
@@ -41,7 +36,6 @@ const Syllabus = () => {
     }
   };
 
-  // 2. FETCH COURSES API (GET) with cache
   const fetchCourses = async () => {
     try {
       const cached = getCache('courses');
@@ -60,21 +54,18 @@ const Syllabus = () => {
 
   useEffect(() => {
     fetchSyllabus();
-    fetchCourses(); 
+    fetchCourses();
   }, []);
 
-  // 🔥 UPDATED: Auto-fill Logic Added Here 🔥
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === 'courseName') {
-      // Select aana course-oda data-va coursesList-la irundhu edukurom
       const selectedCourse = coursesList.find(c => c.courseName === value);
-      
-      setFormData({ 
-        ...formData, 
+
+      setFormData({
+        ...formData,
         courseName: value,
-        // Course data irundha adha fill pannum, illana empty aakkidum
         duration: selectedCourse?.duration || '',
         description: selectedCourse?.description || ''
       });
@@ -83,7 +74,6 @@ const Syllabus = () => {
     }
   };
 
-  // ================= MODULE BUILDER LOGICS =================
   const handleAddModule = () => {
     setModules([...modules, { title: '', topics: [''] }]);
   };
@@ -117,9 +107,7 @@ const Syllabus = () => {
     updated[modIndex].topics[topicIndex] = text;
     setModules(updated);
   };
-  // =========================================================
 
-  // DELETE API
   const handleDelete = async (syllabusToDelete, e) => {
     e.preventDefault();
     if (window.confirm(`Are you sure you want to delete ${syllabusToDelete.courseName} syllabus?`)) {
@@ -130,14 +118,13 @@ const Syllabus = () => {
           setSyllabusList(prev => prev.filter(s => s._id !== syllabusToDelete._id));
           alert("Syllabus Deleted Successfully! 🗑️");
         }
-      } catch (error) { 
+      } catch (error) {
         console.error("Delete syllabus error:", error);
-        alert("Failed to delete syllabus!"); 
+        alert("Failed to delete syllabus!");
       }
     }
   };
 
-  // EDIT SETUP
   const handleEdit = (syllabusToEdit, e) => {
     e.preventDefault();
     setFormData({
@@ -150,7 +137,6 @@ const Syllabus = () => {
     setShowAddForm(true);
   };
 
-  // SAVE / UPDATE API
   const handleSaveSyllabus = async (e) => {
     e.preventDefault();
     const submitData = { ...formData, modules: modules };
@@ -158,30 +144,29 @@ const Syllabus = () => {
     try {
       if (editId) {
         const response = await API.put(`/syllabus/update/${editId}`, submitData);
-        if (response.data?.success || response.status === 200) { 
+        if (response.data?.success || response.status === 200) {
           clearCache('syllabus');
-          alert("Syllabus Updated Successfully! ✏️"); 
-          fetchSyllabus(true); 
+          alert("Syllabus Updated Successfully! ✏️");
+          fetchSyllabus(true);
         }
       } else {
         const response = await API.post('/syllabus/add', submitData);
-        if (response.data?.success || response.status === 201 || response.status === 200) { 
+        if (response.data?.success || response.status === 201 || response.status === 200) {
           clearCache('syllabus');
-          alert("New Syllabus Added! 🚀"); 
-          fetchSyllabus(true); 
+          alert("New Syllabus Added! 🚀");
+          fetchSyllabus(true);
         }
       }
-      setShowAddForm(false); 
-      setEditId(null); 
-      setFormData(initialFormState); 
+      setShowAddForm(false);
+      setEditId(null);
+      setFormData(initialFormState);
       setModules([{ title: '', topics: [''] }]);
-    } catch (error) { 
+    } catch (error) {
       console.error("Save syllabus error:", error);
-      alert("Something went wrong saving syllabus!"); 
+      alert("Something went wrong saving syllabus!");
     }
   };
 
-  // Live Filter
   const displayedSyllabus = syllabusList.filter(s => {
     if (!searchInput) return true;
     const query = searchInput.toLowerCase();
@@ -207,11 +192,11 @@ const Syllabus = () => {
             <div className="form-grid">
               <div className="input-group">
                 <label>Course Name *</label>
-                <select 
-                  name="courseName" 
-                  value={formData.courseName} 
-                  onChange={handleInputChange} 
-                  required 
+                <select
+                  name="courseName"
+                  value={formData.courseName}
+                  onChange={handleInputChange}
+                  required
                   style={{ width: '100%', padding: '10px 14px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '14px', color: '#0f172a', outline: 'none', background: '#fff' }}
                 >
                   <option value="">Select Course</option>
@@ -247,16 +232,16 @@ const Syllabus = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {modules.map((mod, mIndex) => (
                 <div key={mIndex} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                  
+
                   <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px' }}>
                     <div style={{ background: '#334155', color: '#fff', width: '30px', height: '30px', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '6px', fontWeight: 'bold', fontSize: '14px' }}>{mIndex + 1}</div>
-                    <input 
-                      type="text" 
-                      placeholder={`Module ${mIndex + 1} Title`} 
-                      value={mod.title} 
-                      onChange={(e) => handleModuleTitleChange(e.target.value, mIndex)} 
-                      style={{ flex: 1, padding: '10px 15px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', fontSize: '15px', fontWeight: 'bold', color: '#1e293b' }} 
-                      required 
+                    <input
+                      type="text"
+                      placeholder={`Module ${mIndex + 1} Title`}
+                      value={mod.title}
+                      onChange={(e) => handleModuleTitleChange(e.target.value, mIndex)}
+                      style={{ flex: 1, padding: '10px 15px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', fontSize: '15px', fontWeight: 'bold', color: '#1e293b' }}
+                      required
                     />
                     {modules.length > 1 && (
                       <button type="button" onClick={() => handleRemoveModule(mIndex)} style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', width: '40px', height: '40px', borderRadius: '6px', cursor: 'pointer' }}>
@@ -271,13 +256,13 @@ const Syllabus = () => {
                       {mod.topics.map((topic, tIndex) => (
                         <div key={tIndex} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                           <i className="fas fa-play" style={{ color: '#94a3b8', fontSize: '10px' }}></i>
-                          <input 
-                            type="text" 
-                            placeholder="Enter topic name..." 
-                            value={topic} 
-                            onChange={(e) => handleTopicChange(e.target.value, mIndex, tIndex)} 
-                            style={{ flex: 1, padding: '8px 15px', border: '1px solid #e2e8f0', borderRadius: '6px', outline: 'none', fontSize: '14px', minWidth: 0 }} 
-                            required 
+                          <input
+                            type="text"
+                            placeholder="Enter topic name..."
+                            value={topic}
+                            onChange={(e) => handleTopicChange(e.target.value, mIndex, tIndex)}
+                            style={{ flex: 1, padding: '8px 15px', border: '1px solid #e2e8f0', borderRadius: '6px', outline: 'none', fontSize: '14px', minWidth: 0 }}
+                            required
                           />
                           {mod.topics.length > 1 && (
                             <button type="button" onClick={() => handleRemoveTopic(mIndex, tIndex)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '5px', flexShrink: 0 }}>
@@ -323,11 +308,11 @@ const Syllabus = () => {
       <div className="filters-bar" style={{ display: 'flex', gap: '10px', background: '#fff', padding: '15px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', marginBottom: '20px', flexWrap: 'wrap' }}>
         <div className="search-box" style={{ flex: 1, minWidth: 'min(100%, 260px)' }}>
           <i className="fas fa-search"></i>
-          <input 
-            type="text" 
-            placeholder="Search syllabus by course name..." 
-            value={searchInput} 
-            onChange={(e) => setSearchInput(e.target.value)} 
+          <input
+            type="text"
+            placeholder="Search syllabus by course name..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
       </div>
@@ -377,12 +362,10 @@ const Syllabus = () => {
         </table>
       </div>
 
-      {/* ===================== VIEW SYLLABUS MODAL ===================== */}
       {viewSyllabus && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '15px' }}>
           <div style={{ background: '#fff', width: 'min(800px, 100%)', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
-            
-            {/* Modal Header */}
+
             <div style={{ padding: '16px clamp(16px, 2.5vw, 25px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: '18px', color: '#1e293b' }}>{viewSyllabus.courseName}</h2>
@@ -393,9 +376,8 @@ const Syllabus = () => {
               </button>
             </div>
 
-            {/* Modal Body (Scrollable) */}
             <div style={{ overflowY: 'auto', padding: 'clamp(14px, 2.5vw, 25px)' }}>
-              
+
               <div style={{ display: 'flex', gap: '20px', marginBottom: '25px', background: '#eff6ff', padding: '15px', borderRadius: '8px', border: '1px solid #bfdbfe', flexWrap: 'wrap' }}>
                 <div>
                   <span style={{ display: 'block', fontSize: '12px', color: '#3b82f6', fontWeight: 'bold' }}>Duration</span>

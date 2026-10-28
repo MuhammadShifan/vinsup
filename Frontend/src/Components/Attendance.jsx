@@ -4,10 +4,10 @@ import API, { getBaseUrl } from '../utils/api';
 
 const Attendance = () => {
   const [searchInput, setSearchInput] = useState('');
-  const [selectedEmployee, setSelectedEmployee] = useState(null); 
-  const [showHistoryModal, setShowHistoryModal] = useState(false); 
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [historySearch, setHistorySearch] = useState('');
-  
+
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,7 +28,7 @@ const Attendance = () => {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       const dbData = response.data;
-      console.log("Backend Response:", dbData); 
+      console.log("Backend Response:", dbData);
 
       let employeeArray = [];
       if (Array.isArray(dbData)) {
@@ -38,21 +38,21 @@ const Attendance = () => {
       } else if (dbData && Array.isArray(dbData.employees)) {
         employeeArray = dbData.employees;
       } else {
-        employeeArray = []; 
+        employeeArray = [];
       }
-      
+
       const formattedRecords = employeeArray.map((emp) => ({
-        id: emp.empId || emp._id, 
+        id: emp.empId || emp._id,
         name: emp.fullName || emp.name || "Unknown",
         department: emp.department || "General",
         designation: emp.designation || "Trainer",
         shift: emp.shift || "General",
-        checkIn: emp.todayCheckIn || "-",  
+        checkIn: emp.todayCheckIn || "-",
         checkOut: emp.todayCheckOut || "-",
         status: emp.todayStatus || "Not Marked",
         rate: emp.attendancePercentage || 0,
         photo: getPhotoUrl(emp.profilePhoto),
-        reason: emp.leaveReason || "", 
+        reason: emp.leaveReason || "",
         leaveDate: emp.leaveDate || ""
       }));
 
@@ -75,8 +75,8 @@ const Attendance = () => {
   const absentCount = attendanceRecords.filter(emp => emp.status === 'Absent').length;
   const lateCount = attendanceRecords.filter(emp => emp.status === 'Late').length;
 
-  const filteredRecords = attendanceRecords.filter(emp => 
-    emp.name.toLowerCase().includes(searchInput.toLowerCase()) || 
+  const filteredRecords = attendanceRecords.filter(emp =>
+    emp.name.toLowerCase().includes(searchInput.toLowerCase()) ||
     emp.id.toLowerCase().includes(searchInput.toLowerCase())
   );
 
@@ -85,13 +85,13 @@ const Attendance = () => {
     { empId: "EMP001", name: "John Peter", date: "Mar 20, 2026", status: "Absent", reason: "Car Breakdown" },
   ]);
 
-  const historyResults = leaveHistory.filter(log => 
+  const historyResults = leaveHistory.filter(log =>
     historySearch.length > 2 && (log.name.toLowerCase().includes(historySearch.toLowerCase()) || log.empId.toLowerCase().includes(historySearch.toLowerCase()))
   );
 
   return (
     <div className="employees-container" style={{ width: '100%', boxSizing: 'border-box' }}>
-      
+
       <div className="page-header flex-between" style={{ width: '100%' }}>
         <div>
           <h2>Attendance Log</h2>
@@ -127,7 +127,7 @@ const Attendance = () => {
       )}
 
       <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', width: '100%', flexWrap: 'wrap' }}>
-        
+
         <div className="table-container" style={{ flex: '1 1 600px', minWidth: 0, overflowX: 'auto', background: '#fff', borderRadius: '10px' }}>
           <table style={{ width: '100%', minWidth: '700px' }}>
             <thead>
@@ -149,23 +149,23 @@ const Attendance = () => {
                 </td></tr>
               ) : filteredRecords.length > 0 ? (
                 filteredRecords.map((emp, index) => (
-                  <tr 
-                    key={emp.id} 
+                  <tr
+                    key={emp.id}
                     onClick={() => setSelectedEmployee(emp)}
-                    style={{ 
-                      cursor: 'pointer', 
-                      background: selectedEmployee?.id === emp.id ? '#f0f6ff' : 'transparent', 
-                      transition: '0.2s' 
+                    style={{
+                      cursor: 'pointer',
+                      background: selectedEmployee?.id === emp.id ? '#f0f6ff' : 'transparent',
+                      transition: '0.2s'
                     }}
                   >
                     <td>{index + 1}</td>
                     <td style={{ fontWeight: '500', color: '#64748b' }}>{emp.id}</td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <img 
-                          src={emp.photo} 
-                          alt={emp.name} 
-                          style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} 
+                        <img
+                          src={emp.photo}
+                          alt={emp.name}
+                          style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }}
                           onError={(e) => { e.target.src = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; }}
                         />
                         <strong style={{ color: '#1e293b', fontSize: '14px' }}>{emp.name}</strong>
@@ -176,7 +176,7 @@ const Attendance = () => {
                     <td style={{ color: '#475569', fontWeight: '500' }}>{emp.checkIn}</td>
                     <td style={{ color: '#475569', fontWeight: '500' }}>{emp.checkOut}</td>
                     <td>
-                      <span style={{ 
+                      <span style={{
                         padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold',
                         background: emp.status === 'Present' ? '#dcfce7' : emp.status === 'Absent' ? '#fee2e2' : emp.status === 'Late' ? '#fef3c7' : '#f1f5f9',
                         color: emp.status === 'Present' ? '#16a34a' : emp.status === 'Absent' ? '#ef4444' : emp.status === 'Late' ? '#d97706' : '#64748b'
@@ -200,7 +200,7 @@ const Attendance = () => {
                 <h4 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#1e293b', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
                   Summary: {selectedEmployee.name}
                 </h4>
-                
+
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '25px', position: 'relative' }}>
                   <div style={{ position: 'relative', width: '130px', height: '130px' }}>
                     <svg width="130" height="130" viewBox="0 0 100 100">
@@ -213,7 +213,7 @@ const Attendance = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div style={{ fontSize: '13.5px', color: '#475569', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <div className="flex-between"><span>Designation:</span><strong>{selectedEmployee.designation}</strong></div>
                   <div className="flex-between">
@@ -222,7 +222,7 @@ const Attendance = () => {
                       {selectedEmployee.status}
                     </strong>
                   </div>
-                  
+
                   {selectedEmployee.status === 'Absent' && selectedEmployee.reason && (
                     <div style={{ background: '#fef2f2', padding: '15px', borderRadius: '8px', borderLeft: '4px solid #ef4444', marginTop: '10px' }}>
                       <span style={{ display: 'block', fontSize: '11px', color: '#ef4444', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>Absent Reason ({selectedEmployee.leaveDate || "Today"})</span>
@@ -234,7 +234,6 @@ const Attendance = () => {
             ) : (
               <div style={{ textAlign: 'center', color: '#94a3b8', padding: '40px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                 <i className="fas fa-hand-pointer" style={{ fontSize: '40px', color: '#cbd5e1', marginBottom: '15px' }}></i>
-                {/* 🔥 Text updated to guide users to click the row 🔥 */}
                 <p style={{ fontSize: '14px', margin: 0, lineHeight: '1.6' }}>Click anywhere on a <strong>Row</strong> in the table to view attendance summary.</p>
               </div>
             )}

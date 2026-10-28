@@ -5,16 +5,13 @@ const UserHelpdesk = ({ userName, userEmail }) => {
   const [currentView, setCurrentView] = useState('dashboard');
   const [selectedPriority, setSelectedPriority] = useState('Medium');
 
-  // Backend Integration States
-  const [tickets, setTickets] = useState([]); 
+  const [tickets, setTickets] = useState([]);
   const [activeTab, setActiveTab] = useState('All Tickets');
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // 🔥 PAGINATION STATES 🔥
+
   const [currentPage, setCurrentPage] = useState(1);
   const ticketsPerPage = 5;
-  
-  // Dynamic User Email Resolution
+
   const getStoredEmail = () => {
     if (userEmail) return userEmail.toLowerCase().trim();
     try {
@@ -49,7 +46,6 @@ const UserHelpdesk = ({ userName, userEmail }) => {
     }
   }, [currentView, employeeId]);
 
-  // Reset to page 1 when Tab or Search changes
   useEffect(() => {
     setCurrentPage(1);
   }, [activeTab, searchQuery]);
@@ -122,7 +118,6 @@ const UserHelpdesk = ({ userName, userEmail }) => {
     return matchesTab && matchesSearch;
   });
 
-  // 🔥 PAGINATION LOGIC 🔥
   const indexOfLastTicket = currentPage * ticketsPerPage;
   const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
   const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
@@ -138,9 +133,6 @@ const UserHelpdesk = ({ userName, userEmail }) => {
 
   const padZero = (num) => (num < 10 ? `0${num}` : num);
 
-  // ==========================================
-  // VIEW 1: FULL DASHBOARD
-  // ==========================================
   const renderDashboard = () => (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
@@ -148,7 +140,7 @@ const UserHelpdesk = ({ userName, userEmail }) => {
           <h1 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: 'clamp(20px, 3vw, 24px)', fontWeight: 'bold' }}>Helpdesk</h1>
           <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>We're here to help you. Raise a ticket or view your existing requests.</p>
         </div>
-        <button 
+        <button
           onClick={() => setCurrentView('raise_ticket')}
           style={{ padding: '10px 20px', background: '#2563eb', border: 'none', color: '#fff', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <i className="fas fa-plus"></i> Raise New Ticket
@@ -156,9 +148,8 @@ const UserHelpdesk = ({ userName, userEmail }) => {
       </div>
 
       <div className="user-helpdesk-grid">
-        {/* === LEFT COLUMN === */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-          
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '20px' }}>
             {[
               { title: 'My Tickets', count: padZero(totalTickets), icon: 'fas fa-ticket-alt', color: '#2563eb', bg: '#eff6ff', sub: 'All Time' },
@@ -182,8 +173,8 @@ const UserHelpdesk = ({ userName, userEmail }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
               <div style={{ display: 'flex', gap: '20px', borderBottom: '2px solid #f1f5f9', overflowX: 'auto', maxWidth: '100%' }}>
                 {['All Tickets', 'In Progress', 'Resolved'].map((tab, i) => (
-                  <span 
-                    key={i} 
+                  <span
+                    key={i}
                     onClick={() => setActiveTab(tab)}
                     style={{ paddingBottom: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginBottom: '-2px', color: activeTab === tab ? '#2563eb' : '#64748b', borderBottom: activeTab === tab ? '2px solid #2563eb' : '2px solid transparent', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
                     {tab}
@@ -193,12 +184,12 @@ const UserHelpdesk = ({ userName, userEmail }) => {
               <div style={{ display: 'flex', gap: '15px', width: 'auto' }}>
                 <div style={{ position: 'relative', width: '100%' }}>
                   <i className="fas fa-search" style={{ position: 'absolute', left: '12px', top: '11px', color: '#94a3b8', fontSize: '13px' }}></i>
-                  <input 
-                    type="text" 
-                    placeholder="Search tickets..." 
+                  <input
+                    type="text"
+                    placeholder="Search tickets..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ padding: '9px 15px 9px 38px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', width: 'min(220px, 100%)', color: '#1e293b', boxSizing: 'border-box' }} 
+                    style={{ padding: '9px 15px 9px 38px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '13px', width: 'min(220px, 100%)', color: '#1e293b', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
@@ -244,8 +235,8 @@ const UserHelpdesk = ({ userName, userEmail }) => {
                         </td>
                         <td style={{ padding: '20px', fontSize: '13px', color: '#475569' }}>{ticket.date}</td>
                         <td style={{ padding: '20px', textAlign: 'center' }}>
-                          <i 
-                            className="fas fa-trash-alt" 
+                          <i
+                            className="fas fa-trash-alt"
                             onClick={() => handleDeleteTicket(ticket._id)}
                             style={{ color: '#ef4444', cursor: 'pointer', fontSize: '14px', transition: '0.2s', opacity: 0.8 }}
                             title="Delete Ticket"
@@ -265,36 +256,36 @@ const UserHelpdesk = ({ userName, userEmail }) => {
                 </tbody>
               </table>
             </div>
-            
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #f1f5f9', flexWrap: 'wrap', gap: '15px' }}>
               {totalPages > 1 && (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <button 
-                    onClick={prevPage} 
+                  <button
+                    onClick={prevPage}
                     disabled={currentPage === 1}
                     style={{ padding: '6px 12px', border: '1px solid #e2e8f0', background: '#fff', borderRadius: '6px', color: currentPage === 1 ? '#94a3b8' : '#475569', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}>
                     <i className="fas fa-chevron-left"></i>
                   </button>
 
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button 
+                    <button
                       key={page}
                       onClick={() => paginate(page)}
-                      style={{ 
-                        padding: '6px 14px', 
-                        border: page === currentPage ? 'none' : '1px solid #e2e8f0', 
-                        background: page === currentPage ? '#2563eb' : '#fff', 
-                        borderRadius: '6px', 
-                        color: page === currentPage ? '#fff' : '#475569', 
+                      style={{
+                        padding: '6px 14px',
+                        border: page === currentPage ? 'none' : '1px solid #e2e8f0',
+                        background: page === currentPage ? '#2563eb' : '#fff',
+                        borderRadius: '6px',
+                        color: page === currentPage ? '#fff' : '#475569',
                         fontWeight: '600',
-                        cursor: 'pointer' 
+                        cursor: 'pointer'
                       }}>
                       {page}
                     </button>
                   ))}
 
-                  <button 
-                    onClick={nextPage} 
+                  <button
+                    onClick={nextPage}
                     disabled={currentPage === totalPages}
                     style={{ padding: '6px 12px', border: '1px solid #e2e8f0', background: '#fff', borderRadius: '6px', color: currentPage === totalPages ? '#94a3b8' : '#475569', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}>
                     <i className="fas fa-chevron-right"></i>
@@ -305,7 +296,6 @@ const UserHelpdesk = ({ userName, userEmail }) => {
           </div>
         </div>
 
-        {/* === RIGHT COLUMN (SIDEBAR) === */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
           <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(16px, 2vw, 25px)', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
@@ -338,9 +328,6 @@ const UserHelpdesk = ({ userName, userEmail }) => {
     </>
   );
 
-  // ==========================================
-  // VIEW 2: RAISE TICKET FORM 
-  // ==========================================
   const renderRaiseTicket = () => (
     <>
       <div style={{ marginBottom: '25px' }}>
@@ -354,13 +341,12 @@ const UserHelpdesk = ({ userName, userEmail }) => {
       </div>
 
       <div className="user-helpdesk-grid">
-        
-        {/* === LEFT COLUMN (FORM) === */}
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-          
+
           <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(18px, 2.5vw, 30px)', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
             <h3 style={{ margin: '0 0 25px 0', fontSize: '18px', color: '#0f172a', fontWeight: 'bold' }}>Ticket Information</h3>
-            
+
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '14px', color: '#1e293b', marginBottom: '8px', fontWeight: '600' }}>Subject <span style={{ color: '#ef4444' }}>*</span></label>
               <input name="subject" value={formData.subject} onChange={handleInputChange} type="text" placeholder="Enter a short description of your issue" style={{ width: '100%', padding: '14px 18px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', boxSizing: 'border-box', fontSize: '14px', color: '#1e293b' }} />
@@ -379,10 +365,10 @@ const UserHelpdesk = ({ userName, userEmail }) => {
               <label style={{ display: 'block', fontSize: '14px', color: '#1e293b', marginBottom: '8px', fontWeight: '600' }}>Priority <span style={{ color: '#ef4444' }}>*</span></label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
                 {['Low', 'Medium', 'High', 'Urgent'].map(level => (
-                  <div 
-                    key={level} 
+                  <div
+                    key={level}
                     onClick={() => setSelectedPriority(level)}
-                    style={{ 
+                    style={{
                       padding: '14px', borderRadius: '8px', cursor: 'pointer',
                       border: selectedPriority === level ? `1px solid ${getPriorityStyle(level).border}` : '1px solid #e2e8f0',
                       background: selectedPriority === level ? '#fff' : '#f8fafc',
@@ -420,12 +406,11 @@ const UserHelpdesk = ({ userName, userEmail }) => {
           </div>
         </div>
 
-        {/* === RIGHT COLUMN (FORM SIDEBAR) === */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-          
+
           <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(16px, 2vw, 25px)', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
             <h3 style={{ margin: '0 0 25px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>What happens next?</h3>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
               <div style={{ display: 'flex', gap: '15px' }}>
                 <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#eff6ff', color: '#2563eb', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0, fontSize: '16px' }}><i className="fas fa-paper-plane"></i></div>
@@ -434,7 +419,7 @@ const UserHelpdesk = ({ userName, userEmail }) => {
                   <p style={{ margin: 0, fontSize: '13px', color: '#64748b', lineHeight: '1.5' }}>We'll receive your ticket and notify our team.</p>
                 </div>
               </div>
-              
+
               <div style={{ display: 'flex', gap: '15px' }}>
                 <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#f0fdf4', color: '#16a34a', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0, fontSize: '16px' }}><i className="fas fa-search"></i></div>
                 <div>
@@ -457,7 +442,7 @@ const UserHelpdesk = ({ userName, userEmail }) => {
             <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
               <i className="far fa-lightbulb" style={{ color: '#2563eb' }}></i> Helpful Tips
             </h3>
-            
+
             <ul style={{ listStyle: 'none', padding: 0, margin: '0', display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <li style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', fontSize: '13px', color: '#1e293b', lineHeight: '1.5' }}>
                 <i className="fas fa-check" style={{ color: '#2563eb', marginTop: '3px' }}></i> Provide as much detail as possible

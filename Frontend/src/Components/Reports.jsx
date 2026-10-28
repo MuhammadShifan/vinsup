@@ -6,8 +6,8 @@ import { getCache, setCache } from '../utils/cache';
 const Reports = () => {
   const [fromDate, setFromDate] = useState('2026-07-01');
   const [toDate, setToDate] = useState('2026-07-16');
-  
-  const [activeReport, setActiveReport] = useState(null); 
+
+  const [activeReport, setActiveReport] = useState(null);
 
   const [attendanceData, setAttendanceData] = useState([]);
   const [courseData, setCourseData] = useState([]);
@@ -15,14 +15,14 @@ const Reports = () => {
   const [loading, setLoading] = useState(false);
 
   const [activeCourseTab, setActiveCourseTab] = useState('Ongoing');
-  const [activeWorkloadTab, setActiveWorkloadTab] = useState('Active'); 
+  const [activeWorkloadTab, setActiveWorkloadTab] = useState('Active');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [allEmployees, setAllEmployees] = useState([]); 
+  const [allEmployees, setAllEmployees] = useState([]);
   const [generatedReportsHistory, setGeneratedReportsHistory] = useState([]);
-  
+
   const [formData, setFormData] = useState({
-    reportName: 'Attendance Log', 
+    reportName: 'Attendance Log',
     reportType: 'Attendance Log',
     empId: '',
     empName: '',
@@ -74,9 +74,9 @@ const Reports = () => {
     const selectedEmp = allEmployees.find(emp => emp._id === e.target.value || emp.empId === e.target.value);
     if (selectedEmp) {
       const name = selectedEmp.name || selectedEmp.firstName || selectedEmp.fullName || selectedEmp.email || 'Unknown';
-      setFormData({ 
-        ...formData, 
-        empId: selectedEmp._id || selectedEmp.empId, 
+      setFormData({
+        ...formData,
+        empId: selectedEmp._id || selectedEmp.empId,
         empName: name,
         empEmail: selectedEmp.email || ''
       });
@@ -93,7 +93,7 @@ const Reports = () => {
 
     try {
       const res = await API.post('/reports', formData);
-      
+
       if (res.status === 200 || res.status === 201) {
         const targetEmp = allEmployees.find(emp => emp._id === formData.empId || emp.empId === formData.empId);
         const resolvedEmail = (formData.empEmail || targetEmp?.email || targetEmp?.empEmail || '').toLowerCase().trim();
@@ -132,7 +132,7 @@ const Reports = () => {
       const res = await API.delete(`/reports/${id}`);
       if (res.status === 200) {
         alert("Report deleted successfully! 🗑️");
-        fetchGeneratedReportsHistory(); 
+        fetchGeneratedReportsHistory();
       } else {
         alert("Failed to delete the report.");
       }
@@ -148,14 +148,14 @@ const Reports = () => {
 
     try {
       if (reportType === 'attendance' || reportType === 'workload') {
-        
-        if (reportType === 'workload') setActiveWorkloadTab('Active'); 
+
+        if (reportType === 'workload') setActiveWorkloadTab('Active');
 
         const [empResponse, batchResponse] = await Promise.all([
           API.get('/employees').catch(() => ({ data: [] })),
           API.get('/batches').catch(() => ({ data: [] }))
         ]);
-        
+
         const employees = empResponse.data?.data || (Array.isArray(empResponse.data) ? empResponse.data : []);
         const batches = batchResponse.data?.data || (Array.isArray(batchResponse.data) ? batchResponse.data : []);
 
@@ -163,22 +163,22 @@ const Reports = () => {
           const formattedAttendance = employees.map(emp => ({
               id: emp.empId || emp._id,
               name: emp.fullName || emp.name || "Unknown",
-              daysPresent: emp.daysPresent || 0, 
-              daysAbsent: emp.daysAbsent || 0,   
+              daysPresent: emp.daysPresent || 0,
+              daysAbsent: emp.daysAbsent || 0,
               status: emp.attendanceStatus || (emp.attendancePercentage && emp.attendancePercentage >= 75 ? "Good" : (emp.attendancePercentage ? "Defaulter" : "-")),
-              leaveReason: emp.leaveReason || "-" 
+              leaveReason: emp.leaveReason || "-"
             }));
             setAttendanceData(formattedAttendance);
           }
 
           if (reportType === 'workload') {
             const trainers = employees.filter(emp => emp.designation && emp.designation.toLowerCase().includes('trainer'));
-            
+
             const formattedWorkload = trainers.map(trainer => {
               const trainerName = trainer.fullName || trainer.name || "";
-              
-              const myBatches = batches.filter(b => 
-                (b.trainerName && b.trainerName.toLowerCase() === trainerName.toLowerCase()) || 
+
+              const myBatches = batches.filter(b =>
+                (b.trainerName && b.trainerName.toLowerCase() === trainerName.toLowerCase()) ||
                 (b.trainer && b.trainer.toLowerCase() === trainerName.toLowerCase())
               );
 
@@ -194,32 +194,32 @@ const Reports = () => {
               }, 0);
 
               let finalWeeklyHours = 0;
-              
+
               if (trainer.weeklyHours) {
-                finalWeeklyHours = Number(trainer.weeklyHours); 
+                finalWeeklyHours = Number(trainer.weeklyHours);
               } else if (trainer.todayCheckIn && trainer.todayCheckOut && trainer.todayCheckIn !== "-" && trainer.todayCheckOut !== "-") {
                 const [inH, inM] = trainer.todayCheckIn.split(':').map(Number);
                 const [outH, outM] = trainer.todayCheckOut.split(':').map(Number);
-                
+
                 if (!isNaN(inH) && !isNaN(outH)) {
                   const inMinsTotal = (inH * 60) + (inM || 0);
                   const outMinsTotal = (outH * 60) + (outM || 0);
-                  
+
                   let diffMins = outMinsTotal - inMinsTotal;
-                  if (diffMins < 0) diffMins += 24 * 60; 
-                  
+                  if (diffMins < 0) diffMins += 24 * 60;
+
                   const dailyHours = diffMins / 60;
                   finalWeeklyHours = Math.round(dailyHours * 5);
                 }
               }
-              
+
               if (isNaN(finalWeeklyHours)) finalWeeklyHours = 0;
 
               return {
                 trainerId: trainer.empId || trainer._id,
                 name: trainerName || "Unknown",
                 designation: trainer.designation || "Trainer",
-                activeBatches: activeBatchesList.length, 
+                activeBatches: activeBatchesList.length,
                 activeStudents: getStudentCount(activeBatchesList),
                 historyBatches: historyBatchesList.length,
                 historyStudents: getStudentCount(historyBatchesList),
@@ -229,7 +229,7 @@ const Reports = () => {
             setWorkloadData(formattedWorkload);
           }
         } else if (reportType === 'course') {
-        setActiveCourseTab('Ongoing'); 
+        setActiveCourseTab('Ongoing');
         const batchResponse = await API.get('/batches').catch(() => ({ data: [] }));
         const batches = batchResponse.data?.data || (Array.isArray(batchResponse.data) ? batchResponse.data : []);
 
@@ -239,7 +239,7 @@ const Reports = () => {
             course: batch.courseName || "Unknown Course",
             trainer: batch.trainerName || batch.trainer || "Unassigned",
             startDate: batch.startDate || "-",
-            progress: batch.progress || 0, 
+            progress: batch.progress || 0,
             status: batch.status || "Ongoing"
           }));
           setCourseData(formattedCourses);
@@ -270,14 +270,14 @@ const Reports = () => {
 
   return (
     <div className="employees-container" style={{ position: 'relative', padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box' }}>
-      
+
       <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
         <div>
           <h2 style={{ margin: '0 0 5px 0', fontSize: '24px', color: '#0f172a' }}>Reports & Analytics</h2>
           <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>Dashboard &gt; Reports</p>
         </div>
-        
-        <button 
+
+        <button
           onClick={() => setIsModalOpen(true)}
           style={{ padding: '10px 20px', background: '#2563eb', border: 'none', color: '#fff', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)' }}>
           <i className="fas fa-plus"></i> Send Report
@@ -313,7 +313,6 @@ const Reports = () => {
         </div>
       </div>
 
-      {/* DYNAMIC REAL-TIME VIEWER SECTION */}
       {activeReport && (
         <div className="print-area" style={{ background: '#fff', borderRadius: '12px', padding: '25px', boxShadow: '0 5px 15px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', animation: 'fadeIn 0.3s ease-in-out', marginBottom: '30px' }}>
           <div className="flex-between" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
@@ -325,7 +324,7 @@ const Reports = () => {
               </h3>
               <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#64748b' }}>Date Range: {fromDate} to {toDate}</p>
             </div>
-            
+
             <div className="no-print" style={{ display: 'flex', gap: '10px' }}>
               <button style={{ background: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }} onClick={() => window.print()}>
                 <i className="fas fa-print"></i> Print Report
@@ -338,14 +337,14 @@ const Reports = () => {
 
           {activeReport === 'course' && (
             <div className="no-print" style={{ display: 'flex', gap: '30px', borderBottom: '1px solid #e2e8f0', marginBottom: '20px' }}>
-              <div 
-                onClick={() => setActiveCourseTab('Ongoing')} 
+              <div
+                onClick={() => setActiveCourseTab('Ongoing')}
                 style={{ paddingBottom: '12px', cursor: 'pointer', fontWeight: '600', color: activeCourseTab === 'Ongoing' ? '#2563eb' : '#64748b', borderBottom: activeCourseTab === 'Ongoing' ? '3px solid #2563eb' : '3px solid transparent', transition: '0.2s' }}
               >
                 Ongoing Batches
               </div>
-              <div 
-                onClick={() => setActiveCourseTab('Completed')} 
+              <div
+                onClick={() => setActiveCourseTab('Completed')}
                 style={{ paddingBottom: '12px', cursor: 'pointer', fontWeight: '600', color: activeCourseTab === 'Completed' ? '#16a34a' : '#64748b', borderBottom: activeCourseTab === 'Completed' ? '3px solid #16a34a' : '3px solid transparent', transition: '0.2s' }}
               >
                 Completed Batches
@@ -355,14 +354,14 @@ const Reports = () => {
 
           {activeReport === 'workload' && (
             <div className="no-print" style={{ display: 'flex', gap: '30px', borderBottom: '1px solid #e2e8f0', marginBottom: '20px' }}>
-              <div 
-                onClick={() => setActiveWorkloadTab('Active')} 
+              <div
+                onClick={() => setActiveWorkloadTab('Active')}
                 style={{ paddingBottom: '12px', cursor: 'pointer', fontWeight: '600', color: activeWorkloadTab === 'Active' ? '#8b5cf6' : '#64748b', borderBottom: activeWorkloadTab === 'Active' ? '3px solid #8b5cf6' : '3px solid transparent', transition: '0.2s' }}
               >
                 Active Workload
               </div>
-              <div 
-                onClick={() => setActiveWorkloadTab('History')} 
+              <div
+                onClick={() => setActiveWorkloadTab('History')}
                 style={{ paddingBottom: '12px', cursor: 'pointer', fontWeight: '600', color: activeWorkloadTab === 'History' ? '#16a34a' : '#64748b', borderBottom: activeWorkloadTab === 'History' ? '3px solid #16a34a' : '3px solid transparent', transition: '0.2s' }}
               >
                 Past History (Old)
@@ -470,9 +469,9 @@ const Reports = () => {
                     const batchesCount = isHistory ? data.historyBatches : data.activeBatches;
                     const studentsCount = isHistory ? data.historyStudents : data.activeStudents;
                     const labelStudents = isHistory ? 'Trained' : 'Students';
-                    
-                    const badgeColor = isHistory 
-                        ? { bg: '#dcfce7', text: '#16a34a' } 
+
+                    const badgeColor = isHistory
+                        ? { bg: '#dcfce7', text: '#16a34a' }
                         : { bg: '#f5f3ff', text: '#8b5cf6' };
 
                     return (
@@ -503,7 +502,6 @@ const Reports = () => {
         </div>
       )}
 
-      {/* GENERATED REPORTS HISTORY TABLE */}
       <div className="no-print" style={{ background: '#fff', borderRadius: '12px', padding: '25px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', marginTop: activeReport ? '0px' : '30px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h3 style={{ margin: '0', fontSize: '18px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -512,7 +510,6 @@ const Reports = () => {
           <span style={{ fontSize: '13px', color: '#64748b' }}>Showing all sent reports</span>
         </div>
 
-        {/* 🔥 FIX: Added max-height: 400px and overflowY for scrolling after 6 items 🔥 */}
         <div style={{ maxHeight: '400px', overflowY: 'auto', overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead style={{ position: 'sticky', top: 0, background: '#f8fafc', zIndex: 1 }}>
@@ -528,13 +525,13 @@ const Reports = () => {
               {generatedReportsHistory.length > 0 ? (
                 generatedReportsHistory.map((report, idx) => {
                   const targetEmp = allEmployees.find(emp => emp.email === report.empEmail || emp._id === report.empId || emp.empId === report.empId);
-                  
+
                   let finalImage = "";
                   if (targetEmp) {
                     const rawImage = targetEmp.profilePhoto || targetEmp.profilePic || targetEmp.image || targetEmp.avatar || targetEmp.photo || targetEmp.pic || targetEmp.profileImage || targetEmp.empImage || targetEmp.file;
                     if (rawImage && !rawImage.includes('randomuser.me')) {
                       if (rawImage.startsWith('http') || rawImage.startsWith('data:image')) {
-                        finalImage = rawImage; 
+                        finalImage = rawImage;
                       } else {
                         let cleanPath = rawImage.replace(/\\/g, '/').replace(/^\/+/, '');
                         finalImage = getImageUrl(cleanPath);
@@ -570,7 +567,7 @@ const Reports = () => {
                         {report.createdAt ? new Date(report.createdAt).toLocaleDateString() : 'N/A'}
                       </td>
                       <td style={{ padding: '12px', textAlign: 'center' }}>
-                        <button 
+                        <button
                           onClick={() => handleDeleteReport(report._id)}
                           style={{ background: '#fee2e2', border: '1px solid #fca5a5', color: '#ef4444', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '5px', transition: '0.2s' }}
                           onMouseOver={(e) => { e.currentTarget.style.background = '#fef2f2' }}
@@ -594,7 +591,6 @@ const Reports = () => {
         </div>
       </div>
 
-      {/* GENERATE REPORT MODAL */}
       {isModalOpen && (
         <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(2px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '16px' }}>
           <div style={{ background: '#fff', width: 'min(500px, 100%)', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
@@ -602,12 +598,12 @@ const Reports = () => {
               <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 'bold' }}>Send Report</h2>
               <i className="fas fa-times" onClick={() => setIsModalOpen(false)} style={{ color: '#475569', cursor: 'pointer', fontSize: '18px' }}></i>
             </div>
-            
+
             <div style={{ padding: '25px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              
+
               <div>
                 <label style={{ display: 'block', fontSize: '13px', color: '#0f172a', marginBottom: '8px', fontWeight: '600' }}>Select Employee <span style={{ color: '#ef4444' }}>*</span></label>
-                <select 
+                <select
                   value={formData.empId}
                   onChange={handleEmployeeChange}
                   style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', color: '#1e293b', background: '#fff' }}>
@@ -622,15 +618,15 @@ const Reports = () => {
               <div>
                 <label style={{ display: 'block', fontSize: '13px', color: '#0f172a', marginBottom: '8px', fontWeight: '600' }}>Report Type <span style={{ color: '#ef4444' }}>*</span></label>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  
+
                   <label style={{ flex: '1 1 120px', padding: '10px', border: formData.reportType === 'Attendance Log' ? '1px solid #16a34a' : '1px solid #e2e8f0', background: formData.reportType === 'Attendance Log' ? '#dcfce7' : '#fff', color: formData.reportType === 'Attendance Log' ? '#16a34a' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                     <input type="radio" name="reportType" value="Attendance Log" checked={formData.reportType === 'Attendance Log'} onChange={handleInputChange} style={{ display: 'none' }} /> Attendance Log
                   </label>
-                  
+
                   <label style={{ flex: '1 1 120px', padding: '10px', border: formData.reportType === 'Course Progress' ? '1px solid #2563eb' : '1px solid #e2e8f0', background: formData.reportType === 'Course Progress' ? '#eff6ff' : '#fff', color: formData.reportType === 'Course Progress' ? '#2563eb' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                     <input type="radio" name="reportType" value="Course Progress" checked={formData.reportType === 'Course Progress'} onChange={handleInputChange} style={{ display: 'none' }} /> Course Progress
                   </label>
-                  
+
                   <label style={{ flex: '1 1 120px', padding: '10px', border: formData.reportType === 'Employee Workload' ? '1px solid #8b5cf6' : '1px solid #e2e8f0', background: formData.reportType === 'Employee Workload' ? '#f5f3ff' : '#fff', color: formData.reportType === 'Employee Workload' ? '#8b5cf6' : '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                     <input type="radio" name="reportType" value="Employee Workload" checked={formData.reportType === 'Employee Workload'} onChange={handleInputChange} style={{ display: 'none' }} /> Employee Workload
                   </label>
@@ -640,12 +636,12 @@ const Reports = () => {
 
               <div>
                 <label style={{ display: 'block', fontSize: '13px', color: '#0f172a', marginBottom: '8px', fontWeight: '600' }}>Summary Details <span style={{ color: '#ef4444' }}>*</span></label>
-                <textarea 
-                  name="summary" 
-                  value={formData.summary} 
-                  onChange={handleInputChange} 
-                  rows="4" 
-                  placeholder="Enter the main points of this report..." 
+                <textarea
+                  name="summary"
+                  value={formData.summary}
+                  onChange={handleInputChange}
+                  rows="4"
+                  placeholder="Enter the main points of this report..."
                   style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', boxSizing: 'border-box', resize: 'vertical', fontSize: '14px', fontFamily: 'inherit' }}></textarea>
               </div>
 
@@ -653,13 +649,13 @@ const Reports = () => {
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', padding: '20px 25px', borderTop: '1px solid #f1f5f9', background: '#f8fafc' }}>
               <button onClick={() => setIsModalOpen(false)} style={{ padding: '10px 20px', background: '#fff', border: '1px solid #cbd5e1', color: '#475569', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}>Cancel</button>
-              
+
               <button onClick={handleGenerateReport} style={{ padding: '10px 20px', background: '#2563eb', border: 'none', color: '#fff', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}>Send Report</button>
             </div>
           </div>
         </div>
       )}
-      
+
     </div>
   );
 };

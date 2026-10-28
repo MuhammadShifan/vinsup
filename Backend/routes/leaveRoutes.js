@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const LeaveRequest = require('../models/LeaveRequest');
 const Notification = require('../models/Notification');
-const Employee = require('../models/Employee'); // 🔥 Employee Name edukka import pandrom
-
+const Employee = require('../models/Employee');
 
 router.post('/apply', async (req, res) => {
   try {
@@ -35,7 +34,6 @@ router.post('/apply', async (req, res) => {
   }
 });
 
-
 router.get('/user/:email', async (req, res) => {
   try {
     const leaves = await LeaveRequest.find({ empEmail: req.params.email }).sort({ createdAt: -1 });
@@ -45,10 +43,9 @@ router.get('/user/:email', async (req, res) => {
   }
 });
 
-
 router.get('/', async (req, res) => {
   try {
-    console.log("Fetching all leaves from database..."); 
+    console.log("Fetching all leaves from database...");
     const allLeaves = await LeaveRequest.find().sort({ createdAt: -1 });
     console.log("Leaves found in DB:", allLeaves.length);
     res.status(200).json({ success: true, data: allLeaves });
@@ -58,16 +55,14 @@ router.get('/', async (req, res) => {
   }
 });
 
-
 router.put('/:id/status', async (req, res) => {
   try {
-    const { status } = req.body; 
+    const { status } = req.body;
     const updatedLeave = await LeaveRequest.findByIdAndUpdate(
       req.params.id,
       { status },
       { new: true }
     );
-
 
     if (updatedLeave && updatedLeave.empEmail) {
       try {

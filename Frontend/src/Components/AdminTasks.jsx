@@ -5,7 +5,7 @@ const AdminTasks = () => {
   const [currentView, setCurrentView] = useState('list');
   const [activeTab, setActiveTab] = useState('All Tasks');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [employeesList, setEmployeesList] = useState([]);
@@ -23,10 +23,10 @@ const AdminTasks = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const taskResponse = await API.get('/tasks'); 
+        const taskResponse = await API.get('/tasks');
         const taskData = Array.isArray(taskResponse.data) ? taskResponse.data : (taskResponse.data.data || []);
         setTasks(taskData);
-        
+
         if (taskData.length > 0) {
           setSelectedTask(taskData[0]);
         }
@@ -49,17 +49,17 @@ const AdminTasks = () => {
 
   const handleEmployeeChange = (e) => {
     const val = e.target.value;
-    const selectedEmp = employeesList?.find(emp => String(emp._id) === String(val) || String(emp.empId) === String(val)); 
-    
+    const selectedEmp = employeesList?.find(emp => String(emp._id) === String(val) || String(emp.empId) === String(val));
+
     if (selectedEmp) {
       const empName = selectedEmp.name || selectedEmp.firstName || selectedEmp.fullName || selectedEmp.username || selectedEmp.email || 'Employee';
       const empRole = selectedEmp.role || selectedEmp.designation || 'Employee';
-      
-      setNewTask({ 
-        ...newTask, 
-        employeeId: selectedEmp._id || selectedEmp.empId, 
+
+      setNewTask({
+        ...newTask,
+        employeeId: selectedEmp._id || selectedEmp.empId,
         assignedTo: empName,
-        role: empRole 
+        role: empRole
       });
     } else {
       setNewTask({ ...newTask, employeeId: '', assignedTo: '', role: '' });
@@ -101,7 +101,7 @@ const AdminTasks = () => {
   const safeTasks = Array.isArray(tasks) ? tasks : [];
   const filteredTasks = safeTasks.filter(task => {
     const matchesTab = activeTab === 'All Tasks' || task.status === activeTab;
-    const matchesSearch = task.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchesSearch = task.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           task.assignedTo?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
@@ -133,11 +133,11 @@ const AdminTasks = () => {
     if (!emp) return "";
     const rawImage = emp.profilePhoto || emp.profilePic || emp.image || emp.avatar || emp.photo || emp.pic || emp.profileImage || emp.empImage || emp.picture || (emp.profile && emp.profile.pic) || emp.file;
     if (!rawImage) return "";
-    
+
     if (rawImage.includes('randomuser.me') || rawImage.startsWith('http') || rawImage.startsWith('data:image')) {
       return rawImage;
     }
-    
+
     let cleanPath = rawImage.replace(/\\/g, '/').replace(/^\/+/, '');
     return getImageUrl(cleanPath);
   };
@@ -186,13 +186,13 @@ const AdminTasks = () => {
             }
           }
         `}</style>
-        
+
         <div className="task-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
           <div>
             <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>Assign Task</h1>
             <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Create a new task and assign it to a user.</p>
           </div>
-          <button 
+          <button
             onClick={() => setCurrentView('list')}
             style={{ padding: '8px 16px', background: '#fff', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '6px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <i className="fas fa-arrow-left"></i> Back to Tasks
@@ -200,9 +200,9 @@ const AdminTasks = () => {
         </div>
 
         <div className="admin-assign-grid">
-          
+
           <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: 'clamp(15px, 2vw, 30px)' }}>
-            
+
             <div style={{ marginBottom: '35px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
                 <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#2563eb', color: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '14px', fontWeight: 'bold' }}>1</div>
@@ -211,25 +211,25 @@ const AdminTasks = () => {
 
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '13px', color: '#0f172a', marginBottom: '8px', fontWeight: '600' }}>Task Title <span style={{ color: '#ef4444' }}>*</span></label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="title"
                   value={newTask.title}
                   onChange={handleInputChange}
-                  placeholder="e.g. Create Monthly Report UI" 
-                  style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', color: '#1e293b', boxSizing: 'border-box' }} 
+                  placeholder="e.g. Create Monthly Report UI"
+                  style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', color: '#1e293b', boxSizing: 'border-box' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '13px', color: '#0f172a', marginBottom: '8px', fontWeight: '600' }}>Task Description</label>
                 <div style={{ border: '1px solid #cbd5e1', borderRadius: '8px', overflow: 'hidden' }}>
-                  <textarea 
-                    rows="5" 
+                  <textarea
+                    rows="5"
                     name="description"
                     value={newTask.description}
                     onChange={handleInputChange}
-                    placeholder="Explain the task requirements..." 
+                    placeholder="Explain the task requirements..."
                     style={{ width: '100%', padding: '15px', border: 'none', outline: 'none', fontSize: '14px', color: '#1e293b', boxSizing: 'border-box', resize: 'vertical' }}>
                   </textarea>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 15px', borderTop: '1px solid #e2e8f0', background: '#f8fafc', flexWrap: 'wrap', gap: '8px' }}>
@@ -256,7 +256,7 @@ const AdminTasks = () => {
               <div>
                 <label style={{ display: 'block', fontSize: '13px', color: '#0f172a', marginBottom: '8px', fontWeight: '600' }}>Select User <span style={{ color: '#ef4444' }}>*</span></label>
                 <div style={{ position: 'relative' }}>
-                  <select 
+                  <select
                     value={newTask.employeeId}
                     onChange={handleEmployeeChange}
                     style={{ width: '100%', padding: '12px 15px 12px 45px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', color: '#1e293b', boxSizing: 'border-box', appearance: 'none', background: '#fff' }}>
@@ -265,7 +265,7 @@ const AdminTasks = () => {
                       const displayOptionName = emp.name || emp.firstName || emp.fullName || emp.username || emp.email || 'Unknown';
                       return (
                         <option key={emp._id || emp.empId} value={emp._id || emp.empId}>
-                          {displayOptionName} 
+                          {displayOptionName}
                         </option>
                       )
                     })}
@@ -303,12 +303,12 @@ const AdminTasks = () => {
             <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '30px 0 20px 0' }} />
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', flexWrap: 'wrap' }}>
-              <button 
+              <button
                 onClick={() => setCurrentView('list')}
                 style={{ padding: '10px 25px', background: '#fff', border: '1px solid #cbd5e1', color: '#0f172a', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}>
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={handleAssignTask}
                 style={{ padding: '10px 25px', background: '#2563eb', border: 'none', color: '#fff', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}>
                 Assign Task
@@ -318,7 +318,7 @@ const AdminTasks = () => {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            
+
             <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '25px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '25px' }}>
                 <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#f3e8ff', color: '#7c3aed', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '16px' }}>
@@ -358,11 +358,11 @@ const AdminTasks = () => {
                     <div style={{ width: '45px', height: '45px', borderRadius: '50%', background: '#1e293b', color: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px', fontWeight: 'bold', overflow: 'hidden', position: 'relative' }}>
                       <span style={{ zIndex: 0 }}>{previewName.charAt(0).toUpperCase()}</span>
                       {finalPreviewImageUrl && (
-                        <img 
-                          src={finalPreviewImageUrl} 
-                          alt="" 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1 }} 
-                          onError={(e) => { e.target.style.display='none'; }} 
+                        <img
+                          src={finalPreviewImageUrl}
+                          alt=""
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+                          onError={(e) => { e.target.style.display='none'; }}
                         />
                       )}
                     </div>
@@ -433,13 +433,13 @@ const AdminTasks = () => {
           }
         }
       `}</style>
-      
+
       <div className="task-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
         <div>
           <h1 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '24px', fontWeight: 'bold' }}>Task Management</h1>
           <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Assign and monitor tasks across all employees</p>
         </div>
-        <button 
+        <button
           onClick={() => setCurrentView('assign')}
           style={{ padding: '10px 20px', background: '#2563eb', border: 'none', color: '#fff', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <i className="fas fa-plus"></i> Assign New Task
@@ -456,7 +456,7 @@ const AdminTasks = () => {
             <p style={{ margin: '0 0 2px 0', fontSize: '13px', color: '#1e293b', fontWeight: '600' }}>Total Tasks Assigned</p>
           </div>
         </div>
-        
+
         <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', gap: '15px', alignItems: 'center' }}>
           <div style={{ background: '#dcfce7', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#16a34a', fontSize: '24px' }}>
             <i className="far fa-check-circle"></i>
@@ -466,7 +466,7 @@ const AdminTasks = () => {
             <p style={{ margin: '0 0 2px 0', fontSize: '13px', color: '#1e293b', fontWeight: '600' }}>Completed</p>
           </div>
         </div>
-        
+
         <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', gap: '15px', alignItems: 'center' }}>
           <div style={{ background: '#ffedd5', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#f59e0b', fontSize: '24px' }}>
             <i className="fas fa-spinner"></i>
@@ -479,17 +479,17 @@ const AdminTasks = () => {
       </div>
 
       <div className="admin-tasks-grid">
-        
+
         <div style={{ minWidth: 0 }}>
           <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #e2e8f0', minHeight: '400px' }}>
-            
+
             <div style={{ display: 'flex', alignItems: 'flex-end', borderBottom: '1px solid #e2e8f0', marginBottom: '20px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <div style={{ display: 'flex', gap: '25px', paddingTop: '10px' }}>
                 {['All Tasks', 'In Progress', 'Completed'].map(tab => (
-                  <span 
-                    key={tab} 
+                  <span
+                    key={tab}
                     onClick={() => setActiveTab(tab)}
-                    style={{ 
+                    style={{
                       paddingBottom: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginBottom: '-1px',
                       color: activeTab === tab ? '#2563eb' : '#64748b',
                       borderBottom: activeTab === tab ? '2px solid #2563eb' : '2px solid transparent',
@@ -503,7 +503,6 @@ const AdminTasks = () => {
               </div>
             </div>
 
-            {/* Scrollable table container */}
             <div className="task-table-wrap">
               <table style={{ width: '100%', minWidth: '520px', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
@@ -517,8 +516,8 @@ const AdminTasks = () => {
                 <tbody>
                   {filteredTasks?.length > 0 ? (
                     filteredTasks.map((task) => {
-                      const matchedEmployee = employeesList?.find(e => 
-                        String(e._id) === String(task.employeeId) || 
+                      const matchedEmployee = employeesList?.find(e =>
+                        String(e._id) === String(task.employeeId) ||
                         String(e.empId) === String(task.employeeId) ||
                         e.name === task.assignedTo ||
                         e.fullName === task.assignedTo
@@ -526,8 +525,8 @@ const AdminTasks = () => {
                       const taskImageUrl = getEmployeeImage(matchedEmployee);
 
                       return (
-                        <tr 
-                          key={task._id} 
+                        <tr
+                          key={task._id}
                           onClick={() => setSelectedTask(task)}
                           style={{ borderBottom: '1px solid #f1f5f9', cursor: 'pointer', background: selectedTask?._id === task._id ? '#f8fafc' : '#fff' }}
                         >
@@ -536,15 +535,15 @@ const AdminTasks = () => {
                           </td>
                           <td style={{ padding: '15px 10px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              
+
                               <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '11px', color: '#475569', fontWeight: 'bold', overflow: 'hidden', position: 'relative' }}>
                                 <span style={{ zIndex: 0 }}>{task.assignedTo ? task.assignedTo.charAt(0).toUpperCase() : 'U'}</span>
                                 {taskImageUrl && (
-                                  <img 
-                                    src={taskImageUrl} 
-                                    alt="" 
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1 }} 
-                                    onError={(e) => { e.target.style.display='none'; }} 
+                                  <img
+                                    src={taskImageUrl}
+                                    alt=""
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+                                    onError={(e) => { e.target.style.display='none'; }}
                                   />
                                 )}
                               </div>
@@ -581,14 +580,14 @@ const AdminTasks = () => {
 
         <div style={{ minWidth: 0 }}>
           <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: 'fit-content' }}>
-            
+
             {selectedTask ? (
               <>
                 <div style={{ padding: '15px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <h3 style={{ margin: 0, fontSize: '15px', color: '#0f172a', fontWeight: 'bold' }}>Task Overview</h3>
                   <i className="fas fa-times" onClick={() => setSelectedTask(null)} style={{ color: '#64748b', cursor: 'pointer', fontSize: '16px' }}></i>
                 </div>
-                
+
                 <div style={{ padding: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: getStatusStyle(selectedTask.status || 'In Progress').color, fontSize: '13px', fontWeight: '600' }}>
@@ -603,7 +602,7 @@ const AdminTasks = () => {
                   <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#475569', lineHeight: '1.5' }}>{selectedTask.description || 'No description provided.'}</p>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #e2e8f0' }}>
-                    
+
                     <div style={{ display: 'grid', gridTemplateColumns: '40% 60%', fontSize: '13px', alignItems: 'center' }}>
                       <span style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}><i className="far fa-user"></i> Assigned To</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -625,7 +624,7 @@ const AdminTasks = () => {
                 </div>
 
                 <div style={{ padding: '15px 20px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '15px' }}>
-                  <button 
+                  <button
                     onClick={() => handleDeleteTask(selectedTask._id)}
                     style={{ flex: 1, padding: '10px', background: '#fff', color: '#ef4444', border: '1px solid #fca5a5', borderRadius: '6px', fontWeight: '600', cursor: 'pointer', fontSize: '13px' }}>
                     Delete Task

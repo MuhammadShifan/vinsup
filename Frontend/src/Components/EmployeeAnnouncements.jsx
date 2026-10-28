@@ -2,42 +2,36 @@ import React, { useState, useEffect } from 'react';
 import API from '../utils/api';
 
 const EmployeeAnnouncements = ({ trainerData }) => {
-  // Navigation State
-  const [activeTab, setActiveTab] = useState('list'); // 'list' or 'create'
+  const [activeTab, setActiveTab] = useState('list');
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Form States
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
-  const [audience, setAudience] = useState('All Students'); 
+  const [audience, setAudience] = useState('All Students');
   const [selectedBatch, setSelectedBatch] = useState('');
 
-  // Data States
   const [myBatches, setMyBatches] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
 
-  // Fetch Trainer's Assigned Batches & Their Announcements
   useEffect(() => {
     const fetchData = async () => {
       try {
         const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
         const trainerName = (trainerData?.profileDetails?.fullName && trainerData?.profileDetails?.fullName !== 'Loading...') ? trainerData.profileDetails.fullName : (trainerData?.profile?.name || auth.name || 'Trainer');
         const trainerId = (trainerData?.profileDetails?.empId && trainerData?.profileDetails?.empId !== 'N/A') ? trainerData.profileDetails.empId : (trainerData?.profileDetails?.email || auth.email || trainerData?._id || 'trainer');
-        
+
         if (!trainerName) return;
 
-        // 1. Fetch Batches (Filter only for this trainer)
         const batchRes = await API.get('/batches');
         const allBatches = Array.isArray(batchRes.data) ? batchRes.data : (batchRes.data.data || []);
-        
-        const filteredBatches = allBatches.filter(b => 
-          (b.trainerName && b.trainerName.toLowerCase() === trainerName.toLowerCase()) || 
+
+        const filteredBatches = allBatches.filter(b =>
+          (b.trainerName && b.trainerName.toLowerCase() === trainerName.toLowerCase()) ||
           (b.trainer && b.trainer.toLowerCase() === trainerName.toLowerCase()) ||
           (b.trainer && auth.email && b.trainer.toLowerCase() === auth.email.toLowerCase())
         );
         setMyBatches(filteredBatches);
 
-        // 2. Fetch Announcements history for this trainer
         fetchAnnouncements(trainerId);
 
       } catch (error) {
@@ -73,24 +67,23 @@ const EmployeeAnnouncements = ({ trainerData }) => {
     const trainerId = (trainerData?.profileDetails?.empId && trainerData?.profileDetails?.empId !== 'N/A') ? trainerData.profileDetails.empId : (trainerData?.profileDetails?.email || auth.email || trainerData?._id || 'trainer');
     const trainerName = (trainerData?.profileDetails?.fullName && trainerData?.profileDetails?.fullName !== 'Loading...') ? trainerData.profileDetails.fullName : (trainerData?.profile?.name || auth.name || 'Trainer');
 
-    // 🔥 AUTO GENERATE CURRENT LOCAL DATE & TIME 🔥
     const now = new Date();
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const dd = String(now.getDate()).padStart(2, '0');
-    const autoPublishDate = `${yyyy}-${mm}-${dd}`; // Format: YYYY-MM-DD
-    
+    const autoPublishDate = `${yyyy}-${mm}-${dd}`;
+
     const hh = String(now.getHours()).padStart(2, '0');
     const min = String(now.getMinutes()).padStart(2, '0');
-    const autoPublishTime = `${hh}:${min}`; // Format: HH:MM
+    const autoPublishTime = `${hh}:${min}`;
 
     const payload = {
       title,
       message,
       audienceType: audience,
       targetBatch: audience === 'By Batch' ? selectedBatch : '',
-      publishDate: autoPublishDate, // Automatic Date
-      publishTime: autoPublishTime, // Automatic Time
+      publishDate: autoPublishDate,
+      publishTime: autoPublishTime,
       sentBy: trainerName,
       trainerId: trainerId,
       status: 'Published'
@@ -99,16 +92,14 @@ const EmployeeAnnouncements = ({ trainerData }) => {
     try {
       await API.post('/announcements', payload);
       alert("Announcement Sent Successfully! 🚀");
-      
-      // Reset Form
+
       setTitle('');
       setMessage('');
       setAudience('All Students');
       setSelectedBatch('');
-      
-      // Refresh Table
+
       fetchAnnouncements(trainerId);
-      setActiveTab('list'); // Automatically go back to list after sending
+      setActiveTab('list');
     } catch (error) {
       console.error("Error sending announcement:", error);
       alert("Failed to send announcement.");
@@ -126,43 +117,38 @@ const EmployeeAnnouncements = ({ trainerData }) => {
     }
   };
 
-  // Preview Helpers
   const previewAudienceBadge = audience === 'All Students' ? 'All Students' : (selectedBatch || 'Select a batch');
 
-  // 🔥 FIX: Filter for List View (Now searches ONLY in Title) 🔥
   const filteredAnnouncements = announcements.filter(anc => {
     const query = searchQuery.toLowerCase();
     const t = (anc.title || "").toLowerCase();
-    return t.includes(query); // Removed audience checking here!
+    return t.includes(query);
   });
 
   return (
     <div style={{ padding: 'clamp(14px, 2.5vw, 40px)', fontFamily: "'Inter', sans-serif", background: '#f8fafc', minHeight: '100vh', boxSizing: 'border-box' }}>
-      
+
       {activeTab === 'list' ? (
-        /* 🔥 1. ALL ANNOUNCEMENTS LIST VIEW 🔥 */
         <div className="anc-list-view" style={{ animation: 'fadeIn 0.3s ease-out' }}>
-          
-          {/* Header */}
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' }}>
             <div>
               <h1 style={{ margin: '0 0 6px 0', fontSize: 'clamp(20px, 3vw, 24px)', color: '#020617', fontWeight: '800', letterSpacing: '-0.5px' }}>Announcements</h1>
               <p style={{ margin: 0, fontSize: '14px', color: '#475569' }}>Create and manage announcements to keep students informed.</p>
             </div>
-            <button 
-              onClick={() => setActiveTab('create')} 
+            <button
+              onClick={() => setActiveTab('create')}
               style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '12px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: '0.2s' }}
             >
               <i className="fas fa-plus"></i> Create Announcement
             </button>
           </div>
 
-          {/* Search Bar */}
           <div style={{ marginBottom: '24px' }}>
             <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 16px', width: 'min(340px, 100%)', maxWidth: '100%', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff' }}>
-              <input 
-                type="text" 
-                placeholder="Search announcements by title..." 
+              <input
+                type="text"
+                placeholder="Search announcements by title..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ border: 'none', outline: 'none', fontSize: '13px', color: '#0f172a', width: '100%', fontFamily: 'inherit' }}
@@ -171,7 +157,6 @@ const EmployeeAnnouncements = ({ trainerData }) => {
             </div>
           </div>
 
-          {/* Table Section */}
           <div className="custom-scroll" style={{ borderRadius: '12px', border: '1px solid #f1f5f9', overflowX: 'auto', WebkitOverflowScrolling: 'touch', background: '#fff', maxHeight: '600px', overflowY: 'auto' }}>
             <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
@@ -185,7 +170,6 @@ const EmployeeAnnouncements = ({ trainerData }) => {
               </thead>
               <tbody>
                 {filteredAnnouncements.length > 0 ? filteredAnnouncements.map((anc, idx) => {
-                  // Dynamic icon color based on index
                   const colors = ['#eff6ff', '#f0fdf4', '#faf5ff', '#fff7ed'];
                   const textColors = ['#2563eb', '#16a34a', '#a855f7', '#ea580c'];
                   const icons = ['fas fa-bullhorn', 'far fa-file-alt', 'far fa-calendar-alt', 'far fa-bell'];
@@ -241,7 +225,6 @@ const EmployeeAnnouncements = ({ trainerData }) => {
             </table>
           </div>
 
-          {/* Pagination */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', flexWrap: 'wrap', gap: '15px' }}>
             <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>Showing 1 to {filteredAnnouncements.length} of {announcements.length} announcements</span>
             <div style={{ display: 'flex', gap: '6px' }}>
@@ -254,24 +237,22 @@ const EmployeeAnnouncements = ({ trainerData }) => {
 
       ) : (
 
-        /* 🔥 2. CREATE ANNOUNCEMENT FORM VIEW 🔥 */
         <div className="anc-create-view" style={{ animation: 'fadeIn 0.3s ease-out' }}>
-          
-          {/* Header */}
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', flexWrap: 'wrap', gap: '15px' }}>
             <div>
               <h1 style={{ margin: '0 0 5px 0', fontSize: 'clamp(20px, 3vw, 24px)', color: '#0f172a', fontWeight: 'bold' }}>Send Announcement</h1>
               <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>Dashboard &gt; Announcements &gt; Send Announcement</p>
             </div>
             <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-              <button 
+              <button
                 onClick={() => setActiveTab('list')}
                 style={{ padding: '10px 20px', background: '#fff', border: '1px solid #cbd5e1', color: '#2563eb', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', transition: '0.2s' }}
               >
                 View All Announcements
               </button>
-              <button 
-                onClick={handleSendAnnouncement} 
+              <button
+                onClick={handleSendAnnouncement}
                 style={{ padding: '10px 20px', background: '#2563eb', border: 'none', color: '#fff', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', transition: '0.2s' }}
               >
                 <i className="fas fa-paper-plane"></i> Send Announcement
@@ -280,34 +261,32 @@ const EmployeeAnnouncements = ({ trainerData }) => {
           </div>
 
           <div className="emp-anc-grid">
-            
-            {/* LEFT COLUMN - FORM */}
+
             <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: 'clamp(16px, 2.5vw, 25px)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
               <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>Announcement Details</h3>
-              
+
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '13px', color: '#0f172a', marginBottom: '8px', fontWeight: '600' }}>Title <span style={{ color: '#ef4444' }}>*</span></label>
                 <div style={{ position: 'relative' }}>
-                  <input 
-                    type="text" 
-                    value={title} 
+                  <input
+                    type="text"
+                    value={title}
                     onChange={(e) => setTitle(e.target.value.substring(0, 100))}
-                    placeholder="Enter announcement title" 
-                    style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', boxSizing: 'border-box' }} 
+                    placeholder="Enter announcement title"
+                    style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', boxSizing: 'border-box' }}
                   />
                   <span style={{ position: 'absolute', right: '15px', top: '12px', fontSize: '12px', color: '#94a3b8' }}>{title.length}/100</span>
                 </div>
               </div>
 
-              {/* Message Field */}
               <div style={{ marginBottom: '25px' }}>
                 <label style={{ display: 'block', fontSize: '13px', color: '#0f172a', marginBottom: '8px', fontWeight: '600' }}>Message <span style={{ color: '#ef4444' }}>*</span></label>
                 <div>
-                  <textarea 
-                    rows="6" 
+                  <textarea
+                    rows="6"
                     value={message}
                     onChange={(e) => setMessage(e.target.value.substring(0, 2000))}
-                    placeholder="Type your announcement message here..." 
+                    placeholder="Type your announcement message here..."
                     style={{ width: '100%', padding: '15px', border: '1px solid #cbd5e1', borderRadius: '8px', outline: 'none', fontSize: '14px', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }}>
                   </textarea>
                   <div style={{ textAlign: 'right', padding: '4px 4px 0 0', color: '#94a3b8', fontSize: '12px' }}>
@@ -316,17 +295,16 @@ const EmployeeAnnouncements = ({ trainerData }) => {
                 </div>
               </div>
 
-              {/* Audience */}
               <div style={{ marginBottom: '25px' }}>
                 <label style={{ display: 'block', fontSize: '13px', color: '#0f172a', marginBottom: '12px', fontWeight: '600' }}>Audience <span style={{ color: '#ef4444' }}>*</span></label>
                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-                  
+
                   <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
-                    <input 
-                      type="radio" 
-                      checked={audience === 'All Students'} 
+                    <input
+                      type="radio"
+                      checked={audience === 'All Students'}
                       onChange={() => setAudience('All Students')}
-                      style={{ accentColor: '#2563eb', marginTop: '3px', width: '16px', height: '16px' }} 
+                      style={{ accentColor: '#2563eb', marginTop: '3px', width: '16px', height: '16px' }}
                     />
                     <div>
                       <div style={{ fontSize: '14px', color: '#0f172a', fontWeight: '600' }}>All Students</div>
@@ -335,11 +313,11 @@ const EmployeeAnnouncements = ({ trainerData }) => {
                   </label>
 
                   <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
-                    <input 
-                      type="radio" 
-                      checked={audience === 'By Batch'} 
+                    <input
+                      type="radio"
+                      checked={audience === 'By Batch'}
                       onChange={() => setAudience('By Batch')}
-                      style={{ accentColor: '#2563eb', marginTop: '3px', width: '16px', height: '16px' }} 
+                      style={{ accentColor: '#2563eb', marginTop: '3px', width: '16px', height: '16px' }}
                     />
                     <div>
                       <div style={{ fontSize: '14px', color: '#0f172a', fontWeight: '600' }}>By Batch</div>
@@ -349,11 +327,10 @@ const EmployeeAnnouncements = ({ trainerData }) => {
 
                 </div>
 
-                {/* Batch Dropdown */}
                 {audience === 'By Batch' && (
                   <div style={{ marginTop: '15px', animation: 'fadeIn 0.3s' }}>
-                    <select 
-                      value={selectedBatch} 
+                    <select
+                      value={selectedBatch}
                       onChange={(e) => setSelectedBatch(e.target.value)}
                       style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', color: '#1e293b', background: '#fff', boxSizing: 'border-box' }}
                     >
@@ -378,12 +355,11 @@ const EmployeeAnnouncements = ({ trainerData }) => {
 
             </div>
 
-            {/* RIGHT COLUMN - PREVIEW & TIPS */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-              
+
               <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: 'clamp(16px, 2.5vw, 25px)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                 <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>Preview</h3>
-                
+
                 <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '12px', padding: 'clamp(16px, 2vw, 25px)' }}>
                   <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
                     <div style={{ width: '45px', height: '45px', background: '#eff6ff', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#2563eb', fontSize: '18px', flexShrink: 0 }}>
@@ -393,13 +369,12 @@ const EmployeeAnnouncements = ({ trainerData }) => {
                       <h4 style={{ margin: '0 0 5px 0', fontSize: '16px', color: '#0f172a', fontWeight: 'bold', wordBreak: 'break-word' }}>
                         {title || "Announcement Title"}
                       </h4>
-                      {/* 🔥 LIVE PREVIEW DATE AND TIME 🔥 */}
                       <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
                         {new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })} • {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
                       </p>
                     </div>
                   </div>
-                  
+
                   <div style={{ fontSize: '14px', color: '#334155', lineHeight: '1.6', marginBottom: '25px', whiteSpace: 'pre-wrap', minHeight: '60px', wordBreak: 'break-word' }}>
                     {message || "This is how your announcement will appear to the students. Please make sure the information is correct before sending."}
                   </div>
@@ -429,7 +404,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
 
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
+
         .emp-anc-grid {
           display: grid;
           grid-template-columns: 1.2fr 1fr;
@@ -447,7 +422,7 @@ const EmployeeAnnouncements = ({ trainerData }) => {
         .anc-action-btn.view i { color: #64748b; font-size: 13px; }
         .anc-action-btn.edit i { color: #2563eb; font-size: 13px; }
         .anc-action-btn.delete i { color: #ef4444; font-size: 13px; }
-        
+
         .anc-page-btn { width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; border-radius: 6px; border: 1px solid #e2e8f0; background: #ffffff; font-size: 13px; font-weight: 600; color: #475569; cursor: pointer; transition: 0.2s; }
         .anc-page-btn:hover { background: #f8fafc; }
         .anc-page-btn.active { background: #2563eb; border-color: #2563eb; color: #ffffff; }

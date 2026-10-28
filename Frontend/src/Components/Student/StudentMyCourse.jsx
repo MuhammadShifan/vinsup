@@ -3,7 +3,6 @@ import API, { getImageUrl } from '../../utils/api';
 import { getCache, setCache } from '../../utils/cache';
 
 const StudentMyCourse = ({ userEmail, userName }) => {
-  // Initial state
   const [courseData, setCourseData] = useState({
     courseName: 'Loading...',
     description: 'Loading course details...',
@@ -19,8 +18,7 @@ const StudentMyCourse = ({ userEmail, userName }) => {
   });
 
   const [modules, setModules] = useState([]);
-  
-  // Accordion State
+
   const [expandedMod, setExpandedMod] = useState(null);
 
   const toggleMod = (id) => {
@@ -29,7 +27,6 @@ const StudentMyCourse = ({ userEmail, userName }) => {
   };
 
   useEffect(() => {
-    // API Fetch logic for REAL DATA with Cache
     const fetchData = async () => {
       try {
         const auth = JSON.parse(localStorage.getItem('userAuth') || '{}');
@@ -78,7 +75,7 @@ const StudentMyCourse = ({ userEmail, userName }) => {
           const trainerQuery = (currentStudent.trainer || '').trim().toLowerCase();
           const trainerInfo = allEmp.find(e => (e.fullName || e.name || '').trim().toLowerCase() === trainerQuery || (e.email || '').trim().toLowerCase() === trainerQuery);
           const studentBatch = allBatches.find(b => (b.batchName || b.batchId || b.name || '').toLowerCase() === (currentStudent.batch || '').toLowerCase());
-          
+
           const batchProgress = studentBatch ? (studentBatch.progress || 0) : 0;
           const mySyllabus = allSyllabus.find(s => (s.courseName || s.course || '').trim().toLowerCase() === (currentStudent.course || '').trim().toLowerCase());
 
@@ -108,20 +105,18 @@ const StudentMyCourse = ({ userEmail, userName }) => {
                 totalSyllabusConcepts += (rawTopics.length > 0 ? rawTopics.length : (mod.totalConcepts || 0));
             });
 
-            // Proportionally distribute progress across modules
             let tempRemaining = Math.round((batchProgress / 100) * totalSyllabusConcepts);
 
             const colors = [
-              { color: '#2563eb', bg: '#eff6ff' }, { color: '#16a34a', bg: '#f0fdf4' }, 
-              { color: '#c026d3', bg: '#fdf4ff' }, { color: '#d97706', bg: '#fffbeb' }, 
+              { color: '#2563eb', bg: '#eff6ff' }, { color: '#16a34a', bg: '#f0fdf4' },
+              { color: '#c026d3', bg: '#fdf4ff' }, { color: '#d97706', bg: '#fffbeb' },
               { color: '#ef4444', bg: '#fef2f2' }, { color: '#9333ea', bg: '#f5f3ff' }
             ];
-            
+
             const fetchedModules = mySyllabus.modules.map((mod, idx) => {
                let rawTopics = Array.isArray(mod.topics) ? [...mod.topics] : [];
                const total = rawTopics.length > 0 ? rawTopics.length : (mod.totalConcepts || 0);
-               
-               // Generate fallback topics if API only has numbers
+
                if (rawTopics.length === 0 && total > 0) {
                    for (let i = 0; i < total; i++) {
                        rawTopics.push({ topicName: `Concept ${i + 1}` });
@@ -136,20 +131,18 @@ const StudentMyCourse = ({ userEmail, userName }) => {
                    comp = tempRemaining;
                    tempRemaining = 0;
                }
-               
+
                const prog = total > 0 ? Math.round((comp / total) * 100) : 0;
                const theme = colors[idx % colors.length];
 
-               // Formating and 🔥 SORTING 🔥 topics
                const formattedTopics = rawTopics.map((t, tIdx) => {
                    const tName = typeof t === 'string' ? t : (t.topicName || t.name || t.title || `Topic ${tIdx + 1}`);
                    return {
                        topicName: tName,
-                       isCompleted: tIdx < comp // Based on linear progress
+                       isCompleted: tIdx < comp
                    };
                });
 
-               // 🔥 Sorting: Completed topics go to the bottom 🔥
                formattedTopics.sort((a, b) => {
                    if (a.isCompleted === b.isCompleted) return 0;
                    return a.isCompleted ? 1 : -1;
@@ -164,7 +157,7 @@ const StudentMyCourse = ({ userEmail, userName }) => {
                  progress: prog,
                  color: theme.color,
                  bg: theme.bg,
-                 topics: formattedTopics // Sorted topics array
+                 topics: formattedTopics
                };
             });
             setModules(fetchedModules);
@@ -178,14 +171,12 @@ const StudentMyCourse = ({ userEmail, userName }) => {
 
   return (
     <div className="st-mc-wrapper">
-      
-      {/* Page Header */}
+
       <div className="st-mc-header">
         <h1 className="st-mc-title">My Courses</h1>
         <div className="st-mc-breadcrumb">Home <i className="fas fa-chevron-right"></i> <span>My Courses</span></div>
       </div>
 
-      {/* Top Main Course Card */}
       <div className="st-mc-topcard">
         <div className="tc-left">
           <div className="tc-icon-box">
@@ -196,7 +187,7 @@ const StudentMyCourse = ({ userEmail, userName }) => {
               <h2>{courseData.courseName}</h2>
             </div>
             <p className="tc-desc">{courseData.description}</p>
-            
+
             <div className="tc-meta-grid">
               <div className="tc-meta-item">
                 <i className="far fa-calendar-alt"></i>
@@ -254,39 +245,35 @@ const StudentMyCourse = ({ userEmail, userName }) => {
         </div>
       </div>
 
-      {/* Bottom Layout: Modules + Sidebar */}
       <div className="st-mc-bottom-grid">
-        
-        {/* Left Column: Course Modules */}
+
         <div className="st-mc-modules-card">
           <div className="mod-header">
             <h3>Course Modules</h3>
             <p>Track your learning progress in each module.</p>
           </div>
-          
+
           <div className="mod-list">
             {modules.length > 0 ? modules.map((mod, idx) => (
               <div className="mod-item-wrapper" key={idx}>
                 <div className="mod-item" onClick={() => toggleMod(mod.id)}>
                   <div className="mod-number" style={{ background: mod.bg, color: mod.color }}>{mod.id}</div>
-                  
+
                   <div className="mod-content">
                     <h4 className="mod-title">{mod.title}</h4>
                     <p className="mod-desc">{mod.desc}</p>
                   </div>
-                  
+
                   <div className="mod-actions">
                     <div className="mod-progress-bar-bg">
                       <div className="mod-progress-bar-fill" style={{ width: `${mod.progress}%`, background: mod.color }}></div>
                     </div>
                     <span className="mod-prog-percent">{mod.progress}%</span>
                     <span className="mod-topics-count">{mod.topicsDone}/{mod.topicsTotal} Topics</span>
-                    {/* 🔥 Dynamic Arrow Icon 🔥 */}
                     <i className={`fas fa-chevron-${expandedMod === mod.id ? 'up' : 'down'} mod-dropdown-icon`}></i>
                   </div>
                 </div>
 
-                {/* 🔥 Expandable Topics List 🔥 */}
                 {expandedMod === mod.id && (
                   <div className="mod-topics-container">
                     {mod.topics.length > 0 ? mod.topics.map((topic, i) => (
@@ -307,17 +294,14 @@ const StudentMyCourse = ({ userEmail, userName }) => {
           </div>
         </div>
 
-        {/* Right Column: Sidebar */}
         <div className="st-mc-sidebar">
-          
-          {/* Trainer Card */}
+
           <div className="side-card">
             <h3 className="sc-title"><i className="far fa-user"></i> Trainer</h3>
             <div className="trainer-info">
               {courseData.trainerImage ? (
                 <img src={courseData.trainerImage} alt="Trainer" className="trainer-avatar" onError={(e)=>{e.target.style.display='none'; e.target.nextSibling.style.display='block';}} />
               ) : null}
-              {/* Fallback avatar */}
               <div className="trainer-avatar-placeholder" style={{ display: courseData.trainerImage ? 'none' : 'block' }}>
                  <img src={`https://ui-avatars.com/api/?name=${courseData.trainerName}&background=f1f5f9&color=2563eb`} alt="Trainer" />
               </div>
@@ -329,7 +313,6 @@ const StudentMyCourse = ({ userEmail, userName }) => {
             </div>
           </div>
 
-          {/* Course Details Card */}
           <div className="side-card">
             <h3 className="sc-title"><i className="far fa-calendar-alt"></i> Course Details</h3>
             <div className="cd-list">
@@ -342,94 +325,93 @@ const StudentMyCourse = ({ userEmail, userName }) => {
         </div>
       </div>
 
-      {/* --- PURE CSS DESIGN --- */}
       <style>{`
         .st-mc-wrapper { padding: clamp(14px, 2.5vw, 32px); background: #f8fafc; min-height: 100vh; font-family: 'Inter', sans-serif; color: #0f172a; box-sizing: border-box; }
-        
+
         /* Header */
         .st-mc-header { margin-bottom: 20px; }
         .st-mc-title { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.5px;}
         .st-mc-breadcrumb { font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 8px;}
         .st-mc-breadcrumb i { font-size: 10px; }
         .st-mc-breadcrumb span { color: #0f172a; font-weight: 600; }
-        
+
         /* Top Card */
         .card-shadow { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .st-mc-topcard { display: flex; padding: clamp(16px, 2.5vw, 32px); margin-bottom: 24px; align-items: center; gap: 24px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;}
-        
+
         .tc-left { display: flex; gap: 20px; flex: 1; align-items: flex-start; }
         .tc-icon-box { width: 70px; height: 70px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: flex; justify-content: center; align-items: center; font-size: 28px; flex-shrink: 0; }
-        
+
         .tc-info { flex: 1; }
         .tc-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
         .tc-title-row h2 { font-size: 20px; font-weight: 800; margin: 0; color: #0f172a; letter-spacing: -0.5px;}
         .badge-enrolled { background: #dcfce7; color: #16a34a; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-        
+
         .tc-desc { font-size: 13px; color: #475569; margin: 0 0 16px 0; line-height: 1.5; }
-        
+
         .tc-meta-grid { display: flex; gap: 24px; flex-wrap: wrap; }
         .tc-meta-item { display: flex; align-items: center; gap: 10px; }
         .tc-meta-item i { color: #64748b; font-size: 15px; }
         .meta-lbl { font-size: 11px; color: #64748b; font-weight: 600; display: block; margin-bottom: 2px;}
         .meta-val { font-size: 13px; font-weight: 800; color: #0f172a; text-transform: capitalize;}
-        
+
         .tc-divider { width: 1px; height: 100px; background: #e2e8f0; }
-        
+
         .tc-right { width: 280px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; }
         .tc-progress-section { display: flex; gap: 20px; align-items: center; }
         .tc-prog-text-col { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
         .tc-prog-label { font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px;}
         .tc-circular-chart { width: 75px; height: 75px; border-radius: 50%; position: relative; display: flex; justify-content: center; align-items: center; }
         .tc-circular-inner { position: absolute; inset: 7px; background: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: 800; color: #0f172a; }
-        
+
         .tc-prog-details { display: flex; flex-direction: column; gap: 10px; }
         .pd-item { display: flex; flex-direction: column; gap: 2px; }
         .pd-lbl { font-size: 11px; color: #0f172a; font-weight: 800; }
         .pd-val { font-size: 12px; color: #475569; }
-        
+
         /* Bottom Grid */
         .st-mc-bottom-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; margin-bottom: 30px; }
-        
+
         /* Modules Section */
         .st-mc-modules-card { padding: clamp(16px, 2vw, 24px); background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .mod-header { border-bottom: 1px solid #f1f5f9; padding-bottom: 14px; margin-bottom: 14px; }
         .mod-header h3 { font-size: 16px; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; }
         .mod-header p { font-size: 13px; color: #64748b; margin: 0; }
-        
+
         .mod-list { display: flex; flex-direction: column; }
         .mod-item-wrapper { border-bottom: 1px solid #f1f5f9; }
         .mod-item-wrapper:last-child { border-bottom: none; }
-        
+
         .mod-item { display: flex; align-items: center; gap: 16px; padding: 16px 0; cursor: pointer; transition: 0.2s;}
         .mod-item:hover { opacity: 0.8; }
-        
+
         .mod-number { width: 38px; height: 38px; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 13px; font-weight: 800; flex-shrink: 0; }
         .mod-content { flex: 1; min-width: 0; }
         .mod-title { font-size: 14px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0; }
         .mod-desc { font-size: 12px; color: #64748b; margin: 0; }
-        
+
         .mod-actions { display: flex; align-items: center; gap: 14px; width: 250px; justify-content: flex-end; flex-shrink: 0; }
         .mod-progress-bar-bg { width: 75px; height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
         .mod-progress-bar-fill { height: 100%; border-radius: 3px; transition: 0.3s ease; }
         .mod-prog-percent { font-size: 11px; font-weight: 600; color: #94a3b8; width: 26px;}
         .mod-topics-count { font-size: 12px; font-weight: 700; color: #0f172a; width: 75px; text-align: right;}
         .mod-dropdown-icon { color: #0f172a; font-size: 12px; padding-left: 6px; transition: transform 0.3s ease;}
-        
+
         /* Accordion Topics CSS */
         .mod-topics-container { padding: 0 0 16px 54px; animation: slideDown 0.3s ease-out;}
         .topic-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; border: 1px solid transparent; }
         .topic-item:last-child { margin-bottom: 0; }
-        
+
         .topic-item.pending { background: #f8fafc; border-color: #f1f5f9; }
         .topic-item.completed { background: #f1f5f9; opacity: 0.8; }
-        
+
         .topic-icon { font-size: 14px; flex-shrink: 0; }
         .topic-icon.waiting { color: #cbd5e1; }
         .topic-icon.done { color: #16a34a; }
-        
+
         .topic-text { font-size: 13px; font-weight: 600; color: #0f172a; flex: 1; }
         .topic-item.completed .topic-text { text-decoration: line-through; color: #64748b; }
-        
+
         .topic-badge { font-size: 10px; background: #dcfce7; color: #16a34a; padding: 2px 8px; border-radius: 10px; font-weight: 700; flex-shrink: 0; }
         .text-muted { color: #94a3b8; font-weight: 500; }
 
@@ -443,19 +425,19 @@ const StudentMyCourse = ({ userEmail, userName }) => {
         .side-card { padding: clamp(16px, 2vw, 22px); background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; }
         .sc-title { font-size: 13px; font-weight: 800; color: #0f172a; margin: 0 0 14px 0; display: flex; align-items: center; gap: 8px; }
         .sc-title i { color: #475569; font-size: 14px; }
-        
+
         /* Trainer Info */
         .trainer-info { display: flex; align-items: center; gap: 14px; }
         .trainer-avatar, .trainer-avatar-placeholder img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
         .trainer-name { font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 2px;}
         .trainer-role { font-size: 12px; color: #64748b; margin-bottom: 4px;}
         .trainer-email { font-size: 12px; color: #2563eb; display: flex; align-items: center; gap: 6px; font-weight: 500; overflow-wrap: anywhere;}
-        
+
         /* Course Details */
         .cd-list { display: flex; flex-direction: column; }
         .cd-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #64748b; }
         .cd-val { color: #0f172a; font-weight: 800; text-align: right; text-transform: capitalize; }
-        
+
         /* Responsive Breakpoints */
         @media (max-width: 992px) {
           .st-mc-topcard {
@@ -474,7 +456,7 @@ const StudentMyCourse = ({ userEmail, userName }) => {
             grid-template-columns: 1fr;
           }
         }
-        
+
         @media (max-width: 640px) {
           .tc-left {
             flex-direction: column;

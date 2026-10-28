@@ -1,10 +1,6 @@
-/**
- * Vinsup Academy LMS - Client-Side Cache Helper
- * Uses sessionStorage with TTL (Time-To-Live) and safe serialization.
- */
 
 const CACHE_PREFIX = 'vinsup_cache_';
-const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes default
+const DEFAULT_TTL = 5 * 60 * 1000;
 
 export const getCache = (key, maxAgeMs = DEFAULT_TTL) => {
   try {

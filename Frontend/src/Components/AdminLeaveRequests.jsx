@@ -3,13 +3,13 @@ import API, { getImageUrl } from '../utils/api';
 
 const AdminLeaveRequests = () => {
   const [leaves, setLeaves] = useState([]);
-  const [allEmployees, setAllEmployees] = useState([]); 
+  const [allEmployees, setAllEmployees] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
 
   useEffect(() => {
     fetchAllLeaves();
-    fetchAllEmployees(); 
+    fetchAllEmployees();
   }, []);
 
   const fetchAllEmployees = async () => {
@@ -26,11 +26,11 @@ const AdminLeaveRequests = () => {
   const fetchAllLeaves = async () => {
     try {
       setIsLoading(true);
-      const res = await API.get('/leaves'); 
+      const res = await API.get('/leaves');
       if (res.data.success) {
         const data = res.data.data;
-        setLeaves(data || []); 
-        
+        setLeaves(data || []);
+
         let pend = 0, app = 0, rej = 0;
         data.forEach(l => {
           if (l.status === 'Pending') pend++;
@@ -40,7 +40,7 @@ const AdminLeaveRequests = () => {
         setStats({ total: data.length, pending: pend, approved: app, rejected: rej });
 
         localStorage.setItem('pendingLeaveCount', pend);
-        window.dispatchEvent(new Event('storage')); 
+        window.dispatchEvent(new Event('storage'));
       }
     } catch (err) {
       console.error("Error fetching leaves:", err);
@@ -56,8 +56,7 @@ const AdminLeaveRequests = () => {
     try {
       const res = await API.put(`/leaves/${id}/status`, { status: newStatus });
       if (res.data.success) {
-        fetchAllLeaves(); 
-        // 🔥 PUDHU FIX: Frontend-la irundhu pogura duplicate notification line remove panniyachu! Backend automatically anuppidum. 🔥
+        fetchAllLeaves();
       }
     } catch (error) {
       console.error("Error updating status:", error);
@@ -66,7 +65,7 @@ const AdminLeaveRequests = () => {
   };
 
   const getInitials = (name) => name ? name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'EMP';
-  
+
   const parseDate = (dateString) => {
     if (!dateString) return { date: '-', day: '-' };
     const d = new Date(dateString);
@@ -80,14 +79,13 @@ const AdminLeaveRequests = () => {
     switch(status) {
       case 'Approved': return { bg: '#dcfce7', color: '#10b981' };
       case 'Rejected': return { bg: '#fee2e2', color: '#ef4444' };
-      default: return { bg: '#fff7ed', color: '#f59e0b' }; 
+      default: return { bg: '#fff7ed', color: '#f59e0b' };
     }
   };
 
   return (
     <div style={{ padding: 'clamp(14px, 2.5vw, 30px)', width: '100%', boxSizing: 'border-box', fontFamily: "'Inter', sans-serif" }}>
-      
-      {/* 4 Stats Cards */}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
         <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #f1f5f9', display: 'flex', gap: '15px', alignItems: 'center' }}>
           <div style={{ background: '#eff6ff', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#3b82f6', fontSize: '20px' }}><i className="far fa-envelope"></i></div>
@@ -130,13 +128,13 @@ const AdminLeaveRequests = () => {
                 const statusStyle = getStatusStyle(leave.status);
 
                 const targetEmp = allEmployees.find(emp => emp.email === leave.empEmail || emp._id === leave.empId || emp.empId === leave.empId);
-                
+
                 let finalImage = "";
                 if (targetEmp) {
                   const rawImage = targetEmp.profilePhoto || targetEmp.profilePic || targetEmp.image || targetEmp.avatar || targetEmp.photo || targetEmp.pic || targetEmp.profileImage || targetEmp.empImage || targetEmp.file;
                   if (rawImage && !rawImage.includes('randomuser.me')) {
                     if (rawImage.startsWith('http') || rawImage.startsWith('data:image')) {
-                      finalImage = rawImage; 
+                      finalImage = rawImage;
                     } else {
                       let cleanPath = rawImage.replace(/\\/g, '/').replace(/^\/+/, '');
                       finalImage = getImageUrl(cleanPath);
@@ -148,7 +146,7 @@ const AdminLeaveRequests = () => {
 
                 return (
                   <tr key={index} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    
+
                     <td style={{ padding: '15px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         {finalImage ? (

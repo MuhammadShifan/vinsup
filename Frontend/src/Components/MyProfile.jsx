@@ -17,14 +17,12 @@ const MyProfile = ({ trainerData }) => {
           const result = response.data;
           batches = Array.isArray(result) ? result : (result?.data || []);
         }
-        
-        // Filter batches assigned to this trainer
-        const trainerBatches = (batches || []).filter(b => 
-          (b.trainerName && b.trainerName.toLowerCase() === trainerName.toLowerCase()) || 
+
+        const trainerBatches = (batches || []).filter(b =>
+          (b.trainerName && b.trainerName.toLowerCase() === trainerName.toLowerCase()) ||
           (b.trainer && b.trainer.toLowerCase() === trainerName.toLowerCase())
         );
 
-        // Get unique courses count from trainer batches
         const uniqueCourses = [...new Set(trainerBatches.map(b => b.courseName || b.course))];
         setAllocatedCoursesCount(uniqueCourses.length > 0 ? uniqueCourses.length : trainerBatches.length);
       } catch (error) {
@@ -77,24 +75,21 @@ const MyProfile = ({ trainerData }) => {
           }
         }
       `}</style>
-      
-      {/* Top Profile Card */}
+
       <div className="profile-top-card">
-        
-        {/* Avatar */}
+
         <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff', fontSize: '42px', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           <span style={{ zIndex: 0 }}>{(trainerData?.profileDetails?.fullName || "E").charAt(0).toUpperCase()}</span>
           {trainerData?.profile?.profilePic && (
-            <img 
-              src={trainerData.profile.profilePic} 
-              alt="Profile" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1 }} 
-              onError={(e) => { e.target.style.display = 'none'; }} 
+            <img
+              src={trainerData.profile.profilePic}
+              alt="Profile"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+              onError={(e) => { e.target.style.display = 'none'; }}
             />
           )}
         </div>
 
-        {/* Details Grid */}
         <div className="profile-top-details">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '5px', flexWrap: 'wrap' }}>
@@ -115,7 +110,6 @@ const MyProfile = ({ trainerData }) => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div style={{ borderBottom: '1px solid #e2e8f0', marginBottom: '30px', display: 'flex' }}>
         <div style={{ padding: '12px 20px', borderBottom: '2px solid #2563eb', color: '#2563eb', fontWeight: '700', fontSize: '14px' }}>
           Personal Information
@@ -123,8 +117,7 @@ const MyProfile = ({ trainerData }) => {
       </div>
 
       <div className="profile-info-grid">
-        
-        {/* COLUMN 1 */}
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
           <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px' }}>
@@ -146,7 +139,6 @@ const MyProfile = ({ trainerData }) => {
           </div>
         </div>
 
-        {/* COLUMN 2 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
           <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px' }}>
@@ -174,7 +166,6 @@ const MyProfile = ({ trainerData }) => {
           </div>
         </div>
 
-        {/* COLUMN 3: Profile Summary */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
           <div style={{ background: '#fff', borderRadius: '12px', padding: 'clamp(15px, 2vw, 25px)', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px' }}>
@@ -183,28 +174,24 @@ const MyProfile = ({ trainerData }) => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '15px' }}>
-              {/* Experience */}
               <div style={{ background: '#f4ebff', padding: '20px 15px', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ color: '#9333ea', fontSize: '20px' }}><i className="far fa-calendar-alt"></i></div>
                 <h4 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData?.profileDetails?.summary?.experience}</h4>
                 <span style={{ fontSize: '11px', color: '#7e22ce', fontWeight: '500' }}>Total Experience</span>
               </div>
 
-              {/* Batches Taken */}
               <div style={{ background: '#dcfce7', padding: '20px 15px', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ color: '#16a34a', fontSize: '20px' }}><i className="fas fa-layer-group"></i></div>
                 <h4 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData?.profileDetails?.summary?.batches}</h4>
                 <span style={{ fontSize: '11px', color: '#166534', fontWeight: '500' }}>Batches Taken</span>
               </div>
 
-              {/* Students Trained */}
               <div style={{ background: '#ffedd5', padding: '20px 15px', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ color: '#ea580c', fontSize: '20px' }}><i className="fas fa-users"></i></div>
                 <h4 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>{trainerData?.profileDetails?.summary?.students}</h4>
                 <span style={{ fontSize: '11px', color: '#9a3412', fontWeight: '500' }}>Students Trained</span>
               </div>
 
-              {/* Allocated Courses (Real Fetch Count) */}
               <div style={{ background: '#e0f2fe', padding: '20px 15px', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ color: '#0284c7', fontSize: '20px' }}><i className="fas fa-book"></i></div>
                 <h4 style={{ margin: 0, fontSize: '16px', color: '#0f172a', fontWeight: 'bold' }}>

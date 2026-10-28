@@ -8,7 +8,7 @@ const StudentBatchChat = ({ userName, userEmail }) => {
   const [studentBatch, setStudentBatch] = useState("");
   const [myAvatar, setMyAvatar] = useState("");
   const [loading, setLoading] = useState(true);
-  
+
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
   const chatEndRef = useRef(null);
@@ -34,7 +34,7 @@ const StudentBatchChat = ({ userName, userEmail }) => {
         const stuRes = await API.get('/students').catch(() => null);
         const allStudents = stuRes?.data?.data || stuRes?.data || [];
         const currentStudent = allStudents.find(s => (s.email || '').toLowerCase().trim() === activeEmail);
-        
+
         const studentBatchRaw = currentStudent ? (currentStudent.batch || currentStudent.Batch || currentStudent.course || '') : '';
         const myBatch = String(studentBatchRaw).trim();
         setStudentBatch(myBatch);
@@ -73,7 +73,6 @@ const StudentBatchChat = ({ userName, userEmail }) => {
     }
   }, [messages, studentBatch]);
 
-  // Socket Event: Listen for incoming batch messages
   useEffect(() => {
     const handleReceiveBatchMessage = (msg) => {
       const currentBatch = studentBatchRef.current;
@@ -99,7 +98,7 @@ const StudentBatchChat = ({ userName, userEmail }) => {
 
     const newAttachments = [];
     for (let file of files) {
-      if (file.size > 5 * 1024 * 1024) { 
+      if (file.size > 5 * 1024 * 1024) {
         alert(`File ${file.name} is larger than 5MB! Skipping.`);
         continue;
       }
@@ -163,28 +162,29 @@ const StudentBatchChat = ({ userName, userEmail }) => {
           <div className="no-messages">No messages yet. Say Hi! 👋</div>
         ) : (
           messages.map((msg, index) => {
-            const isMe = msg.senderRole === 'Student' && msg.senderEmail.toLowerCase() === (userEmail||"").toLowerCase();
-            
+            const isMe = (userEmail && (msg.senderEmail || '').toLowerCase() === (userEmail || '').toLowerCase()) || (userName && msg.senderName === userName && msg.senderRole === 'Student');
+            const isStaff = msg.senderRole === 'Trainer' || msg.senderRole === 'Admin';
+
             return (
               <div key={index} className={`chat-msg-row ${isMe ? 'me' : 'others'}`}>
-                
+
                 {!isMe && (
                   <div className="msg-avatar">
-                    <img 
-                      src={getPhotoUrl(msg.senderAvatar, msg.senderName)} 
-                      alt="User" 
+                    <img
+                      src={getPhotoUrl(msg.senderAvatar, msg.senderName)}
+                      alt="User"
                       onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.senderName)}&background=random&color=fff`; }}
                     />
                   </div>
                 )}
-                
-                <div className={`chat-bubble ${isMe ? 'my-bubble' : 'other-bubble'} ${msg.senderRole === 'Trainer' ? 'trainer-bubble' : ''}`}>
+
+                <div className={`chat-bubble ${isMe ? 'my-bubble' : 'other-bubble'} ${isStaff ? 'trainer-bubble' : ''}`}>
                   {!isMe && (
                     <div className="msg-sender">
-                      {msg.senderName} {msg.senderRole === 'Trainer' && <span className="trainer-badge">Trainer</span>}
+                      {msg.senderName} {isStaff && <span className="trainer-badge">{msg.senderRole}</span>}
                     </div>
                   )}
-                  
+
                   {msg.attachments && msg.attachments.length > 0 && (
                     <div className="msg-attachments-grid">
                       {msg.attachments.map((att, i) => (
@@ -225,7 +225,7 @@ const StudentBatchChat = ({ userName, userEmail }) => {
       <form className="chat-footer" onSubmit={handleSendMessage}>
         <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} style={{display: 'none'}} />
         <button type="button" className="attach-btn" onClick={() => fileInputRef.current.click()}><i className="fas fa-paperclip"></i></button>
-        
+
         <input type="text" placeholder="Type a message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
         <button type="submit" disabled={!newMessage.trim() && selectedFiles.length === 0}><i className="fas fa-paper-plane"></i></button>
       </form>
@@ -237,16 +237,16 @@ const StudentBatchChat = ({ userName, userEmail }) => {
         .ch-avatar { width: 42px; height: 42px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 16px; flex-shrink: 0; }
         .ch-info h2 { margin: 0; font-size: 16px; color: #0f172a; font-weight: 700; word-break: break-word; }
         .ch-info p { margin: 2px 0 0 0; font-size: 12px; color: #64748b; }
-        
+
         .chat-body { flex: 1; padding: clamp(14px, 2vw, 24px); overflow-y: auto; background: #f1f5f9; display: flex; flex-direction: column; gap: 16px; }
         .no-messages { text-align: center; color: #94a3b8; margin-top: 50px; font-size: 14px; }
         .chat-msg-row { display: flex; gap: 10px; align-items: flex-end; width: 100%; }
         .chat-msg-row.me { justify-content: flex-end; }
         .chat-msg-row.others { justify-content: flex-start; }
-        
+
         .msg-avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex-shrink: 0; margin-bottom: 25px; background: #e2e8f0;}
         .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        
+
         .chat-bubble { max-width: min(450px, 80%); padding: 10px 14px; border-radius: 12px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
         .my-bubble { background: #2563eb; color: #fff; border-bottom-right-radius: 4px; }
         .other-bubble { background: #fff; color: #0f172a; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; }
@@ -258,12 +258,12 @@ const StudentBatchChat = ({ userName, userEmail }) => {
         .msg-time { font-size: 10px; text-align: right; margin-top: 5px; opacity: 0.8; }
         .my-bubble .msg-time { color: #dbeafe; }
         .other-bubble .msg-time { color: #94a3b8; }
-        
+
         .msg-attachments-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
         .chat-image { max-width: 100%; max-height: 200px; border-radius: 8px; display: block; border: 1px solid rgba(0,0,0,0.1); }
         .chat-file-link { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 10px 14px; border-radius: 8px; color: inherit; text-decoration: none; font-size: 13px; font-weight: 600; }
         .chat-file-link:hover { background: rgba(0,0,0,0.1); }
-        
+
         .file-preview-area { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px clamp(14px, 2vw, 24px); background: #f8fafc; border-top: 1px solid #e2e8f0; max-height: 80px; overflow-y: auto;}
         .file-preview-item { background: #fff; border: 1px solid #cbd5e1; border-radius: 20px; padding: 6px 12px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #475569; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
         .file-preview-item button { background: none; border: none; color: #ef4444; cursor: pointer; padding: 0; display: flex; font-size: 14px;}
@@ -275,7 +275,7 @@ const StudentBatchChat = ({ userName, userEmail }) => {
         .chat-footer input[type="text"]:focus { border-color: #3b82f6; }
         .chat-footer button[type="submit"] { width: 42px; height: 42px; border-radius: 50%; background: #2563eb; color: #fff; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 15px; transition: 0.2s; flex-shrink: 0;}
         .chat-footer button[type="submit"]:disabled { background: #94a3b8; cursor: not-allowed; }
-        
+
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
